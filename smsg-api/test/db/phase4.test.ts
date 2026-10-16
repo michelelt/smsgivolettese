@@ -178,3 +178,56 @@ describe('phase 4 review fixes', () => {
     });
   });
 });
+
+describe('site_settings.pages (ADR-061)', () => {
+  const set = (v: string) => `update site_settings set pages = '${v.replaceAll("'", "''")}'::jsonb`;
+  it('rejects a missing key or a non-object with 23514', async () => {
+    await rolledBack(async (tx) => {
+      await fixtures(tx);
+      await actAs(tx, 'staff');
+      const pages = (await tx.unsafe(`select pages from site_settings`))[0]!.pages;
+      const missing = Object.fromEntries(Object.entries(pages).filter(([k]) => k !== 'privacy'));
+      expect(await err(tx, set(JSON.stringify(missing)))).toMatch(/^23514/);
+      expect(await err(tx, set('[]'))).toMatch(/^23514/);
+      expect(await err(tx, set('"x"'))).toMatch(/^23514/);
+      expect(await err(tx, set(JSON.stringify(pages)))).toBe('OK');
+    });
+  });
+  it('is readable by anon and filled with the seeded copy', async () => {
+    await rolledBack(async (tx) => {
+      await fixtures(tx);
+      await actAs(tx, 'anon');
+      const [r] = await tx.unsafe(`select pages from site_settings`);
+      expect(Object.keys(r!.pages).sort()).toEqual([
+        'chiSiamo',
+        'convenzioni',
+        'doveSiamo',
+        'home',
+        'privacy',
+        'servizi',
+      ]);
+    });
+  });
+  it('denies volontario updates and audits staff updates', async () => {
+    await rolledBack(async (tx) => {
+      await fixtures(tx);
+      await actAs(tx, 'volontario');
+      const rows = await tx
+        .unsafe(
+          `update site_settings set pages = jsonb_set(pages, '{home,quote}', '"x"') returning 1`,
+        )
+        .catch(() => []);
+      expect(rows).toHaveLength(0);
+    });
+    await rolledBack(async (tx) => {
+      await fixtures(tx);
+      await actAs(tx, 'staff');
+      await tx.unsafe(`update site_settings set pages = jsonb_set(pages, '{home,quote}', '"x"')`);
+      await tx.unsafe('reset role'); // audit_log is not readable by staff
+      const a = await tx.unsafe(
+        `select 1 from audit_log where table_name = 'site_settings' and action = 'update'`,
+      );
+      expect(a.length).toBeGreaterThan(0);
+    });
+  });
+});

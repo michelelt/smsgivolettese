@@ -406,7 +406,10 @@ describe('members and counters', () => {
       expect(await err(tx, 'select app.set_member_counter(50)')).toMatch(/^42501/);
       await reset(tx);
       await actAs(tx, 'super_admin');
-      expect(await err(tx, 'select app.set_member_counter(5)')).toMatch(/COUNTER_BELOW_MAX/);
+      // One below the highest card in use, whatever earlier runs left behind.
+      expect(
+        await err(tx, 'select app.set_member_counter((select max(card_number) - 1 from members))'),
+      ).toMatch(/COUNTER_BELOW_MAX/);
       expect(await err(tx, 'select app.set_member_counter(9500)')).toBe('OK');
       expect(await err(tx, 'update org_settings set last_card_number = 1')).toMatch(
         /COUNTER_BELOW_MAX/,

@@ -8,9 +8,10 @@ export const putSiteSettings = async (tx: Tx, s: z.infer<typeof SiteSettingsInpu
       update public.site_settings set address = ${s.address}, slogan = ${s.slogan},
         home_intro = ${s.homeIntro}, vat_number = ${s.vatNumber},
         conventions = ${tx.json(s.conventions)}, footer_links = ${tx.json(s.footerLinks)},
+        pages = ${tx.json(s.pages)},
         updated_at = now()
       returning address, slogan, home_intro as "homeIntro", vat_number as "vatNumber",
-                conventions, footer_links as "footerLinks"`
+                conventions, footer_links as "footerLinks", pages`
   )[0]!;
 
 export const orgInfo = async (tx: Tx) =>

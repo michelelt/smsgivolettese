@@ -36,6 +36,7 @@ describe('GET /public/*', () => {
       'conventions',
       'footerLinks',
       'homeIntro',
+      'pages',
       'slogan',
       'vatNumber',
     ]);

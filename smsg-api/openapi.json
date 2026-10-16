@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "SMS Givolettese API",
-    "version": "2.0.0"
+    "version": "3.0.0"
   },
   "components": {
     "securitySchemes": {
@@ -395,6 +395,197 @@
         },
         "required": [
           "km"
+        ],
+        "additionalProperties": false
+      },
+      "PageTexts": {
+        "type": "object",
+        "properties": {
+          "home": {
+            "type": "object",
+            "properties": {
+              "servicesButton": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "whereButton": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "quote": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              "quoteSource": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              }
+            },
+            "required": [
+              "servicesButton",
+              "whereButton",
+              "quote",
+              "quoteSource"
+            ],
+            "additionalProperties": false
+          },
+          "chiSiamo": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "intro": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "sections": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "heading": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "body": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 5000
+                    }
+                  },
+                  "required": [
+                    "heading",
+                    "body"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 20
+              }
+            },
+            "required": [
+              "title",
+              "intro",
+              "sections"
+            ],
+            "additionalProperties": false
+          },
+          "privacy": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "intro": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "sections": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "heading": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "body": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 5000
+                    }
+                  },
+                  "required": [
+                    "heading",
+                    "body"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 20
+              }
+            },
+            "required": [
+              "title",
+              "intro",
+              "sections"
+            ],
+            "additionalProperties": false
+          },
+          "servizi": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "intro": {
+                "type": "string",
+                "maxLength": 2000
+              }
+            },
+            "required": [
+              "title",
+              "intro"
+            ],
+            "additionalProperties": false
+          },
+          "convenzioni": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "intro": {
+                "type": "string",
+                "maxLength": 2000
+              }
+            },
+            "required": [
+              "title",
+              "intro"
+            ],
+            "additionalProperties": false
+          },
+          "doveSiamo": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "intro": {
+                "type": "string",
+                "maxLength": 2000
+              }
+            },
+            "required": [
+              "title",
+              "intro"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "home",
+          "chiSiamo",
+          "privacy",
+          "servizi",
+          "convenzioni",
+          "doveSiamo"
         ],
         "additionalProperties": false
       },
@@ -1706,6 +1897,9 @@
               "additionalProperties": false
             },
             "maxItems": 60
+          },
+          "pages": {
+            "$ref": "#/components/schemas/PageTexts"
           }
         },
         "required": [
@@ -1714,7 +1908,8 @@
           "homeIntro",
           "vatNumber",
           "conventions",
-          "footerLinks"
+          "footerLinks",
+          "pages"
         ],
         "additionalProperties": false
       },
@@ -3459,6 +3654,9 @@
                         ],
                         "additionalProperties": false
                       }
+                    },
+                    "pages": {
+                      "$ref": "#/components/schemas/PageTexts"
                     }
                   },
                   "required": [
@@ -3467,7 +3665,8 @@
                     "homeIntro",
                     "vatNumber",
                     "conventions",
-                    "footerLinks"
+                    "footerLinks",
+                    "pages"
                   ],
                   "additionalProperties": false
                 }
@@ -5922,6 +6121,9 @@
                         ],
                         "additionalProperties": false
                       }
+                    },
+                    "pages": {
+                      "$ref": "#/components/schemas/PageTexts"
                     }
                   },
                   "required": [
@@ -5930,7 +6132,8 @@
                     "homeIntro",
                     "vatNumber",
                     "conventions",
-                    "footerLinks"
+                    "footerLinks",
+                    "pages"
                   ],
                   "additionalProperties": false
                 }

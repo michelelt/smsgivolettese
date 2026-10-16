@@ -1,5 +1,5 @@
 import { z } from '@hono/zod-openapi';
-import { Convention, FooterLink, SiteSettings } from '../public/public.schemas.js';
+import { Convention, FooterLink, PageTexts, SiteSettings } from '../public/public.schemas.js';
 
 const text = (max: number) => z.string().trim().min(1).max(max);
 const httpsUrl = z.url({ protocol: /^https$/ }).max(500);
@@ -23,6 +23,7 @@ export const SiteSettingsInput = z
       )
       .max(50),
     footerLinks: z.array(FooterLink.extend({ label: text(120), url: httpsUrl })).max(60),
+    pages: PageTexts,
   })
   .openapi('SiteSettingsInput');
 

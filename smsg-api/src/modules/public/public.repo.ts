@@ -15,7 +15,7 @@ export const getSiteSettings = async (requestId?: string) =>
     await db.asAnon(
       (tx) => tx<z.infer<typeof SiteSettings>[]>`
         select address, slogan, home_intro as "homeIntro", vat_number as "vatNumber",
-               conventions, footer_links as "footerLinks"
+               conventions, footer_links as "footerLinks", pages
         from public.site_settings`,
       requestId,
     )

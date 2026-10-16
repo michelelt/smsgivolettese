@@ -202,19 +202,28 @@ describe('services and settings', () => {
       vatNumber: '12345678901',
       conventions: [{ title: 'Conv', description: 'd', url: 'https://example.org' }],
       footerLinks: [{ group: 'utili', label: 'L', url: 'https://example.org/x' }],
+      pages: (await (await app.request('/public/site-settings')).json()).pages as J,
     };
     const r = await staff('PUT', '/site-settings', ok);
     expect(r.status).toBe(200);
     expect(revalidate).toHaveBeenCalledWith(['site-settings']);
-    expect(
-      ((await (await app.request('/public/site-settings')).json()) as J).conventions,
-    ).toHaveLength(1);
+    const pub = (await (await app.request('/public/site-settings')).json()) as J;
+    expect(pub.conventions).toHaveLength(1);
+    expect(pub.pages).toEqual(ok.pages);
+    const sec = { heading: 'H', body: 'B' };
+    const pg = (k: string, v: unknown) => ({ ...ok, pages: { ...ok.pages, [k]: v } });
+    const chi = ok.pages.chiSiamo as J;
     const bad = [
       { ...ok, footerLinks: [{ group: 'utili', label: 'L', url: 'http://x.org' }] },
       { ...ok, vatNumber: '123' },
       { ...ok, conventions: Array.from({ length: 51 }, () => ok.conventions[0]) },
       { ...ok, footerLinks: [{ group: 'altro', label: 'L', url: 'https://x.org' }] },
       { ...ok, extra: 1 },
+      { ...ok, pages: undefined },
+      pg('chiSiamo', { ...chi, extra: 1 }),
+      pg('servizi', { title: '', intro: '' }),
+      pg('chiSiamo', { ...chi, sections: Array.from({ length: 21 }, () => sec) }),
+      pg('privacy', { ...chi, sections: [{ heading: 'H', body: 'x'.repeat(5001) }] }),
     ];
     for (const b of bad) expect((await staff('PUT', '/site-settings', b)).status).toBe(400);
     const o = (await staff('GET', '/org-info')).data;

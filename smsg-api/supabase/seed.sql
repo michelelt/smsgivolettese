@@ -69,3 +69,65 @@ select c.id, s.id, current_date + d.off, 'mattina', s.price_cents, 'telefono', d
 from public.members c, public.services s,
   (values (1, 'attesa'), (-7, 'eseguita'), (-3, 'eseguita')) d (off, st)
 where c.last_name = 'Rossi (esempio)' and s.name = 'Prelievi (esempio)';
+
+-- Page texts (ADR-061): same copy as the migration default, placeholders included.
+update public.site_settings set pages = $pages${
+  "home": {
+    "servicesButton": "I nostri servizi",
+    "whereButton": "Dove siamo",
+    "quote": "Le Società di Mutuo Soccorso non hanno finalità di lucro, ma perseguono finalità di interesse generale, sulla base del principio costituzionale di sussidiarietà.",
+    "quoteSource": "Legge 15 aprile 1886, n. 3818, articolo 1"
+  },
+  "chiSiamo": {
+    "title": "Una società di persone che si aiutano",
+    "intro": "La Società di Mutuo Soccorso Givolettese fa parte di una lunga tradizione piemontese: lavoratori e famiglie che, versando una piccola quota, si sostengono a vicenda nei momenti di bisogno.\n\nOggi questo aiuto prende la forma di servizi sanitari per i soci, accompagnamenti, attività culturali e ricreative, e di un luogo dove ritrovarsi.",
+    "sections": [
+      {
+        "heading": "Senza scopo di lucro",
+        "body": "Ogni euro raccolto torna ai soci sotto forma di servizi e sostegno."
+      },
+      {
+        "heading": "Porta aperta",
+        "body": "Chiunque può iscriversi. Una volta soci, non si viene esclusi per età o per salute."
+      },
+      {
+        "heading": "Decidono i soci",
+        "body": "L'assemblea dei soci elegge il consiglio e approva il bilancio ogni anno."
+      }
+    ]
+  },
+  "privacy": {
+    "title": "Informativa sulla privacy",
+    "intro": "Testo provvisorio. L'informativa completa sarà pubblicata prima dell'apertura del sito.",
+    "sections": [
+      {
+        "heading": "Titolare del trattamento",
+        "body": "Società di Mutuo Soccorso Givolettese, Givoletto."
+      },
+      {
+        "heading": "Dati raccolti da questo sito",
+        "body": "Il sito pubblico è solo informativo: non raccoglie dati personali dei visitatori."
+      },
+      {
+        "heading": "Per quanto tempo",
+        "body": "[Da definire.]"
+      },
+      {
+        "heading": "I suoi diritti",
+        "body": "Può chiedere di vedere, correggere o cancellare i suoi dati rivolgendosi alla sede."
+      }
+    ]
+  },
+  "servizi": {
+    "title": "I nostri servizi",
+    "intro": ""
+  },
+  "convenzioni": {
+    "title": "Convenzioni",
+    "intro": ""
+  },
+  "doveSiamo": {
+    "title": "Dove siamo",
+    "intro": ""
+  }
+}$pages$::jsonb;
