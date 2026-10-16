@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
-import { ButtonLink } from "@/components/ui/button";
-import { Icon } from "@/components/ui/icon";
+import {
+  DEFAULT_INTRO,
+  DEFAULT_SLOGAN,
+  HomeHero,
+} from "@/components/public/site-parts";
 import { getSiteSettings } from "@/lib/public/server";
 
 export const revalidate = 3600;
@@ -13,24 +16,10 @@ export default async function Home() {
   const site = await getSiteSettings();
   return (
     <div className="space-y-10">
-      <section className="space-y-4 rounded-2xl bg-blu p-6 text-white">
-        <h1 className="text-4xl font-extrabold">
-          {site.slogan ?? "Ci aiutiamo a vicenda, qui a Givoletto."}
-        </h1>
-        <p className="text-xl">
-          {site.homeIntro ??
-            "Servizi, convenzioni e momenti insieme per i soci e le loro famiglie."}
-        </p>
-        <div className="flex flex-wrap gap-3">
-          <ButtonLink href="/servizi" variant="secondary">
-            <Icon name="heart" />I nostri servizi
-          </ButtonLink>
-          <ButtonLink href="/dove-siamo" variant="secondary">
-            <Icon name="pin" />
-            Dove siamo
-          </ButtonLink>
-        </div>
-      </section>
+      <HomeHero
+        slogan={site.slogan ?? DEFAULT_SLOGAN}
+        intro={site.homeIntro ?? DEFAULT_INTRO}
+      />
 
       <blockquote className="border-l-8 border-bordeaux pl-4 italic">
         Le Società di Mutuo Soccorso non hanno finalità di lucro, ma perseguono

@@ -142,23 +142,61 @@ test("axe: member detail pages", async ({ page }) => {
 
 test("site info saves, https-only links", async ({ page }) => {
   await page.goto("/gestione/sito");
-  await page.getByLabel("Slogan").fill("Insieme, da sempre");
   await page.getByRole("button", { name: "Aggiungi link: Link utili" }).click();
-  await page.getByLabel("Testo del link").last().fill("Prova");
-  await page
-    .getByLabel("Indirizzo web", { exact: true })
-    .last()
-    .fill("http://x.it");
-  await page.getByRole("button", { name: "Salva", exact: true }).click();
-  await expect(page.getByText("https://").first()).toBeVisible();
-  await page
-    .getByLabel("Indirizzo web", { exact: true })
-    .last()
-    .fill("https://x.it");
-  await page
-    .getByRole("button", { name: /Togli link \d+ \(Link utili\)/ })
-    .last()
-    .click();
-  await page.getByRole("button", { name: "Salva", exact: true }).click();
+  const dlg = page.getByRole("dialog", { name: "Nuovo link" });
+  await dlg.getByLabel("Testo del link").fill("Prova");
+  await dlg.getByLabel("Indirizzo web").fill("http://x.it");
+  await dlg.getByRole("button", { name: "Conferma" }).click();
+  await expect(dlg.getByText("https://").first()).toBeVisible();
+  await dlg.getByLabel("Indirizzo web").fill("https://x.it");
+  await dlg.getByRole("button", { name: "Conferma" }).click();
+  await expect(page.getByText("Modifiche non salvate (1)")).toBeVisible();
+  // Remove it again: net change is zero, and saving stays possible with the other edit below.
+  await page.getByRole("button", { name: "Modifica link Prova" }).click();
+  await page.getByRole("button", { name: "Togli link" }).click();
+  await expect(page.getByText("Nessuna modifica")).toBeVisible();
+  await page.getByRole("button", { name: "Modifica partita IVA" }).click();
+  await page.getByLabel("partita IVA").fill("123");
+  await page.keyboard.press("Enter");
+  await expect(page.getByText("la partita IVA ha 11 cifre")).toBeVisible();
+  await page.getByRole("button", { name: "Annulla modifiche" }).click();
+  await expect(page.getByText("Nessuna modifica")).toBeVisible();
+});
+
+test("slogan edited in place shows on the public home", async ({
+  page,
+  context,
+}) => {
+  test.setTimeout(90_000);
+  const slogan = `Insieme ${Date.now()}`;
+  await page.goto("/gestione/sito");
+  const original = (
+    await page.getByRole("button", { name: "Modifica slogan" }).innerText()
+  ).trim();
+  await page.getByRole("button", { name: "Modifica slogan" }).click();
+  await page.getByLabel("slogan", { exact: true }).fill("sbagliato");
+  await page.keyboard.press("Escape"); // cancels
+  await expect(
+    page.getByRole("button", { name: "Modifica slogan" }),
+  ).not.toHaveText("sbagliato");
+  await page.getByRole("button", { name: "Modifica slogan" }).click();
+  await page.getByLabel("slogan", { exact: true }).fill(slogan);
+  await page.keyboard.press("Enter");
+  await expect(page.getByText("Modifiche non salvate (1)")).toBeVisible();
+  await page.getByRole("button", { name: "Salva e pubblica" }).click();
+  await expect(page.getByText("Info del sito salvate")).toBeVisible();
+  const pub = await context.newPage();
+  await expect(async () => {
+    await pub.goto("/");
+    await expect(pub.getByRole("heading", { level: 1 })).toHaveText(slogan, {
+      timeout: 1000,
+    });
+  }).toPass({ timeout: 40_000 });
+
+  // Put the demo slogan back so local data stays clean.
+  await page.getByRole("button", { name: "Modifica slogan" }).click();
+  await page.getByLabel("slogan", { exact: true }).fill(original);
+  await page.keyboard.press("Enter");
+  await page.getByRole("button", { name: "Salva e pubblica" }).click();
   await expect(page.getByText("Info del sito salvate")).toBeVisible();
 });

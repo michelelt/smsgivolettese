@@ -5,6 +5,7 @@ export class ApiError extends Error {
     message: string,
     readonly status: number,
     readonly code?: string,
+    readonly details?: unknown,
   ) {
     super(message);
   }
@@ -18,12 +19,15 @@ export async function call<T>(p: Promise<Result<T>>): Promise<T> {
   // 204 (e.g. respond, delete) has no body: data stays undefined and that is a success.
   if (!response.ok || (data === undefined && response.status !== 204)) {
     const e = (
-      error as { error?: { code?: string; message?: string } } | undefined
+      error as
+        | { error?: { code?: string; message?: string; details?: unknown } }
+        | undefined
     )?.error;
     throw new ApiError(
       e?.message ?? "Operazione non riuscita. Riprova.",
       response.status,
       e?.code,
+      e?.details,
     );
   }
   return data as T;
