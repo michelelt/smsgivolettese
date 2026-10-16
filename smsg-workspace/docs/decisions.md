@@ -83,7 +83,7 @@ Decision: committed `openapi.json`, CI regenerates (must match) and runs `oasdif
 Consequences: breaking changes need a major bump; backward-compatible changes make repo deploy order irrelevant.
 
 ### ADR-019 Audit via triggers
-Decision: generic `app.audit()` trigger on members, fees, invoices, lines, counters, roles, profiles, volunteers, shifts, assignments, transports, org_settings; actor from JWT claims; GDPR anonymisation redacts affected rows.
+Decision: generic `app.audit()` trigger on clients, services, site_settings, members, fees, invoices, lines, counters, roles, profiles, volunteers, shifts, assignments, transports, org_settings; actor from JWT claims; GDPR anonymisation redacts affected rows.
 Consequences: SQL-function writes are audited too; audit table grows (no retention purge yet).
 
 ### ADR-020 Auth details
@@ -202,3 +202,37 @@ Consequences: no anonymous write path until phase 6; staff must enter every book
 Decision: prices stay in `services.member_price_cents/non_member_price_cents` (staff, invoices) but anon gets column-level select only on `services (id, name, description, schedule_note, sort_order, active)`, so price leaks fail in the DB too. `site_settings` drops `phone`, `email`, `opening_hours`, `membership_info` (no public consumer; avoids a quota price on the site) and adds `vat_number text`, `conventions jsonb not null default '[]'` (`[{ title, description, url? }]`) and `footer_links jsonb not null default '[]'` (`[{ group: associazioni|mutuo_soccorso|utili, label, url }]`), both `check (jsonb_typeof(..) = 'array')`, items validated by Zod on write (https URLs only). Smallest option: no new tables; ADR-007 "whole row is public" stays true.
 Contract (supersedes ADR-039): `GET /public/services` → `{ items: [{ id, name, description, scheduleNote }] }`; `GET /public/site-settings` → `{ address, slogan, homeIntro, vatNumber, conventions, footerLinks }`; strict Zod response schemas. Major `info.version` bump (ADR-018).
 Consequences: Convenzioni and footer lists are edited by staff in "site info" (phase 4), seeded until then; downloadable per-service PDFs (reference site) are out of scope until asked.
+
+### ADR-045 Staff API conventions (phase 4 onwards)
+Context: first staff modules; later phases should copy the same shape.
+Decision: JSON camelCase; dates `YYYY-MM-DD`, times `HH:MM`, money `*Cents` int. Lists: `?page=1&pageSize=50` (max 100) → `{ items, total }` (`src/lib/pagination.ts`); `q` = case-insensitive contains. Edits `PATCH`; state changes `POST /<res>/:id/<verb>` as conditional UPDATEs (`where id = $1 and status in (…)`): 0 rows → 404 if the row is missing, else 409 `<RES>_INVALID_TRANSITION`. No DELETE endpoints (services deactivate, bookings cancel, invoices void). `:id` = `z.uuid()`; static paths (`/kpis`, `/export.csv`) registered before `/:id`. Files: `application/pdf` / `text/csv; charset=utf-8`, `Content-Disposition: attachment`, `Cache-Control: no-store`. `23505` mapped by constraint name in `errors.ts`, new `P0001` codes added to `PG_RAISE`, `23514` → 400 `VALIDATION_ERROR`. Additive changes → minor `info.version` bump.
+Consequences: one pattern to learn; status rules live in the service (unit-tested), RLS still limits who writes.
+
+### ADR-046 Booking lifecycle; transport sync on cancel/restore
+Context: roadmap left open whether `bookings_create_transport` gets an update branch.
+Decision: create → `origin = 'telefono'` (desk too, no new enum value), `status = time ? 'confermata' : 'attesa'`. confirm `attesa→confermata` (time optional, as the prototype); execute `attesa|confermata→eseguita` (`executed_at = now()`); cancel `attesa|confermata→annullata` (`cancelled_by` `staff|utente`); restore `annullata→attesa` (time kept). Client, service, day, slot and price are immutable after creation (cancel and re-create): no endpoint, so no trigger branch for them. New AFTER UPDATE OF status trigger `bookings_sync_transport` (security invoker): to `annullata` → linked transport `annullato` unless `svolto|annullato`; from `annullata` → an `annullato` linked transport back to `richiesto` with driver and vehicle cleared.
+Chosen over manual reconciliation: a forgotten transport sends a volunteer out for nothing. Consequences: commitments freed by the existing transport trigger; no driver email until phase 5 (add it there); an edit endpoint must extend the trigger.
+
+### ADR-047 Price at booking
+Decision: `declared_member` = body `declaredMember` when sent, else "client linked to an `attivo` member"; `price_applied_cents` = that service price, snapshotted. Inactive service → 422 `SERVICE_INACTIVE`. Payment of the current year's fee is not considered.
+Consequences: staff can apply the member price to someone not yet linked (prototype "Socio" checkbox); price changes never touch existing bookings.
+
+### ADR-048 Tax code validation in the API only
+Decision: `api/src/lib/tax-code.ts`: normalise (trim, upper, drop spaces); hard rule `^[A-Z0-9]{16}$` (= DB check, 400); soft rule = official layout incl. omocodia + check character → 422 `TAX_CODE_INVALID` (`details.field`) unless the body has `taxCodeConfirmed: true`. Used by members, clients and invoice issue. The web does not duplicate the algorithm: on 422 it shows the warning and a "Salva comunque" button that resubmits with the flag.
+Consequences: one unit-tested implementation; one extra round trip only when the code looks wrong.
+
+### ADR-049 PDFs and staff-readable issuer data
+Decision: `pdfkit` (+ `@types/pdfkit`), embedded DejaVu Sans regular + bold TTF (`api/assets/fonts`, Bitstream Vera/public-domain license file alongside; covers ș ł ğ and €), loaded with `readFileSync(new URL('../../assets/fonts/…', import.meta.url))` so Vercel's tracer bundles it, plus `functions."api/index.ts".includeFiles` in `vercel.json`, A4, no logo, rendered per request in `src/lib/pdf.ts` → Buffer. Invoice uses only its snapshot: issuer, "Fattura n. N/AAAA", date, customer, lines, "Totale prestazioni (esente IVA)", "Imposta di bollo" row when > 0, total, `vat_exemption_text`, payment line, "ANNULLATA" banner + reason when void. Fee receipt: prototype copy (art. 4 D.P.R. 633/1972 note, signature line) with current issuer data. Staff cannot read `org_settings`, so new definer `public.staff_org_info()` (staff) returns issuer name/tax code/address, fee, stamp threshold/amount and next card number; `GET /org-info` serves form defaults.
+Consequences: receipts re-rendered later show today's issuer data (acceptable, no fiscal value); verify the fonts are bundled on Vercel in phase 8.
+
+### ADR-050 CSV exports
+Decision: `src/lib/csv.ts`: UTF-8 BOM, `;`, CRLF, every field double-quoted (`""` escape), cells starting with `= + - @`, tab or CR prefixed with `'` (formula injection), except phone-like values matching `/^\+[\d\s]+$/`, dates `dd/mm/yyyy`, amounts `1234,50`. Members (`libro-soci-AAAA-MM-GG.csv`, by card): Tessera, Cognome, Nome, Codice fiscale, Data nascita, Luogo nascita, Indirizzo, CAP, Comune, Telefono, Email, Data iscrizione, Tipo, Stato, Cessato il, Motivo, Quota {anno}, Privacy firmata il. Invoices (`fatture-AAAA.csv`, `?year=`, by number): Numero, Data, Cliente, Codice fiscale, Indirizzo, Imponibile, Bollo, Totale, Stato, Metodo pagamento, Pagata il, Annullata il, Motivo annullamento.
+Consequences: opens correctly in Italian Excel/LibreOffice; whole-table exports are fine at village scale.
+
+### ADR-051 Site info write path
+Decision: `PUT /site-settings` (staff) replaces the row from Zod: `address`/`slogan` ≤ 200, `homeIntro` ≤ 2000, `vatNumber` `^\d{11}$` or null, ≤ 50 conventions, ≤ 60 footer links, reusing `Convention`/`FooterLink` from `public.schemas.ts` with non-empty, length-capped strings; then revalidates `site-settings` (services writes revalidate `services`). DB check `site_settings_links_valid` → immutable `app.site_links_valid(conventions, footer_links)`: every item an object, `title`/`label` non-empty strings, `group` one of the 3 values, `url` a string `^https://\S+$` (required for links, optional for conventions). Staff page reads `GET /public/site-settings` (no second read endpoint).
+Consequences: an item that trips the fail-closed 500 can only come from direct SQL; seed `vat_number` must become 11 digits.
+
+### ADR-052 /gestione data layer and UI primitives
+Decision: Client Components; `lib/api/client.ts` gets an `openapi-fetch` middleware adding `Authorization: Bearer` from `supabase.auth.getSession()`; `@tanstack/react-query` (brief) with one provider in `app/gestione/providers.tsx`, invalidate the module key after each mutation, no optimistic updates. Forms: React Hook Form + Zod for hard rules only; the API message is shown on errors. Dialogs: native `<dialog>` + `showModal()` (focus trap, Esc, inert) in `components/ui/dialog.tsx` instead of Radix (no dependency). One `aria-live` toast region. Downloads: `parseAs: 'blob'` → object URL → `<a download>` (a plain link cannot carry the bearer). Money inputs: text `inputmode="decimal"`, `lib/money.ts` parses "12,50" → 1250 and formats with `Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' })`.
+Consequences: deviates from the brief's Radix suggestion; generated types via `make gen-api` keep web and API in step.

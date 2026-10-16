@@ -32,7 +32,8 @@ export const can = (role: AppRole | null, action: Action) => rank(role) >= rank(
 | `clients.read`, `clients.write` | – | – | ✔ | ✔ | staff |
 | `members.read`, `members.write`, `members.end`, `members.export`, `membership_fees.write` | – | – | ✔ | ✔ | staff |
 | `invoices.read`, `invoices.issue`, `invoices.mark_paid`, `invoices.void`, `invoices.export` | – | – | ✔ | ✔ | staff |
-| `services.write`, `site_settings.write` | – | – | ✔ | ✔ | staff |
+| `services.read` (all, with prices), `services.write`, `site_settings.write` | – | – | ✔ | ✔ | staff |
+| `org_info.read` (`staff_org_info()`: issuer, fee, stamp duty, next card number) | – | – | ✔ | ✔ | staff |
 | `posts.read_drafts`, `posts.write`, `posts.publish`, `posts.delete` | – | – | ✔ | ✔ | staff |
 | `proposals.read`, `proposals.moderate` | – | – | ✔ | ✔ | staff |
 | `media.upload`, `media.delete` | – | – | ✔ | ✔ | staff |
@@ -54,7 +55,7 @@ Notes: `org_settings` is read by `issue_invoice`/receipts internally (definer), 
 | Route under `/gestione` | Min role |
 |---|---|
 | `/` (dashboard by role; volunteer = "I miei impegni"), `/disponibilita` (own grid; staff see all) | volontario |
-| `prenotazioni`, `utenti`, `soci`, `fatture`, `bacheca`, `servizi`, `turni`, `trasporti`, `volontari` | staff |
+| `prenotazioni`, `utenti`, `soci`, `fatture`, `bacheca`, `servizi`, `sito` (Info del sito), `turni`, `trasporti`, `volontari` | staff |
 | `impostazioni`, `utenti-e-ruoli`, `registro-attivita` | super_admin |
 Navigation hides what the role cannot do; the API is the enforcement point.
 

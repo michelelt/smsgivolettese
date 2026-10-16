@@ -65,6 +65,38 @@ API module list (`src/modules/*`): `health`, `public` (services without prices, 
 7. Repo runs inside `db.asUser(claims, fn)`: `sql.begin(async tx => { await tx\`select set_config('request.jwt.claims', ${json}, true), set_config('role','authenticated', true), set_config('app.request_id', ${id}, true)\`; … })`. Public endpoints use `db.asAnon`, cron/invites `db.asService`. `postgres(DATABASE_URL, { prepare: false })` (transaction pooler).
 8. Critical writes call SQL functions (`issue_invoice`, `register_member`, `submit_post_proposal`, …); exclusion/unique/check violations are mapped to domain errors.
 
+## Staff API (phase 4, conventions ADR-045)
+All routes require a session; permission key → minimum role in `permissions.ts` (all `staff`).
+| Route | Permission | Notes |
+|---|---|---|
+| `GET /bookings?status=aperte\|attesa\|confermata\|eseguita\|da_fatturare\|annullata\|tutte&q&from&to&clientId&page&pageSize` | `bookings.read` | default `aperte`, sort `day, time`; item has client name/phone, service, `isMember`, `priceAppliedCents`, `invoiceNumber` |
+| `GET /bookings/kpis` | `bookings.read` | `{ toConfirm, today, toInvoice, invoicedMonthCents, toCollectCents }` (Europe/Rome) |
+| `POST /bookings` `{ clientId, serviceId, day, slot, time?, declaredMember?, notes? ≤600 }` | `bookings.write` | 201; ADR-046/047; `422 SERVICE_INACTIVE` |
+| `POST /bookings/:id/confirm` `{ time? }` · `/execute` · `/cancel` `{ by: staff\|utente }` · `/restore` | `bookings.change_status` | `409 BOOKING_INVALID_TRANSITION` |
+| `GET /clients?q&page&pageSize` | `clients.read` | item adds `bookingsCount, toInvoiceCount, invoicedCents, toCollectCents, memberCardNumber` |
+| `GET /clients/:id` | `clients.read` | client + member card/status + all bookings (desc) + invoices (history) |
+| `POST /clients`, `PATCH /clients/:id` `{ firstName, lastName, phone, taxCode?, taxCodeConfirmed?, address?, notes?, memberId? (null unlinks) }` | `clients.write` | `409 CLIENT_ALREADY_LINKED` (`clients_member_id_key`) |
+| `GET /members?filter=attivi\|da_rinnovare\|cessati\|tutti&q&page&pageSize` | `members.read` | item adds `feePaidCurrentYear` |
+| `GET /members/kpis` | `members.read` | `{ active, paidCurrentYear, unpaidCurrentYear, joinedCurrentYear }` |
+| `GET /members/:id` | `members.read` | member + fees + linked client |
+| `POST /members` `{ …member fields, taxCodeConfirmed?, feeMethod?, clientId? }` | `members.write` | `register_member` + link client in the same tx; 201 with `cardNumber`; `409 MEMBER_TAX_CODE_EXISTS` |
+| `PATCH /members/:id` (same fields, no card/status) | `members.write` | |
+| `POST /members/:id/end` `{ endedOn?, endReason }` · `/reactivate` | `members.end` | `409 MEMBER_INVALID_TRANSITION` |
+| `POST /members/:id/fees` `{ method, year?, amountCents?, paidOn? }` | `membership_fees.write` | defaults: current year, `staff_org_info().membership_fee_cents`, today; `409 FEE_ALREADY_PAID` (`membership_fees_member_id_year_key`) |
+| `GET /members/:id/fees/:feeId/receipt.pdf` | `members.read` | ADR-049 |
+| `GET /members/export.csv` | `members.export` | ADR-050 |
+| `GET /invoices?status=emessa\|pagata\|annullata\|tutte&year&q&page&pageSize` | `invoices.read` | sort `year desc, number desc` |
+| `GET /invoices/kpis?year` | `invoices.read` | `{ count, totalCents, collectedCents, toCollectCents }` (non-void) |
+| `GET /invoices/:id` · `GET /invoices/:id/pdf` | `invoices.read` | |
+| `POST /invoices` `{ clientId, bookingIds[], customerTaxCode?, taxCodeConfirmed?, customerAddress?, paymentMethod? }` | `invoices.issue` | `issue_invoice`; given tax code/address also saved on the client (same tx); 201 |
+| `POST /invoices/:id/pay` `{ method, paidOn? }` | `invoices.mark_paid` | `emessa` only, else `409 INVOICE_NOT_PAYABLE` |
+| `POST /invoices/:id/void` `{ reason 1..300 }` | `invoices.void` | `void_invoice` |
+| `GET /invoices/export.csv?year` | `invoices.export` | ADR-050 |
+| `GET /services` · `POST /services` · `PATCH /services/:id` | `services.read` / `services.write` | all services with prices; writes revalidate `services`; no DELETE |
+| `PUT /site-settings` | `site_settings.write` | ADR-051; read via `GET /public/site-settings` |
+| `GET /org-info` | `org_info.read` | `staff_org_info()` |
+New error codes: `TAX_CODE_INVALID` 422, `SERVICE_INACTIVE` 422, `BOOKING_INVALID_TRANSITION`, `MEMBER_INVALID_TRANSITION`, `INVOICE_NOT_PAYABLE`, `MEMBER_TAX_CODE_EXISTS`, `FEE_ALREADY_PAID`, `CLIENT_ALREADY_LINKED`, `CARD_NUMBER_IMMUTABLE` 409; `CLIENT_NOT_FOUND` 404, `VOID_REASON_REQUIRED` 400 (existing raises, now mapped).
+
 ## Signed upload flow
 1. `POST /media/upload-url {kind: image|video, mime, size}` (staff) or `POST /public/proposals/upload-url` (anon, Turnstile, image only, ≤ 5 MB). API checks mime whitelist (`image/webp`, `image/jpeg`, `image/png`, `video/mp4`, `video/webm`) and size (`org_settings.video_max_mb` for video). Returns `{ bucket, path, token, signedUrl }` from `storage.from(bucket).createSignedUploadUrl(path)`; path = `<yyyy>/<uuid>.<ext>`.
 2. Browser resizes images first (long side ≤ 2000 px, WebP), then `uploadToSignedUrl` directly to Storage. Files never pass through Vercel.

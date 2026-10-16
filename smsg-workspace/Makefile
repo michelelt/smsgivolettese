@@ -36,7 +36,10 @@ dev: ## Start local Supabase, apply new migrations, then API (:3001) and web (:3
 test: ## Run lint, typecheck and tests of both repos
 	pnpm -C api lint
 	pnpm -C api typecheck
-	pnpm -C api test
+	pnpm -C api test:unit
+	@# DB tests mutate schema/data: always start from a fresh LOCAL database
+	$(MAKE) db-reset
+	pnpm -C api test:db
 	pnpm -C web lint
 	pnpm -C web typecheck
 	pnpm -C web test
