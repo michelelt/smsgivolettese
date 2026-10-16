@@ -58,7 +58,10 @@ export function LoginForms({ next }: { next?: string }) {
           </p>
         )}
         {msg && (
-          <p className="mt-4 rounded-xl border-2 border-blu p-3 font-bold text-blu">
+          <p
+            role="status"
+            className="mt-4 rounded-xl border-2 border-blu p-3 font-bold text-blu"
+          >
             {msg}
           </p>
         )}
