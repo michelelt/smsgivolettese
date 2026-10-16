@@ -12,6 +12,11 @@ let jwks: ReturnType<typeof createRemoteJWKSet> | undefined;
 
 /** Verifies the bearer token against the Supabase JWKS. Anonymous (no header) -> user null. */
 export const authenticate = createMiddleware<AuthEnv>(async (c, next) => {
+  // The cron route carries CRON_SECRET, not a JWT: it checks the secret itself (ADR-058).
+  if (c.req.path === '/cron/daily') {
+    c.set('user', null);
+    return next();
+  }
   const m = /^Bearer (.+)$/.exec(c.req.header('authorization') ?? '');
   let user: AuthUser | null = null;
   if (m) {

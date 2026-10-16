@@ -12,6 +12,12 @@ import { invoicesRoutes } from './modules/invoices/invoices.routes.js';
 import { membersRoutes } from './modules/members/members.routes.js';
 import { servicesRoutes } from './modules/services/services.routes.js';
 import { settingsRoutes } from './modules/settings/settings.routes.js';
+import { cronRoutes } from './modules/cron/cron.routes.js';
+import { shiftsRoutes } from './modules/shifts/shifts.routes.js';
+import { transportsRoutes } from './modules/transports/transports.routes.js';
+import { usersRoutes } from './modules/users/users.routes.js';
+import { vehiclesRoutes } from './modules/vehicles/vehicles.routes.js';
+import { volunteersRoutes } from './modules/volunteers/volunteers.routes.js';
 import { healthRoutes } from './modules/health/health.routes.js';
 
 export const app = new OpenAPIHono();
@@ -52,6 +58,12 @@ app.route('/', membersRoutes);
 app.route('/', invoicesRoutes);
 app.route('/', servicesRoutes);
 app.route('/', settingsRoutes);
+app.route('/', volunteersRoutes);
+app.route('/', vehiclesRoutes);
+app.route('/', shiftsRoutes);
+app.route('/', transportsRoutes);
+app.route('/', usersRoutes);
+app.route('/', cronRoutes);
 
 app.openAPIRegistry.registerComponent('securitySchemes', 'bearerAuth', {
   type: 'http',
@@ -61,7 +73,7 @@ app.openAPIRegistry.registerComponent('securitySchemes', 'bearerAuth', {
 
 app.doc('/openapi.json', {
   openapi: '3.1.0',
-  info: { title: 'SMS Givolettese API', version: '1.1.0' },
+  info: { title: 'SMS Givolettese API', version: '1.2.0' },
 });
 
 const body = (code: string, message: string, details?: unknown) => ({

@@ -129,3 +129,46 @@ export const receiptPdf = (r: ReceiptPdf) =>
     d.moveDown(3);
     d.fontSize(11).text('Firma ______________________');
   });
+
+export type TransportSheet = {
+  travelDate: string;
+  departureTime: string | null;
+  appointmentTime: string | null;
+  returnTime: string | null;
+  clientName: string;
+  clientPhone: string;
+  fromAddress: string | null;
+  toAddress: string | null;
+  wheelchair: boolean;
+  companion: boolean;
+  driverName: string | null;
+  vehicle: string | null;
+};
+
+/** Trip sheet (ADR-055): volunteer-minimal fields only, no reason or staff notes; Km/Note/Firma left blank. */
+export const transportSheetPdf = (t: TransportSheet) =>
+  render((d) => {
+    d.font('Sans-Bold')
+      .fontSize(16)
+      .text(`Foglio di viaggio del ${dmy(t.travelDate)}`);
+    d.moveDown();
+    d.font('Sans').fontSize(11);
+    const f = (k: string, v: string | null) => v && d.text(`${k}: ${v}`);
+    f('Autista', t.driverName);
+    f('Mezzo', t.vehicle);
+    d.moveDown(0.5);
+    f('Assistito', `${t.clientName} (${t.clientPhone})`);
+    f('Partenza', t.departureTime);
+    f('Appuntamento', t.appointmentTime);
+    f('Ritorno', t.returnTime);
+    f('Da', t.fromAddress);
+    f('A', t.toAddress);
+    f('Carrozzina', t.wheelchair ? 'Sì' : 'No');
+    f('Accompagnatore', t.companion ? 'Sì' : 'No');
+    d.moveDown(2);
+    d.text('Km ______________');
+    d.moveDown(1.5);
+    d.text('Note ______________________________________________');
+    d.moveDown(1.5);
+    d.text('Firma ______________________');
+  });

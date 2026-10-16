@@ -659,6 +659,39 @@ describe('volunteer functions', () => {
       ).toBe(0);
     });
   });
+  it('respond_shift_assignment: only proposto|confermato and before start', async () => {
+    await rolledBack(async (tx) => {
+      await world(tx);
+      const call = `select respond_shift_assignment('f6000000-0000-4000-8000-000000000001', true)`;
+      await tx.unsafe(`update shifts set starts_at = now() - interval '1 hour', ends_at = now() + interval '1 hour'
+        where id = 'f5000000-0000-4000-8000-000000000001'`);
+      await actAs(tx, 'volontario');
+      expect(await err(tx, call)).toMatch(/ASSIGNMENT_INVALID_TRANSITION/);
+      await reset(tx);
+      await tx.unsafe(`update shifts set starts_at = now() + interval '1 day', ends_at = now() + interval '1 day 3 hours'
+        where id = 'f5000000-0000-4000-8000-000000000001';
+        update shift_assignments set status = 'rifiutato' where id = 'f6000000-0000-4000-8000-000000000001'`);
+      await actAs(tx, 'volontario');
+      expect(await err(tx, call)).toMatch(/ASSIGNMENT_INVALID_TRANSITION/);
+    });
+  });
+  it('respond_transport: only on or after travel date, from assegnato|confermato', async () => {
+    await rolledBack(async (tx) => {
+      await world(tx);
+      const call = (a: boolean) =>
+        `select respond_transport('fc000000-0000-4000-8000-000000000001', ${a})`;
+      await tx.unsafe(`update transports set travel_date = (now() at time zone 'Europe/Rome')::date - 1
+        where id = 'fc000000-0000-4000-8000-000000000001'`);
+      await actAs(tx, 'volontario');
+      expect(await err(tx, call(true))).toMatch(/TRANSPORT_INVALID_TRANSITION/);
+      expect(await err(tx, call(false))).toMatch(/TRANSPORT_INVALID_TRANSITION/);
+      await reset(tx);
+      await tx.unsafe(`update transports set travel_date = (now() at time zone 'Europe/Rome')::date, status = 'svolto', km = 1, completed_at = now()
+        where id = 'fc000000-0000-4000-8000-000000000001'`);
+      await actAs(tx, 'volontario');
+      expect(await err(tx, call(true))).toMatch(/TRANSPORT_INVALID_TRANSITION/);
+    });
+  });
   it('anon cannot call volunteer functions', async () => {
     await rolledBack(async (tx) => {
       await world(tx);

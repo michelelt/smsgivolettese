@@ -17,10 +17,13 @@ async function run<T>(
   claims: Record<string, unknown>,
   requestId: string | undefined,
   fn: (tx: Tx) => Promise<T>,
+  actor?: { id: string; role: string },
 ): Promise<T> {
   return conn().begin(async (tx) => {
     await tx`select set_config('request.jwt.claims', ${JSON.stringify(claims)}, true),
-                    set_config('app.request_id', ${requestId ?? ''}, true)`;
+                    set_config('app.request_id', ${requestId ?? ''}, true),
+                    set_config('app.actor_id', ${actor?.id ?? ''}, true),
+                    set_config('app.actor_role', ${actor?.role ?? ''}, true)`;
     await tx.unsafe(`set local role ${role}`); // role is a closed literal union, never user input
     return fn(tx);
   }) as Promise<T>;
@@ -32,7 +35,11 @@ export const db = {
   asAnon: <T>(fn: (tx: Tx) => Promise<T>, requestId?: string) =>
     run('anon', { role: 'anon' }, requestId, fn),
   // No app_role claim: app.has_role() is false. Only cron, invites, bootstrap, rate limiting.
-  asService: <T>(fn: (tx: Tx) => Promise<T>, requestId?: string) =>
-    run('service_role', { role: 'service_role' }, requestId, fn),
+  // actor: recorded by app.audit() as actor_id/actor_role (honoured only in service mode)
+  asService: <T>(
+    fn: (tx: Tx) => Promise<T>,
+    requestId?: string,
+    actor?: { id: string; role: string },
+  ) => run('service_role', { role: 'service_role' }, requestId, fn, actor),
   end: () => pool?.end(),
 };

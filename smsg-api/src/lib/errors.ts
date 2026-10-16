@@ -61,6 +61,12 @@ const PG_UNIQUE: Record<string, [string, string]> = {
     "La quota di quell'anno è già registrata",
   ],
   clients_member_id_key: ['CLIENT_ALREADY_LINKED', 'Il socio è già collegato a un altro cliente'],
+  shift_types_name_key: ['SHIFT_TYPE_EXISTS', 'Esiste già un tipo di turno con questo nome'],
+  vehicles_plate_key: ['VEHICLE_PLATE_EXISTS', 'Esiste già un mezzo con questa targa'],
+  shift_assignments_shift_id_volunteer_id_key: [
+    'ALREADY_ASSIGNED',
+    'Il volontario è già assegnato a questo turno',
+  ],
 };
 
 // Stable RAISE EXCEPTION message codes from the DB -> [HTTP status, Italian message].
@@ -76,6 +82,11 @@ const PG_RAISE: Record<string, [ErrorStatus, string]> = {
   INVALID_INPUT: [400, 'Dati non validi'],
   ASSIGNMENT_NOT_FOUND: [404, 'Assegnazione non trovata'],
   TRANSPORT_NOT_FOUND: [404, 'Trasporto non trovato'],
+  ASSIGNMENT_INVALID_TRANSITION: [409, "L'assegnazione non può più essere modificata"],
+  TRANSPORT_INVALID_TRANSITION: [
+    409,
+    'Operazione non consentita nello stato attuale del trasporto',
+  ],
   TRANSPORT_NOT_COMPLETABLE: [409, 'Il trasporto non può essere completato'],
   CLIENT_NOT_FOUND: [404, 'Cliente non trovato'],
   VOID_REASON_REQUIRED: [400, "Indica il motivo dell'annullamento"],

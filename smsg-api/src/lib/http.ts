@@ -62,3 +62,15 @@ export const attachment = (body: Buffer | string, mime: string, filename: string
       'cache-control': 'no-store',
     },
   });
+
+/** JSON response / request-body descriptors for createRoute. */
+export const ok = <T extends z.ZodType>(schema: T, description: string) => ({
+  content: { 'application/json': { schema } },
+  description,
+});
+export const jsonBody = <T extends z.ZodType>(schema: T) => ({
+  content: { 'application/json': { schema } },
+  required: true as const,
+});
+
+export const hhmm = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Orario HH:MM');
