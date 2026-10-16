@@ -96,7 +96,7 @@ erDiagram
 ## Tables
 
 ### Identity
-**profiles** — `id uuid PK references auth.users(id) on delete restrict`, `first_name text not null`, `last_name text not null`, `email text not null` (copy of auth email, for lists), `phone text`, `active bool not null default true`, `anonymized_at timestamptz`, timestamps. Created by the API on invite / bootstrap (no trigger on `auth.users`).
+**profiles** — `id uuid PK references auth.users(id) on delete restrict`, `first_name text not null`, `last_name text not null`, `email text not null` (copy of auth email, for lists), `phone text`, `active bool not null default true`, `anonymized_at timestamptz`, timestamps. Created by the API on invite / bootstrap (no profile trigger on `auth.users`; the only trigger there records `app.password_set`, ADR-034).
 
 **user_roles** — `user_id uuid PK references profiles(id)`, `role app_role not null`, `updated_at`. One role per user (ADR-005). Trigger `user_roles_protect_last_super_admin` (see invariants).
 

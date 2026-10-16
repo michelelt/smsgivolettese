@@ -48,7 +48,7 @@ gen-api: ## Regenerate the web API client from the API OpenAPI schema
 	pnpm -C api openapi:export
 	OPENAPI_URL=../api/openapi.json pnpm -C web gen:api
 
-superadmin: ## Create the first super admin from secrets.env (phase 2)
+superadmin: ## Create the first super admin from secrets.env (idempotent)
 	@$(LOAD_SECRETS); pnpm -C api superadmin
 
 deploy-check: ## Check env vars on Vercel and Supabase (phase 8)

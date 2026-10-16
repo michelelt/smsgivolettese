@@ -41,9 +41,10 @@ export const can = (role: AppRole | null, action: Action) => rank(role) >= rank(
 | `transports.read`, `transports.write`, `transports.assign`, `transports.export` | – | – | ✔ | ✔ | staff |
 | `volunteers.read`, `volunteers.write`, `vehicles.read`, `vehicles.write` | – | – | ✔ | ✔ | staff |
 | `availability.read_all` | – | – | ✔ | ✔ | staff |
+| `users.read` (all `profiles`: name, email, phone, active; all `user_roles`) | – | own | ✔ | ✔ | staff |
 | `users.invite_volunteer` | – | – | ✔ | ✔ | staff |
 | `availability.write_all` | – | – | – | ✔ | super_admin |
-| `users.read`, `users.invite_staff`, `users.change_role`, `users.deactivate` | – | – | – | ✔ | super_admin |
+| `users.invite_staff`, `users.change_role`, `users.deactivate`, `users.reset_staff_password` (phase 7) | – | – | – | ✔ | super_admin |
 | `org_settings.write`, `counters.write` | – | – | – | ✔ | super_admin |
 | `audit.read` | – | – | – | ✔ | super_admin |
 | `gdpr.export`, `gdpr.anonymize` | – | – | – | ✔ | super_admin |
@@ -104,10 +105,13 @@ Enforced twice: the view `volunteer_transports_v` (owned by `postgres`, `securit
 ## Invites and user lifecycle
 - `POST /users/invite {email, first_name, last_name, role}`: staff → only `volontario`; super_admin → any. API calls `auth.admin.inviteUserByEmail(email, { redirectTo: <web>/imposta-password })` with the secret key, then in one transaction inserts `profiles`, `user_roles` and (for `volontario`) `volunteers`; on DB failure it deletes the auth user.
 - Public sign-up disabled in Supabase Auth; volunteer magic link uses `signInWithOtp({ shouldCreateUser: false })`.
+- **Sign-in methods by role (ADR-034)**: the Auth Hook refuses to issue a token for `staff`/`super_admin` when the session comes from an emailed link (GoTrue method `otp`, which covers magic link, recovery and invite) and the account has a recorded password (`app.password_set`, filled by a trigger on `auth.users`); while the account has no password, a link session carries no `app_role` (it can only set the first password; the web then signs out), then they sign in with `password`. Volunteers may use magic link and recovery. Real-Auth tests cover password, magic link and recovery per role, plus the staff invite → first password → password login flow.
 - Role change / deactivation: super_admin only. Deactivation sets `profiles.active=false`, bans the auth user, the Auth Hook stops issuing `app_role`. Residual access ≤ JWT lifetime (set to 15 min).
 - **Last super admin**: DB trigger (`LAST_SUPER_ADMIN`, 409) + API check for a clear message. A super admin may not demote/deactivate themself if they are the last one.
 - Bootstrap: `scripts/bootstrap-superadmin.ts` (idempotent) reads `SUPERADMIN_EMAIL` + `SUPERADMIN_PASSWORD` (Zod: valid email, password ≥ 12 chars) from the workspace `secrets.env`. If the auth user is missing it creates it with `auth.admin.createUser({ email, password, email_confirm: true })`; if it exists it never touches the password. Then upserts profile + `super_admin` role (ADR-027).
-- **Super admin password**: changeable only by that super admin, logged in, via `supabase.auth.updateUser({ password })` with "Secure password change" on (reauthentication required). No API endpoint, role or script may set or reset another user's password; `auth.admin.updateUserById` with `password` is forbidden in the codebase. Lost password: owner resets it from the Supabase dashboard (outside the app).
+- **Own password change** (all roles in `/gestione`): UI always calls `reauthenticate()` and sends the emailed nonce with `updateUser({ password, nonce })`; "Secure password change" on. GoTrue enforces the nonce only for sessions > 24 h (accepted residual risk, ADR-034).
+- **Super admin password**: changeable only by that super admin, logged in, as above. Lost password: owner resets it from the Supabase dashboard (outside the app).
+- **Staff lost password** (phase 7, **not built yet**): `POST /users/:id/reset-password`, super_admin only, target must be `staff` (never `super_admin`, never self); audited. This is the only allowed use of `auth.admin.updateUserById` with `password`; no other endpoint, role or script may set another user's password. Until phase 7, staff passwords are reset by the owner from the dashboard.
 
 ## GDPR (super_admin)
 - `GET /gdpr/export?subject=client|member|user&id=…` → JSON with every row referencing the person (client + bookings + transports + invoices; member + fees; profile + volunteer + availability + assignments). Writes an audit row.

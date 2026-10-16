@@ -87,7 +87,7 @@ Decision: generic `app.audit()` trigger on members, fees, invoices, lines, count
 Consequences: SQL-function writes are audited too; audit table grows (no retention purge yet).
 
 ### ADR-020 Auth details
-Decision: JWT verified with `jose` + Supabase JWKS; new key names (`sb_publishable_…`, `sb_secret_…`; legacy anon/service_role work identically); sign-ups disabled; Resend as Auth SMTP; JWT lifetime 15 min; profiles created by the API (no trigger on `auth.users`).
+Decision: JWT verified with `jose` + Supabase JWKS; new key names (`sb_publishable_…`, `sb_secret_…`; legacy anon/service_role work identically); sign-ups disabled; Resend as Auth SMTP; JWT lifetime 15 min; profiles created by the API (no profile trigger on `auth.users`; see ADR-034 for the password_set trigger).
 Consequences: deactivation/role change takes effect within 15 min.
 
 ### ADR-021 Next.js 16 `proxy.ts`
@@ -146,3 +146,16 @@ Consequences: local keys are never typed by hand or committed; both env files gi
 Context: `make dev` must regenerate the web client before the API is running.
 Decision: `pnpm -C api openapi:export` writes `api/openapi.json` by importing the app (no server); `make gen-api` = export, then `OPENAPI_URL=../api/openapi.json pnpm -C web gen:api`.
 Consequences: no start-up race; web CI still uses the committed `schema.d.ts`.
+
+### ADR-034 Staff and super admin cannot sign in with magic link or recovery
+Context: phase 2 security review; an emailed link (magic link/OTP, recovery) would let anyone with access to a staff mailbox get a privileged session without the password.
+Decision (approved by the owner): the Custom Access Token Hook returns an error (no token) when `app_role ∈ {staff, super_admin}`, the account has a recorded password (`app.password_set`), and `authentication_method` or any `amr` method is not `password`/`token_refresh`. GoTrue reports magic link, recovery, invite and email OTP all as `otp`, and GoTrue sets a random password while verifying an invite, so the hook relies on `app.password_set` (a row written by a trigger on `auth.users` when a confirmed user sets a password, or a user is created with one); without that row a link session is issued without `app_role` and can only set the first password; a link-born session also loses refresh once a password exists, so after setting the first password staff sign in again with email and password; volunteers keep magic link + recovery (elderly-friendly). Own password change in `/gestione` always does `reauthenticate()` + emailed nonce in the UI.
+Residual risk (accepted): GoTrue `secure_password_change` enforces the nonce server-side only for sessions older than 24 h, so a stolen fresh session could change the password calling GoTrue directly. Mitigations: 15 min JWT, "password changed" email, short sessions.
+Lost password: staff → super admin resets it via the API (phase 7, not built yet; see `permissions.md`); super admin → owner resets it from the Supabase dashboard.
+Rejected: MFA/TOTP for super admin (revisit in phase 7); Send Email hook dropping emails (more code, the token hook already covers it).
+Consequences: staff/super_admin created through the admin API must be created email-confirmed (`email_confirm: true`), otherwise a password set before confirmation is not recorded in `app.password_set`; staff email changes go through super_admin or the admin API, because the `email_change` link is a link login and the hook refuses it. Supabase still sends magic link/recovery emails to staff, but the link yields no session; the `/accedi` UI shows the password form for staff.
+
+### ADR-035 PostgREST/GraphQL expose only an empty schema
+Context: reinforces ADR-003; removing only `public` still exposes `graphql_public` and any future schema.
+Decision: `[api] schemas = ["api"]` in `api/supabase/config.toml`, where `api` is an empty schema with no objects or grants (`schemas = []` makes PostgREST fall back to `public`); the same setting is applied by hand in the dashboard (API settings → Exposed schemas only the empty `api` schema, GraphQL off) of both remote projects (phase 8 checklist).
+Consequences: no Data API surface at all; the publishable key alone can reach only Auth and Storage.
