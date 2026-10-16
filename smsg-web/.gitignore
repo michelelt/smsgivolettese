@@ -13,3 +13,5 @@ coverage
 CLAUDE.md
 CLAUDE.local.md
 .mcp.json
+test-results
+playwright-report
