@@ -28,7 +28,7 @@ Environments:
 
 | | local | staging | production |
 |---|---|---|---|
-| Supabase | CLI (`supabase start`, Docker) | existing project `<STAGING_REF>` | existing project `<PROD_REF>` |
+| Supabase | CLI (`supabase start`, Docker) | existing project `ydqdnicpfspqewclqrgk` | existing project `vcpmnpsfcgebhmgqlqeu` |
 | API | `localhost:3001` | `staging` branch deploy, fixed alias (e.g. `api-staging.<domain>`) + PR previews | `main` → prod domain |
 | Web | `localhost:3000` (rewrite → 3001) | every PR / non-main branch preview, `API_URL` = staging API | `main` → prod domain |
 | Email | Supabase Inbucket / Resend test key | Resend (test domain) | Resend (verified domain) |
@@ -122,7 +122,7 @@ Web serves images with `next/image` (`remotePatterns` = Supabase Storage host). 
 - Pushes to GitHub are manual, by the owner, when everything is stable; `main` push = production release.
 
 ## Open questions
-1. Supabase project refs and region are still placeholders in `brief.md` (`<PROD_REF>`, `<STAGING_REF>`, `<REGIONE>`); EU region must be confirmed before phase 8.
+1. ~~Supabase refs and region~~ resolved: `smsg-prod` `vcpmnpsfcgebhmgqlqeu`, `smsg-staging` `ydqdnicpfspqewclqrgk`, both `eu-central-1` (EU).
 2. Vercel plan: Hobby terms are for non-commercial personal use; confirm the association's account/plan (Pro if required).
 3. Client IP availability behind the external rewrite (rate limiting) — verify in phase 3.
 4. GDPR retention of invoices and of the members' register — confirm with the privacy officer (ADR-026).

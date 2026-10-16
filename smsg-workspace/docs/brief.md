@@ -34,8 +34,8 @@ La lingua dell'interfaccia è l'**italiano**. Codice, nomi di variabili, commit 
 
 Due progetti dedicati, `smsg-prod` e `smsg-staging` (piano Pro, `eu-central-1`). **Non crearne altri** e non toccare gli altri progetti dell'organizzazione.
 
-- **Produzione:** project ref `<PROD_REF>`, regione `<REGIONE>`
-- **Staging** (anteprime Vercel e prove): project ref `<STAGING_REF>`
+- **Produzione:** project ref `vcpmnpsfcgebhmgqlqeu`, regione `eu-central-1` (Francoforte, UE)
+- **Staging** (anteprime Vercel e prove): project ref `ydqdnicpfspqewclqrgk`
 - **Sviluppo:** sempre in locale con la Supabase CLI (`supabase start`), mai sui progetti remoti.
 
 Regole:
