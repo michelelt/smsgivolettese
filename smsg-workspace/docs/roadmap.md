@@ -34,7 +34,7 @@ Rules: one phase at a time; a phase is done when `make test` is green, `security
 - **Repos**: api, web.
 
 ## 7. Super admin, GDPR, accessibility, full e2e
-- **Scope**: users & roles (invite staff, change role, deactivate, last-admin protection UX, staff password reset by super admin — ADR-034; revisit MFA/TOTP for super admin), org settings (issuer data, VAT exemption text, stamp duty, fee, counters upward only), audit log viewer with filters, GDPR export/anonymise, accessibility pass on `/gestione`, complete Playwright suite (public booking, staff login, shift create/assign, volunteer availability, invoice issuance).
+- **Scope**: users & roles (invite staff, change role, deactivate, last-admin protection UX; revisit MFA/TOTP for super admin), org settings (issuer data, VAT exemption text, stamp duty, fee, counters upward only), audit log viewer with filters, GDPR export/anonymise, accessibility pass on `/gestione`, complete Playwright suite (public booking, staff login, shift create/assign, volunteer availability, invoice issuance).
 - **Acceptance**: all e2e green in CI; anonymisation leaves invoices intact and redacts audit; last super admin cannot be removed (UI + API + DB); settings changes audited.
 - **Repos**: api, web.
 

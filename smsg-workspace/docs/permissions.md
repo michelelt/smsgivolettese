@@ -44,7 +44,7 @@ export const can = (role: AppRole | null, action: Action) => rank(role) >= rank(
 | `users.read` (all `profiles`: name, email, phone, active; all `user_roles`) | – | own | ✔ | ✔ | staff |
 | `users.invite_volunteer` | – | – | ✔ | ✔ | staff |
 | `availability.write_all` | – | – | – | ✔ | super_admin |
-| `users.invite_staff`, `users.change_role`, `users.deactivate`, `users.reset_staff_password` (phase 7) | – | – | – | ✔ | super_admin |
+| `users.invite_staff`, `users.change_role`, `users.deactivate` | – | – | – | ✔ | super_admin |
 | `org_settings.write`, `counters.write` | – | – | – | ✔ | super_admin |
 | `audit.read` | – | – | – | ✔ | super_admin |
 | `gdpr.export`, `gdpr.anonymize` | – | – | – | ✔ | super_admin |
@@ -111,7 +111,7 @@ Enforced twice: the view `volunteer_transports_v` (owned by `postgres`, `securit
 - Bootstrap: `scripts/bootstrap-superadmin.ts` (idempotent) reads `SUPERADMIN_EMAIL` + `SUPERADMIN_PASSWORD` (Zod: valid email, password ≥ 12 chars) from the workspace `secrets.env`. If the auth user is missing it creates it with `auth.admin.createUser({ email, password, email_confirm: true })`; if it exists it never touches the password. Then upserts profile + `super_admin` role (ADR-027).
 - **Own password change** (all roles in `/gestione`): UI always calls `reauthenticate()` and sends the emailed nonce with `updateUser({ password, nonce })`; "Secure password change" on. GoTrue enforces the nonce only for sessions > 24 h (accepted residual risk, ADR-034).
 - **Super admin password**: changeable only by that super admin, logged in, as above. Lost password: owner resets it from the Supabase dashboard (outside the app).
-- **Staff lost password** (phase 7, **not built yet**): `POST /users/:id/reset-password`, super_admin only, target must be `staff` (never `super_admin`, never self); audited. This is the only allowed use of `auth.admin.updateUserById` with `password`; no other endpoint, role or script may set another user's password. Until phase 7, staff passwords are reset by the owner from the dashboard.
+- **Staff lost password**: the super admin resets it from the Supabase dashboard (owner decision, ADR-034). There is no API endpoint for it: no endpoint, role or script may call `auth.admin.updateUserById` with `password` or otherwise set another user's password.
 
 ## GDPR (super_admin)
 - `GET /gdpr/export?subject=client|member|user&id=…` → JSON with every row referencing the person (client + bookings + transports + invoices; member + fees; profile + volunteer + availability + assignments). Writes an audit row.
