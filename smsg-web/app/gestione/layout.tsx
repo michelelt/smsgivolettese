@@ -30,9 +30,18 @@ export default async function GestioneLayout({
       </header>
       <nav aria-label="Sezioni di gestione" className="mt-4">
         <ul className="flex flex-wrap gap-3">
+          {role === "volontario" && (
+            <li>
+              <NavLink href="/gestione">I miei impegni</NavLink>
+            </li>
+          )}
           {items.map((s) => (
             <li key={s.slug}>
-              <NavLink href={`/gestione/${s.slug}`}>{s.label}</NavLink>
+              <NavLink href={`/gestione/${s.slug}`}>
+                {s.slug === "disponibilita" && role !== "volontario"
+                  ? "Disponibilità volontari"
+                  : s.label}
+              </NavLink>
             </li>
           ))}
           <li>

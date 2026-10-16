@@ -15,7 +15,8 @@ type Result<T> = { data?: T; error?: unknown; response: Response };
 /** Unwraps an openapi-fetch result: data or a thrown ApiError carrying the API message. */
 export async function call<T>(p: Promise<Result<T>>): Promise<T> {
   const { data, error, response } = await p;
-  if (!response.ok || data === undefined) {
+  // 204 (e.g. respond, delete) has no body: data stays undefined and that is a success.
+  if (!response.ok || (data === undefined && response.status !== 204)) {
     const e = (
       error as { error?: { code?: string; message?: string } } | undefined
     )?.error;
@@ -25,7 +26,7 @@ export async function call<T>(p: Promise<Result<T>>): Promise<T> {
       e?.code,
     );
   }
-  return data;
+  return data as T;
 }
 
 /** Saves a blob result (PDF/CSV) through an object URL: a plain link cannot carry the bearer. */

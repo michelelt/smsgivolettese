@@ -29,6 +29,7 @@ export const SECTIONS = [
   { slug: "sito", label: "Info del sito", min: "staff" },
   { slug: "turni", label: "Turni", min: "staff" },
   { slug: "trasporti", label: "Trasporti", min: "staff" },
+  { slug: "mezzi", label: "Mezzi", min: "staff" },
   { slug: "volontari", label: "Volontari", min: "staff" },
   { slug: "impostazioni", label: "Impostazioni", min: "super_admin" },
   { slug: "utenti-e-ruoli", label: "Utenti e ruoli", min: "super_admin" },
