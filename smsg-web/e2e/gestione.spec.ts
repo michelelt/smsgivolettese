@@ -62,7 +62,14 @@ test("invoice issuance end to end", async ({ page }) => {
 
   // PDF, paid, void.
   await page.goto("/gestione/fatture");
+  // Data rendered = hydrated; filling earlier is wiped by hydration and the
+  // new invoice then sits beyond page 1 of the unfiltered list.
+  await expect(page.getByText(/^Fattura n\. \d+\//).first()).toBeVisible();
+  const filtered = page.waitForResponse(
+    (r) => r.url().includes("/invoices?") && r.url().includes(last),
+  );
   await page.getByLabel("Cerca per socio o numero").fill(last);
+  await filtered;
   const inv = card(page, name);
   const [dl] = await Promise.all([
     page.waitForEvent("download"),
@@ -102,7 +109,11 @@ test("a doubtful tax code can be saved anyway", async ({ page }) => {
   await dlg
     .getByLabel("Codice fiscale (facoltativo)")
     .fill(`AAAAAA00A00A${String(Date.now()).slice(-3)}A`);
+  const saved = page.waitForResponse(
+    (r) => r.request().method() === "POST" && r.url().includes("/members"),
+  );
   await dlg.getByRole("button", { name: "Registra socio" }).click();
+  await saved; // the warning comes from the API; it can be slow under load
   await expect(dlg.getByRole("alert")).toContainText("codice fiscale");
   await dlg.getByRole("button", { name: "Salva comunque" }).click();
   await expect(page.getByText(`Socio scelto: E2E ${last}`)).toBeVisible();
@@ -184,7 +195,7 @@ test("slogan edited in place shows on the public home", async ({
   await page.keyboard.press("Enter");
   await expect(page.getByText("Modifiche non salvate (1)")).toBeVisible();
   await page.getByRole("button", { name: "Salva e pubblica" }).click();
-  await expect(page.getByText("Info del sito salvate")).toBeVisible();
+  await expect(page.getByText("Modifiche salvate")).toBeVisible();
   const pub = await context.newPage();
   await expect(async () => {
     await pub.goto("/");
@@ -198,5 +209,36 @@ test("slogan edited in place shows on the public home", async ({
   await page.getByLabel("slogan", { exact: true }).fill(original);
   await page.keyboard.press("Enter");
   await page.getByRole("button", { name: "Salva e pubblica" }).click();
-  await expect(page.getByText("Info del sito salvate")).toBeVisible();
+  await expect(page.getByText("Modifiche salvate")).toBeVisible();
+});
+
+test("Chi siamo paragraph edited in place shows on the public page", async ({
+  page,
+  context,
+}) => {
+  test.setTimeout(90_000);
+  const marker = `Modifica ${Date.now()}`;
+  await page.goto("/gestione/sito?pagina=chi-siamo");
+  const btn = page.getByRole("button", {
+    name: "Modifica testo della sezione 1",
+  });
+  const original = (await btn.innerText()).trim();
+  const edit = async (text: string) => {
+    await btn.click();
+    await page.getByLabel("testo della sezione 1", { exact: true }).fill(text);
+    await page.getByLabel("testo della sezione 1", { exact: true }).blur();
+    await page.getByRole("button", { name: "Salva e pubblica" }).click();
+    await expect(page.getByText("Modifiche salvate")).toBeVisible();
+  };
+  await edit(`${original}\n\n${marker}`);
+  const pub = await context.newPage();
+  await expect(async () => {
+    await pub.goto("/chi-siamo");
+    await expect(pub.getByText(marker)).toBeVisible({ timeout: 1000 });
+  }).toPass({ timeout: 40_000 });
+  // The edit link is shown to staff on the public page.
+  await expect(
+    pub.getByRole("link", { name: "Modifica questa pagina" }),
+  ).toHaveAttribute("href", "/gestione/sito?pagina=chi-siamo");
+  await edit(original); // restore local data
 });

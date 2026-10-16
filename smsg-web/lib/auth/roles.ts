@@ -40,7 +40,7 @@ export const SECTIONS = [
     min: "staff",
     group: "Amministrazione",
   },
-  { slug: "sito", label: "Info del sito", min: "staff", group: "Sito" },
+  { slug: "sito", label: "Modifica il sito", min: "staff", group: "Sito" },
   { slug: "turni", label: "Turni", min: "staff", group: "Attività" },
   { slug: "trasporti", label: "Trasporti", min: "staff", group: "Attività" },
   { slug: "mezzi", label: "Mezzi", min: "staff", group: "Amministrazione" },

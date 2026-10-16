@@ -24,7 +24,7 @@ const MENU: Record<string, Record<string, Pick<Item, "icon" | "desc">>> = {
   },
   Sito: {
     bacheca: { icon: "news", desc: "Avvisi per i soci" },
-    sito: { icon: "globe", desc: "Contatti e orari" },
+    sito: { icon: "globe", desc: "Testi di tutte le pagine" },
   },
   "Super admin": {
     impostazioni: { icon: "gear", desc: "Configurazione generale" },

@@ -1,10 +1,15 @@
+import type { ReactNode } from "react";
 import { Icon } from "@/components/ui/icon";
 import type { paths } from "@/lib/api/schema";
 
 export type PublicService =
   paths["/public/services"]["get"]["responses"][200]["content"]["application/json"]["items"][number];
 
-export function ServiceCard({ s }: { s: PublicService }) {
+export function ServiceCard({
+  s,
+}: {
+  s: { name: ReactNode; description?: ReactNode; scheduleNote?: ReactNode };
+}) {
   return (
     <article className="flex flex-col gap-3 rounded-2xl border-2 border-ink bg-white p-5">
       <h3 className="text-2xl font-extrabold text-bordeaux">{s.name}</h3>

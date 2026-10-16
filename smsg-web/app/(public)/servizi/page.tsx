@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import { Paragraphs, SimplePage } from "@/components/public/page-bodies";
 import { ServiceCard } from "@/components/public/service-card";
-import { getServices } from "@/lib/public/server";
+import { getServices, getSiteSettings } from "@/lib/public/server";
 
 export const revalidate = 3600;
 export const metadata: Metadata = {
@@ -10,12 +11,15 @@ export const metadata: Metadata = {
 };
 
 export default async function Servizi() {
-  const services = await getServices();
+  const [services, { pages }] = await Promise.all([
+    getServices(),
+    getSiteSettings(),
+  ]);
   return (
-    <div className="space-y-6">
-      <h1 className="text-4xl font-extrabold text-bordeaux">
-        I nostri servizi
-      </h1>
+    <SimplePage
+      title={pages.servizi.title}
+      intro={<Paragraphs text={pages.servizi.intro} />}
+    >
       {services.length === 0 ? (
         <p>Al momento non ci sono servizi in elenco.</p>
       ) : (
@@ -25,6 +29,6 @@ export default async function Servizi() {
           ))}
         </div>
       )}
-    </div>
+    </SimplePage>
   );
 }

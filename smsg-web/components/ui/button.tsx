@@ -9,6 +9,10 @@ const styles = {
 const base =
   "min-h-12 rounded-xl border-2 px-5 text-lg font-bold disabled:opacity-60";
 
+/** Big-button look for elements that are not buttons (inert preview). */
+export const bigButtonClass = (variant: keyof typeof styles = "primary") =>
+  `inline-flex w-full items-center justify-center gap-2 text-center ${base} sm:w-auto ${styles[variant]}`;
+
 export function Button({
   variant = "primary",
   auto = false,

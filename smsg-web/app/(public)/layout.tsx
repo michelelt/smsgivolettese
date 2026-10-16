@@ -1,3 +1,4 @@
+import { EditPageLink } from "@/components/public/edit-page-link";
 import { PublicHeader, SiteFooter } from "@/components/public/site-parts";
 import { getSiteSettings } from "@/lib/public/server";
 
@@ -16,6 +17,7 @@ export default async function PublicLayout({
         Vai al contenuto
       </a>
       <PublicHeader />
+      <EditPageLink />
       <main
         id="contenuto"
         tabIndex={-1}

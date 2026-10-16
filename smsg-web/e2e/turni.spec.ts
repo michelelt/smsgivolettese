@@ -17,7 +17,7 @@ async function login(page: Page, email: string) {
 // Far-away random week and Monday: reruns do not collide with earlier commitments.
 const shiftDay = addDays(
   mondayOf(today()),
-  7 * (2 + Math.floor(Math.random() * 50)),
+  7 * (2 + Math.floor(Math.random() * 500)),
 );
 
 test.describe.configure({ mode: "serial" });

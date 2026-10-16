@@ -11,6 +11,30 @@ const PAGES = [
   "/privacy",
 ];
 
+test("edit link is hidden for anonymous visitors", async ({ page }) => {
+  await page.goto("/chi-siamo");
+  await page.locator("h1").waitFor();
+  await page.waitForTimeout(500); // the check runs after hydration
+  await expect(
+    page.getByRole("link", { name: "Modifica questa pagina" }),
+  ).toHaveCount(0);
+});
+
+test("edit link is hidden for a logged-in volunteer", async ({ page }) => {
+  await page.goto("/accedi");
+  const form = page.getByRole("form", { name: "Entra con la password" });
+  await form.getByLabel("Email").fill(process.env.E2E_VOLUNTEER_EMAIL!);
+  await form.getByLabel("Password").fill(process.env.E2E_PASSWORD!);
+  await form.getByRole("button", { name: "Entra" }).click();
+  await page.waitForURL("**/gestione");
+  await page.goto("/chi-siamo");
+  await page.locator("h1").waitFor();
+  await page.waitForTimeout(1000); // the role check runs after hydration
+  await expect(
+    page.getByRole("link", { name: "Modifica questa pagina" }),
+  ).toHaveCount(0);
+});
+
 test("text size persists", async ({ page }) => {
   await page.goto("/servizi");
   await page.getByRole("button", { name: "Testo grande" }).click();

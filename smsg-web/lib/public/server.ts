@@ -13,6 +13,20 @@ const EMPTY_SETTINGS = {
   vatNumber: null,
   conventions: [],
   footerLinks: [],
+  // Build-only fallback while the API is down; pages revalidate within the hour.
+  pages: {
+    home: {
+      servicesButton: "I nostri servizi",
+      whereButton: "Dove siamo",
+      quote: "",
+      quoteSource: "",
+    },
+    chiSiamo: { title: "Chi siamo", intro: "", sections: [] },
+    privacy: { title: "Informativa sulla privacy", intro: "", sections: [] },
+    servizi: { title: "I nostri servizi", intro: "" },
+    convenzioni: { title: "Convenzioni", intro: "" },
+    doveSiamo: { title: "Dove siamo", intro: "" },
+  },
 };
 
 // Throw at runtime so ISR keeps serving the last good page instead of caching a broken one;

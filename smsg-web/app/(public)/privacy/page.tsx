@@ -1,35 +1,23 @@
 import type { Metadata } from "next";
+import { Paragraphs, PrivacyBody } from "@/components/public/page-bodies";
+import { getSiteSettings } from "@/lib/public/server";
 
+export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "Informativa sulla privacy",
   alternates: { canonical: "/privacy" },
 };
 
-// Placeholder copy: the final text is supplied by the association (phase 8).
-export default function Privacy() {
+export default async function Privacy() {
+  const p = (await getSiteSettings()).pages.privacy;
   return (
-    <div className="max-w-prose space-y-4">
-      <h1 className="text-4xl font-extrabold text-bordeaux">
-        Informativa sulla privacy
-      </h1>
-      <p>
-        <b>Testo provvisorio.</b> L&apos;informativa completa sarà pubblicata
-        prima dell&apos;apertura del sito.
-      </p>
-      <h2 className="text-2xl font-extrabold">Titolare del trattamento</h2>
-      <p>Società di Mutuo Soccorso Givolettese, Givoletto.</p>
-      <h2 className="text-2xl font-extrabold">Dati raccolti da questo sito</h2>
-      <p>
-        Il sito pubblico è solo informativo: non raccoglie dati personali dei
-        visitatori.
-      </p>
-      <h2 className="text-2xl font-extrabold">Per quanto tempo</h2>
-      <p>[Da definire.]</p>
-      <h2 className="text-2xl font-extrabold">I suoi diritti</h2>
-      <p>
-        Può chiedere di vedere, correggere o cancellare i suoi dati rivolgendosi
-        alla sede.
-      </p>
-    </div>
+    <PrivacyBody
+      title={p.title}
+      intro={<Paragraphs text={p.intro} />}
+      sections={p.sections.map((s) => ({
+        heading: s.heading,
+        body: <Paragraphs text={s.body} />,
+      }))}
+    />
   );
 }

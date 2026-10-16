@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Paragraphs, SimplePage } from "@/components/public/page-bodies";
 import { ConventionCard } from "@/components/public/site-parts";
 import { getSiteSettings } from "@/lib/public/server";
 
@@ -10,10 +11,12 @@ export const metadata: Metadata = {
 };
 
 export default async function Convenzioni() {
-  const { conventions } = await getSiteSettings();
+  const { conventions, pages } = await getSiteSettings();
   return (
-    <div className="space-y-6">
-      <h1 className="text-4xl font-extrabold text-bordeaux">Convenzioni</h1>
+    <SimplePage
+      title={pages.convenzioni.title}
+      intro={<Paragraphs text={pages.convenzioni.intro} />}
+    >
       {conventions.length === 0 ? (
         <p>Al momento non ci sono convenzioni in elenco.</p>
       ) : (
@@ -23,6 +26,6 @@ export default async function Convenzioni() {
           ))}
         </div>
       )}
-    </div>
+    </SimplePage>
   );
 }

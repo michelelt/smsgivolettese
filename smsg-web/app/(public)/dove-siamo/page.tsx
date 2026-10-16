@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
-import { Icon } from "@/components/ui/icon";
+import {
+  AddressBlock,
+  Paragraphs,
+  SimplePage,
+} from "@/components/public/page-bodies";
 import { getSiteSettings } from "@/lib/public/server";
 
 export const revalidate = 3600;
@@ -10,27 +14,18 @@ export const metadata: Metadata = {
 };
 
 export default async function DoveSiamo() {
-  const { address } = await getSiteSettings();
+  const { address, pages } = await getSiteSettings();
   return (
-    <div className="max-w-prose space-y-4">
-      <h1 className="text-4xl font-extrabold text-bordeaux">Dove siamo</h1>
+    <SimplePage
+      prose
+      title={pages.doveSiamo.title}
+      intro={<Paragraphs text={pages.doveSiamo.intro} />}
+    >
       {address ? (
-        <>
-          <p className="flex items-start gap-2 text-xl">
-            <Icon name="pin" /> <span>{address}</span>
-          </p>
-          <a
-            className="font-bold text-blu underline"
-            href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(address)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Apri la mappa (si apre in una nuova scheda)
-          </a>
-        </>
+        <AddressBlock address={address} mapQuery={address} />
       ) : (
         <p>L&apos;indirizzo sarà pubblicato a breve.</p>
       )}
-    </div>
+    </SimplePage>
   );
 }

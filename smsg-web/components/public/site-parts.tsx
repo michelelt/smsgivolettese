@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { MainNav } from "@/components/public/main-nav";
 import { TextSize } from "@/components/public/text-size";
-import { ButtonLink } from "@/components/ui/button";
+import { bigButtonClass, ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { httpsOnly, isHttps } from "@/lib/public/https-url";
 
@@ -49,28 +49,57 @@ export const DEFAULT_INTRO =
 export function HomeHero({
   slogan,
   intro,
+  servicesButton,
+  whereButton,
   preview,
 }: {
   slogan: ReactNode;
   intro: ReactNode;
-  /** Staff preview: buttons inert and no second h1 on the page. */
+  servicesButton: ReactNode;
+  whereButton: ReactNode;
+  /** Staff preview: buttons are not links (their labels are editable) and no second h1 on the page. */
   preview?: boolean;
 }) {
   const H = preview ? "h2" : "h1";
+  const items = [
+    ["/servizi", "heart", servicesButton],
+    ["/dove-siamo", "pin", whereButton],
+  ] as const;
   return (
     <section className="space-y-4 rounded-2xl bg-blu p-6 text-white">
       <H className="text-4xl font-extrabold">{slogan}</H>
       <p className="whitespace-pre-line text-xl">{intro}</p>
-      <div inert={preview} className="flex flex-wrap gap-3">
-        <ButtonLink href="/servizi" variant="secondary">
-          <Icon name="heart" />I nostri servizi
-        </ButtonLink>
-        <ButtonLink href="/dove-siamo" variant="secondary">
-          <Icon name="pin" />
-          Dove siamo
-        </ButtonLink>
+      <div className="flex flex-wrap gap-3">
+        {items.map(([href, icon, label]) =>
+          preview ? (
+            <span key={href} className={bigButtonClass("secondary")}>
+              <Icon name={icon} />
+              {label}
+            </span>
+          ) : (
+            <ButtonLink key={href} href={href} variant="secondary">
+              <Icon name={icon} />
+              {label}
+            </ButtonLink>
+          ),
+        )}
       </div>
     </section>
+  );
+}
+
+export function HomeQuote({
+  quote,
+  source,
+}: {
+  quote: ReactNode;
+  source: ReactNode;
+}) {
+  return (
+    <blockquote className="border-l-8 border-bordeaux pl-4 italic">
+      {quote}
+      <footer className="mt-1 text-base not-italic">{source}</footer>
+    </blockquote>
   );
 }
 

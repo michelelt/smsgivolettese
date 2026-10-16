@@ -780,6 +780,7 @@ export interface paths {
                                 /** Format: uri */
                                 url: string;
                             }[];
+                            pages: components["schemas"]["PageTexts"];
                         };
                     };
                 };
@@ -2902,6 +2903,7 @@ export interface paths {
                                 /** Format: uri */
                                 url: string;
                             }[];
+                            pages: components["schemas"]["PageTexts"];
                         };
                     };
                 };
@@ -5392,6 +5394,42 @@ export interface components {
             km: number;
             driverNotes?: string | null;
         };
+        PageTexts: {
+            home: {
+                servicesButton: string;
+                whereButton: string;
+                quote: string;
+                quoteSource: string;
+            };
+            chiSiamo: {
+                title: string;
+                intro: string;
+                sections: {
+                    heading: string;
+                    body: string;
+                }[];
+            };
+            privacy: {
+                title: string;
+                intro: string;
+                sections: {
+                    heading: string;
+                    body: string;
+                }[];
+            };
+            servizi: {
+                title: string;
+                intro: string;
+            };
+            convenzioni: {
+                title: string;
+                intro: string;
+            };
+            doveSiamo: {
+                title: string;
+                intro: string;
+            };
+        };
         BookingPage: {
             items: components["schemas"]["Booking"][];
             total: number;
@@ -5706,6 +5744,7 @@ export interface components {
                 /** Format: uri */
                 url: string;
             }[];
+            pages: components["schemas"]["PageTexts"];
         };
         OrgInfo: {
             legalName: string;
