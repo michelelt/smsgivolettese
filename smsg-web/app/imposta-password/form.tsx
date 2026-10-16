@@ -7,7 +7,7 @@ import type { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { setPasswordSchema } from "@/lib/auth/schemas";
-import { roleFromClaims } from "@/lib/auth/roles";
+import { keepsSessionAfterPassword, roleFromClaims } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/client";
 
 export function SetPasswordForm() {
@@ -27,9 +27,9 @@ export function SetPasswordForm() {
       return setErr(
         "Non è stato possibile salvare la password. Riprova o richiedi un nuovo link.",
       );
-    // Staff/super_admin cannot refresh a link-born session: send them to sign in with the password.
+    // Staff/super_admin (or a session without role) cannot refresh a link-born session: send them to sign in with the password.
     const { data } = await supabase.auth.getClaims();
-    if (roleFromClaims(data?.claims) !== "volontario") {
+    if (!keepsSessionAfterPassword(roleFromClaims(data?.claims))) {
       await supabase.auth.signOut();
       window.location.assign("/accedi?impostata=1");
       return;

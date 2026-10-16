@@ -78,11 +78,20 @@ test("magic link from Mailpit signs the volunteer in", async ({
 }) => {
   const to = env("E2E_VOLUNTEER_EMAIL");
   await requestLink(page, to);
-  await page.goto(await mailedLink(request, to));
+  const link = await mailedLink(request, to);
+  await page.goto(link);
   await expect(page).toHaveURL(/\/gestione/);
   await expect(
     page.getByRole("heading", { name: "I miei impegni" }),
   ).toBeVisible();
+  // Same link again (single use) must give the generic message, not the staff one.
+  await page.context().clearCookies();
+  await page.goto(link);
+  await expect(page).toHaveURL(/\/accedi\?errore=link/);
+  await expect(
+    page.getByText("il link non è valido o è scaduto"),
+  ).toBeVisible();
+  await expect(page.getByText("usa la password")).toHaveCount(0);
 });
 
 // Needs db-engineer's Access Token Hook change (staff cannot get a session via link).

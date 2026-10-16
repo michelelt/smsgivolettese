@@ -69,3 +69,17 @@ export function safeNext(next: string | null | undefined): string {
     return "/gestione";
   }
 }
+
+/** GoTrue answers 403 for the hook refusal but also for expired links (`otp_expired`). */
+export const isRoleRefusal = (e: {
+  status?: number;
+  code?: string;
+  message?: string;
+}) =>
+  e.status === 403 &&
+  e.code !== "otp_expired" &&
+  /non consentito per questo ruolo/i.test(e.message ?? "");
+
+/** After setting a password only volunteers keep the session; staff and role-less sign in again. */
+export const keepsSessionAfterPassword = (role: AppRole | null) =>
+  role === "volontario";

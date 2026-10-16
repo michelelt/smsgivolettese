@@ -1,4 +1,11 @@
-import { canAccess, roleFromClaims, safeNext, SECTIONS } from "./roles";
+import {
+  canAccess,
+  isRoleRefusal,
+  keepsSessionAfterPassword,
+  roleFromClaims,
+  safeNext,
+  SECTIONS,
+} from "./roles";
 
 describe("roleFromClaims", () => {
   it("accepts known roles only", () => {
@@ -55,5 +62,35 @@ describe("safeNext", () => {
       "/%E0%A4%A",
     ])
       expect(safeNext(bad)).toBe("/gestione");
+  });
+});
+
+describe("isRoleRefusal", () => {
+  const msg =
+    "Accesso con link non consentito per questo ruolo: usa email e password.";
+  it("matches only the hook refusal", () => {
+    expect(isRoleRefusal({ status: 403, code: "unknown", message: msg })).toBe(
+      true,
+    );
+    expect(
+      isRoleRefusal({
+        status: 403,
+        code: "otp_expired",
+        message: "Email link is invalid or has expired",
+      }),
+    ).toBe(false);
+    expect(
+      isRoleRefusal({ status: 403, code: "otp_expired", message: msg }),
+    ).toBe(false);
+    expect(isRoleRefusal({ status: 400, message: msg })).toBe(false);
+  });
+});
+
+describe("keepsSessionAfterPassword", () => {
+  it("keeps volunteers, signs out staff, admins and role-less sessions", () => {
+    expect(keepsSessionAfterPassword("volontario")).toBe(true);
+    expect(keepsSessionAfterPassword("staff")).toBe(false);
+    expect(keepsSessionAfterPassword("super_admin")).toBe(false);
+    expect(keepsSessionAfterPassword(null)).toBe(false);
   });
 });

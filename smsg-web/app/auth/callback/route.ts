@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { z } from "zod";
-import { safeNext } from "@/lib/auth/roles";
+import { isRoleRefusal, safeNext } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/server";
 
 const query = z.object({
@@ -25,7 +25,8 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
   const q = query.safeParse(Object.fromEntries(searchParams));
   const supabase = await createClient();
-  let error: { message: string; status?: number } | null | undefined;
+  let error:
+    { message: string; status?: number; code?: string } | null | undefined;
   if (q.success) {
     if (q.data.code) {
       ({ error } = await supabase.auth.exchangeCodeForSession(q.data.code));
@@ -38,8 +39,8 @@ export async function GET(request: NextRequest) {
   } else error = { message: "invalid params" };
   if (error) {
     // The Access Token Hook rejects staff/super_admin sessions from links.
-    // GoTrue answers 403 for it; other failures are plain invalid/expired links.
-    const staff = error.status === 403;
+    // Other failures (expired, already used, invalid) get the generic link message.
+    const staff = isRoleRefusal(error);
     return NextResponse.redirect(
       `${origin}/accedi?errore=${staff ? "personale" : "link"}`,
     );
