@@ -1,18 +1,22 @@
 name: deploy
 permissions: { contents: read }
 on:
-  push:
+  workflow_run:
+    workflows: [ci]
+    types: [completed]
     branches: [main]
 concurrency: deploy-prod
 jobs:
   deploy:
+    if: github.event.workflow_run.conclusion == 'success'
+    environment: production
     runs-on: ubuntu-latest
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v4
-        with: { persist-credentials: false }
+        with: { ref: '${{ github.event.workflow_run.head_sha }}', persist-credentials: false }
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with: { node-version-file: .nvmrc, cache: pnpm }
@@ -22,12 +26,12 @@ jobs:
       - uses: supabase/setup-cli@v1
       - name: Push migrations to production
         run: |
-          supabase link --project-ref "$SUPABASE_PROD_REF" --password "$SUPABASE_DB_PASSWORD_PROD"
-          supabase db push --password "$SUPABASE_DB_PASSWORD_PROD"
+          supabase link --project-ref "$SUPABASE_PROD_REF"
+          supabase db push
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROD_REF: ${{ secrets.SUPABASE_PROD_REF }}
-          SUPABASE_DB_PASSWORD_PROD: ${{ secrets.SUPABASE_DB_PASSWORD_PROD }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_PROD }}
       - run: pnpm dlx vercel@64.3.1 pull --yes --environment=production --token "$VERCEL_TOKEN"
         env: { VERCEL_TOKEN: '${{ secrets.VERCEL_TOKEN }}' }
       - run: pnpm dlx vercel@64.3.1 build --prod --token "$VERCEL_TOKEN"
