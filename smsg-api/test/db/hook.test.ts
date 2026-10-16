@@ -117,7 +117,7 @@ describe('custom access token hook: no link sessions for staff/super_admin', () 
   it('hook refuses refresh of a link-born staff session (function level, amr otp)', async () => {
     await rolledBack(async (tx) => {
       await fixtures(tx);
-      await tx`update auth.users set encrypted_password = 'x' where id = ${ID.staff}`;
+      await tx`insert into app.password_set values (${ID.staff})`;
       const event = {
         user_id: ID.staff,
         authentication_method: 'token_refresh',
@@ -125,9 +125,56 @@ describe('custom access token hook: no link sessions for staff/super_admin', () 
       };
       const [r] = await tx`select app.custom_access_token_hook(${tx.json(event)}) as e`;
       expect(r!.e.error.http_code).toBe(403);
-      await tx`update auth.users set encrypted_password = '' where id = ${ID.staff}`; // invite: no password yet
+      await tx`delete from app.password_set where user_id = ${ID.staff}`; // invite: no password yet
       const [r2] = await tx`select app.custom_access_token_hook(${tx.json(event)}) as e`;
-      expect(r2!.e.claims.app_role).toBe('staff');
+      expect(r2!.e.claims).not.toHaveProperty('app_role');
     });
+  });
+
+  it('invite flow: no app_role until a password is set, then no more link sessions', async () => {
+    const email = `invito.${Date.now()}@example.test`;
+    const g = (await (
+      await post('admin/generate_link', secret, { type: 'invite', email }, true)
+    ).json()) as {
+      id: string;
+      hashed_token: string;
+    };
+    try {
+      await sql`insert into profiles (id, first_name, last_name, email) values (${g.id}, 'Invitato', '(esempio)', ${email})`;
+      await sql`insert into user_roles values (${g.id}, 'staff')`;
+      const v = await post('verify', key, { type: 'invite', token_hash: g.hashed_token });
+      const vt = await v.text();
+      expect(v.status, vt).toBe(200);
+      const { access_token } = JSON.parse(vt) as { access_token: string };
+      const claimsOf = (t: string) =>
+        JSON.parse(Buffer.from(t.split('.')[1]!, 'base64url').toString());
+      expect(claimsOf(access_token)).not.toHaveProperty('app_role');
+      const pw = 'Nuova-Password-Esempio-123!';
+      const up = await fetch(`${url}/auth/v1/user`, {
+        method: 'PUT',
+        headers: {
+          apikey: key,
+          authorization: `Bearer ${access_token}`,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({ password: pw }),
+      });
+      expect(up.status).toBe(200);
+      const login = await post('token?grant_type=password', key, { email, password: pw });
+      expect(login.status).toBe(200);
+      expect(
+        claimsOf(((await login.json()) as { access_token: string }).access_token).app_role,
+      ).toBe('staff');
+      const res = await verify('magiclink', email);
+      expect(res.status).toBeGreaterThanOrEqual(400);
+      expect(await res.text()).not.toContain('access_token');
+    } finally {
+      await sql`delete from user_roles where user_id = ${g.id}`;
+      await sql`delete from profiles where id = ${g.id}`;
+      await fetch(`${url}/auth/v1/admin/users/${g.id}`, {
+        method: 'DELETE',
+        headers: { apikey: secret, authorization: `Bearer ${secret}` },
+      });
+    }
   });
 });

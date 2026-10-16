@@ -46,6 +46,16 @@ describe('PostgREST exposes nothing (ADR-003)', () => {
   });
 });
 
+describe('schema api stays empty', () => {
+  it('has no ACL grants, relations or functions', async () => {
+    const [r] = await sql`select
+      (select nspacl::text from pg_namespace where nspname = 'api') as acl,
+      (select count(*)::int from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'api') as rels,
+      (select count(*)::int from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'api') as fns`;
+    expect(r).toEqual({ acl: null, rels: 0, fns: 0 });
+  });
+});
+
 describe('table privileges', () => {
   it('every public table has RLS enabled', async () => {
     const rows =
