@@ -14,7 +14,6 @@ const MENU: Record<string, Record<string, Pick<Item, "icon" | "desc">>> = {
     disponibilita: { icon: "hands", desc: "Chi può aiutare e quando" },
   },
   Persone: {
-    utenti: { icon: "user", desc: "Anagrafica delle persone assistite" },
     soci: { icon: "heart", desc: "Iscrizioni e quote" },
     volontari: { icon: "hands", desc: "Elenco dei volontari" },
   },

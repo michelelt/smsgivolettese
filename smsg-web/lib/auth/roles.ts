@@ -31,7 +31,6 @@ export const SECTIONS = [
     min: "staff",
     group: "Attività",
   },
-  { slug: "utenti", label: "Assistiti", min: "staff", group: "Persone" },
   { slug: "soci", label: "Soci", min: "staff", group: "Persone" },
   { slug: "fatture", label: "Fatture", min: "staff", group: "Amministrazione" },
   { slug: "bacheca", label: "Bacheca", min: "staff", group: "Sito" },

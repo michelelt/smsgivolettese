@@ -809,7 +809,7 @@ export interface paths {
                     q?: string;
                     from?: string;
                     to?: string;
-                    clientId?: string;
+                    memberId?: string;
                 };
                 header?: never;
                 path?: never;
@@ -1329,292 +1329,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/clients": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: {
-                    page?: number;
-                    pageSize?: number;
-                    q?: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Clienti */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ClientPage"];
-                    };
-                };
-                /** @description Dati non validi */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non autenticato */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Permesso negato */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["ClientCreate"];
-                };
-            };
-            responses: {
-                /** @description Cliente creato */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Client"];
-                    };
-                };
-                /** @description Dati non validi */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non autenticato */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Permesso negato */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Conflitto con lo stato attuale */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Richiede conferma o non elaborabile */
-                422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/clients/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Scheda cliente */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ClientDetail"];
-                    };
-                };
-                /** @description Dati non validi */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non autenticato */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Permesso negato */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non trovato */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["ClientPatch"];
-                };
-            };
-            responses: {
-                /** @description Cliente aggiornato */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Client"];
-                    };
-                };
-                /** @description Dati non validi */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non autenticato */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Permesso negato */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non trovato */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Conflitto con lo stato attuale */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Richiede conferma o non elaborabile */
-                422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-            };
-        };
-        trace?: never;
-    };
     "/members": {
         parameters: {
             query?: never;
@@ -1901,7 +1615,7 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Socio con quote e cliente collegato */
+                /** @description Socio con quote e storico (prenotazioni, trasporti, fatture) */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -5665,9 +5379,9 @@ export interface components {
             status: "assegnato" | "confermato" | "svolto";
             km: number | null;
             driverNotes: string | null;
-            clientFirstName: string;
-            clientLastName: string;
-            clientPhone: string;
+            memberFirstName: string;
+            memberLastName: string;
+            memberPhone: string | null;
             vehiclePlate: string | null;
             vehicleModel: string | null;
         };
@@ -5686,9 +5400,9 @@ export interface components {
             /** Format: uuid */
             id: string;
             /** Format: uuid */
-            clientId: string;
-            clientName: string;
-            clientPhone: string;
+            memberId: string;
+            memberName: string;
+            memberPhone: string | null;
             /** Format: uuid */
             serviceId: string;
             serviceName: string;
@@ -5698,7 +5412,6 @@ export interface components {
             time: string | null;
             /** @enum {string} */
             status: "attesa" | "confermata" | "eseguita" | "annullata";
-            isMember: boolean;
             priceAppliedCents: number;
             /** @enum {string} */
             origin: "online" | "telefono";
@@ -5718,7 +5431,7 @@ export interface components {
         };
         BookingCreate: {
             /** Format: uuid */
-            clientId: string;
+            memberId: string;
             /** Format: uuid */
             serviceId: string;
             /** Format: date */
@@ -5726,7 +5439,6 @@ export interface components {
             /** @enum {string} */
             slot: "mattina" | "pomeriggio";
             time?: string;
-            declaredMember?: boolean;
             notes?: string;
         };
         BookingConfirm: {
@@ -5735,84 +5447,6 @@ export interface components {
         BookingCancel: {
             /** @enum {string} */
             by: "staff" | "utente";
-        };
-        ClientPage: {
-            items: components["schemas"]["Client"][];
-            total: number;
-        };
-        Client: {
-            /** Format: uuid */
-            id: string;
-            firstName: string;
-            lastName: string;
-            phone: string;
-            taxCode: string | null;
-            address: string | null;
-            notes: string | null;
-            /** Format: uuid */
-            memberId: string | null;
-            memberCardNumber: number | null;
-            bookingsCount: number;
-            toInvoiceCount: number;
-            invoicedCents: number;
-            toCollectCents: number;
-        };
-        ClientDetail: components["schemas"]["Client"] & {
-            member: {
-                /** Format: uuid */
-                id: string;
-                cardNumber: number;
-                firstName: string;
-                lastName: string;
-                /** @enum {string} */
-                status: "attivo" | "cessato";
-            } | null;
-            bookings: components["schemas"]["Booking"][];
-            invoices: components["schemas"]["Invoice"][];
-        };
-        Invoice: {
-            /** Format: uuid */
-            id: string;
-            year: number;
-            number: number;
-            issuedOn: string;
-            /** Format: uuid */
-            clientId: string;
-            customerName: string;
-            customerTaxCode: string | null;
-            customerAddress: string | null;
-            subtotalCents: number;
-            stampDutyCents: number;
-            totalCents: number;
-            /** @enum {string} */
-            status: "emessa" | "pagata" | "annullata";
-            /** @enum {string|null} */
-            paymentMethod: "contanti" | "pos" | "bonifico" | null;
-            paidOn: string | null;
-            voidedOn: string | null;
-            voidReason: string | null;
-        };
-        ClientCreate: {
-            firstName: string;
-            lastName: string;
-            phone: string;
-            taxCode?: string | null;
-            taxCodeConfirmed?: boolean;
-            address?: string | null;
-            notes?: string | null;
-            /** Format: uuid */
-            memberId?: string | null;
-        };
-        ClientPatch: {
-            firstName?: string;
-            lastName?: string;
-            phone?: string;
-            taxCode?: string | null;
-            taxCodeConfirmed?: boolean;
-            address?: string | null;
-            notes?: string | null;
-            /** Format: uuid */
-            memberId?: string | null;
         };
         MemberPage: {
             items: components["schemas"]["Member"][];
@@ -5852,13 +5486,9 @@ export interface components {
         };
         MemberDetail: components["schemas"]["Member"] & {
             fees: components["schemas"]["MembershipFee"][];
-            client: {
-                /** Format: uuid */
-                id: string;
-                firstName: string;
-                lastName: string;
-                phone: string;
-            } | null;
+            bookings: components["schemas"]["Booking"][];
+            transports: components["schemas"]["Transport"][];
+            invoices: components["schemas"]["Invoice"][];
         };
         MembershipFee: {
             /** Format: uuid */
@@ -5870,6 +5500,59 @@ export interface components {
             paidOn: string;
             /** @enum {string} */
             method: "contanti" | "pos" | "bonifico";
+        };
+        Transport: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            memberId: string;
+            memberName: string;
+            memberPhone: string | null;
+            travelDate: string;
+            departureTime: string | null;
+            appointmentTime: string | null;
+            returnTime: string | null;
+            fromAddress: string | null;
+            toAddress: string | null;
+            requestedBy: string | null;
+            reason: string | null;
+            wheelchair: boolean;
+            companion: boolean;
+            notes: string | null;
+            /** @enum {string} */
+            status: "richiesto" | "assegnato" | "confermato" | "svolto" | "annullato";
+            /** Format: uuid */
+            driverId: string | null;
+            driverName: string | null;
+            /** Format: uuid */
+            vehicleId: string | null;
+            vehiclePlate: string | null;
+            km: number | null;
+            driverNotes: string | null;
+            /** Format: uuid */
+            bookingId: string | null;
+        };
+        Invoice: {
+            /** Format: uuid */
+            id: string;
+            year: number;
+            number: number;
+            issuedOn: string;
+            /** Format: uuid */
+            memberId: string;
+            customerName: string;
+            customerTaxCode: string | null;
+            customerAddress: string | null;
+            subtotalCents: number;
+            stampDutyCents: number;
+            totalCents: number;
+            /** @enum {string} */
+            status: "emessa" | "pagata" | "annullata";
+            /** @enum {string|null} */
+            paymentMethod: "contanti" | "pos" | "bonifico" | null;
+            paidOn: string | null;
+            voidedOn: string | null;
+            voidReason: string | null;
         };
         MemberCreate: {
             firstName: string;
@@ -5894,8 +5577,6 @@ export interface components {
             notes?: string | null;
             /** @enum {string} */
             feeMethod?: "contanti" | "pos" | "bonifico";
-            /** Format: uuid */
-            clientId?: string;
         };
         MemberPatch: {
             firstName?: string;
@@ -5958,7 +5639,7 @@ export interface components {
         };
         InvoiceIssue: {
             /** Format: uuid */
-            clientId: string;
+            memberId: string;
             bookingIds: string[];
             customerTaxCode?: string | null;
             taxCodeConfirmed?: boolean;
@@ -5984,8 +5665,7 @@ export interface components {
             name: string;
             description: string | null;
             scheduleNote: string | null;
-            memberPriceCents: number;
-            nonMemberPriceCents: number;
+            priceCents: number;
             active: boolean;
             requiresTransport: boolean;
             sortOrder: number;
@@ -5994,8 +5674,7 @@ export interface components {
             name: string;
             description?: string | null;
             scheduleNote?: string | null;
-            memberPriceCents: number;
-            nonMemberPriceCents: number;
+            priceCents: number;
             active?: boolean;
             requiresTransport?: boolean;
             sortOrder?: number;
@@ -6004,8 +5683,7 @@ export interface components {
             name?: string;
             description?: string | null;
             scheduleNote?: string | null;
-            memberPriceCents?: number;
-            nonMemberPriceCents?: number;
+            priceCents?: number;
             active?: boolean;
             requiresTransport?: boolean;
             sortOrder?: number;
@@ -6204,40 +5882,9 @@ export interface components {
             items: components["schemas"]["Transport"][];
             total: number;
         };
-        Transport: {
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            clientId: string;
-            clientName: string;
-            clientPhone: string;
-            travelDate: string;
-            departureTime: string | null;
-            appointmentTime: string | null;
-            returnTime: string | null;
-            fromAddress: string | null;
-            toAddress: string | null;
-            requestedBy: string | null;
-            reason: string | null;
-            wheelchair: boolean;
-            companion: boolean;
-            notes: string | null;
-            /** @enum {string} */
-            status: "richiesto" | "assegnato" | "confermato" | "svolto" | "annullato";
-            /** Format: uuid */
-            driverId: string | null;
-            driverName: string | null;
-            /** Format: uuid */
-            vehicleId: string | null;
-            vehiclePlate: string | null;
-            km: number | null;
-            driverNotes: string | null;
-            /** Format: uuid */
-            bookingId: string | null;
-        };
         TransportCreate: {
             /** Format: uuid */
-            clientId: string;
+            memberId: string;
             /** Format: date */
             travelDate: string;
             departureTime?: string | null;

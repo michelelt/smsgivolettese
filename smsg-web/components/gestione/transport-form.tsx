@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -10,10 +10,10 @@ import { FormError } from "@/components/ui/bits";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
+import { MemberPicker } from "./member-picker";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/toast";
 import { api, call } from "@/lib/api/call";
-import { useDebounced } from "@/lib/api/hooks";
 import type { components } from "@/lib/api/schema";
 import { fmtTime, today } from "@/lib/dates";
 
@@ -41,57 +41,11 @@ const nul = (s: string) => s.trim() || null;
 export const NO_HEALTH =
   "Non scriva informazioni sulla salute (malattie, diagnosi, terapie): il motivo può essere solo, per esempio, «visita in ospedale».";
 
-function ClientPicker({ onPick }: { onPick: (id: string) => void }) {
-  const [q, setQ] = useState("");
-  const [id, setId] = useState("");
-  const dq = useDebounced(q);
-  const clients = useQuery({
-    queryKey: ["clients", { q: dq, picker: true }],
-    queryFn: () =>
-      call(api.GET("/clients", { params: { query: { q: dq, pageSize: 8 } } })),
-  });
-  return (
-    <fieldset className="mt-4">
-      <legend className="font-bold">Assistito</legend>
-      <Field
-        label="Cerca per nome o telefono"
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        autoComplete="off"
-      />
-      <div role="radiogroup" aria-label="Utenti trovati" className="mt-2">
-        {clients.data?.items.map((c) => (
-          <label
-            key={c.id}
-            className="flex min-h-12 items-center gap-3 font-bold"
-          >
-            <input
-              type="radio"
-              name="client"
-              className="size-6 accent-bordeaux"
-              checked={id === c.id}
-              onChange={() => {
-                setId(c.id);
-                onPick(c.id);
-              }}
-            />
-            {c.firstName} {c.lastName} · {c.phone}
-          </label>
-        ))}
-      </div>
-      <p aria-live="polite">
-        {clients.data?.items.length === 0 &&
-          "Nessun utente trovato. Lo registri prima nella sezione Utenti."}
-      </p>
-    </fieldset>
-  );
-}
-
 export function TransportForm({ transport }: { transport?: Transport }) {
   const router = useRouter();
   const toast = useToast();
-  const [clientId, setClientId] = useState(transport?.clientId ?? "");
-  const [clientErr, setClientErr] = useState<string>();
+  const [memberId, setMemberId] = useState(transport?.memberId ?? "");
+  const [memberErr, setMemberErr] = useState<string>();
   const f = useForm<Values>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -136,7 +90,7 @@ export function TransportForm({ transport }: { transport?: Transport }) {
               body,
             }),
           )
-        : call(api.POST("/transports", { body: { clientId, ...body } }));
+        : call(api.POST("/transports", { body: { memberId, ...body } }));
     },
     onSuccess: (t) => {
       toast(transport ? "Trasporto salvato" : "Trasporto registrato");
@@ -147,20 +101,21 @@ export function TransportForm({ transport }: { transport?: Transport }) {
     <form
       noValidate
       onSubmit={f.handleSubmit((v) => {
-        if (!transport && !clientId)
-          return setClientErr("scelga l'assistito dall'elenco");
-        setClientErr(undefined);
+        if (!transport && !memberId)
+          return setMemberErr("scelga il socio dall'elenco");
+        setMemberErr(undefined);
         m.mutate(v);
       })}
     >
       {transport ? (
         <p className="mt-4 text-xl font-bold">
-          {transport.clientName} · {transport.clientPhone}
+          {transport.memberName}
+          {transport.memberPhone && ` · ${transport.memberPhone}`}
         </p>
       ) : (
         <>
-          <ClientPicker onPick={setClientId} />
-          <FormError message={clientErr} />
+          <MemberPicker onPick={setMemberId} />
+          <FormError message={memberErr} />
         </>
       )}
       <Field

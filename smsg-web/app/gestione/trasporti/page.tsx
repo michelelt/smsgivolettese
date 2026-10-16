@@ -95,7 +95,7 @@ export default function Trasporti() {
                   className="text-blu underline"
                   href={`/gestione/trasporti/${t.id}`}
                 >
-                  {t.clientName}
+                  {t.memberName}
                 </Link>
               </p>
               <Pill>{TRANSPORT_STATUS[t.status]}</Pill>

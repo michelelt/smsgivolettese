@@ -140,7 +140,9 @@ test("turni never scrolls horizontally", async ({ page }) => {
 test("staff registers a transport and opens its page", async ({ page }) => {
   await login(page, env("E2E_STAFF_EMAIL"));
   await page.goto("/gestione/trasporti/nuovo");
-  await page.getByLabel("Cerca per nome o telefono").fill("Rossi");
+  await page
+    .getByLabel("Cerca per nome, tessera, codice fiscale o telefono")
+    .fill("Rossi");
   await page.getByRole("radio").first().check();
   await page.getByLabel("Data").fill(shiftDay);
   await page.getByLabel("Ora di partenza").fill("08:30");

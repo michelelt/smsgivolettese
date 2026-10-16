@@ -18,7 +18,6 @@ import { dateField, METHODS, optText, orNull, taxCodeField } from "@/lib/forms";
 import { formatEuro } from "@/lib/money";
 
 type Member = components["schemas"]["Member"];
-type Client = components["schemas"]["Client"];
 
 export const TYPES = [
   ["ordinario", "Ordinario"],
@@ -58,29 +57,23 @@ const NULLABLE = [
   "notes",
 ] as const;
 
-/** Create (optionally from a client) or edit; edit sends only changed fields. */
-export function MemberForm({
-  member,
-  client,
-}: {
-  member?: Member;
-  client?: Client;
-}) {
+/** Create or edit; edit sends only changed fields. */
+export function MemberForm({ member }: { member?: Member }) {
   const router = useRouter();
   const toast = useToast();
   const org = useOrgInfo().data;
   const f = useForm<Values>({
     resolver: zodResolver(schema),
     defaultValues: {
-      firstName: member?.firstName ?? client?.firstName ?? "",
-      lastName: member?.lastName ?? client?.lastName ?? "",
-      taxCode: member?.taxCode ?? client?.taxCode ?? "",
+      firstName: member?.firstName ?? "",
+      lastName: member?.lastName ?? "",
+      taxCode: member?.taxCode ?? "",
       birthDate: member?.birthDate ?? "",
       birthPlace: member?.birthPlace ?? "",
-      address: member?.address ?? client?.address ?? "",
+      address: member?.address ?? "",
       postalCode: member?.postalCode ?? "",
       city: member?.city ?? "",
-      phone: member?.phone ?? client?.phone ?? "",
+      phone: member?.phone ?? "",
       email: member?.email ?? "",
       memberType: member?.memberType ?? "ordinario",
       joinedOn: member?.joinedOn ?? today(),
@@ -115,7 +108,6 @@ export function MemberForm({
           body: {
             ...body,
             ...(feeMethod && { feeMethod }),
-            ...(client && { clientId: client.id }),
           } as components["schemas"]["MemberCreate"],
         }),
       );

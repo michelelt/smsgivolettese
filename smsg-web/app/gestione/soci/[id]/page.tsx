@@ -17,6 +17,13 @@ import type { components } from "@/lib/api/schema";
 import { currentYear, fmtDate, today } from "@/lib/dates";
 import { METHODS } from "@/lib/forms";
 import { formatEuro } from "@/lib/money";
+import {
+  invoiceable,
+  IssueInvoiceDialog,
+} from "@/components/gestione/issue-invoice-dialog";
+import { NewBookingDialog } from "@/components/gestione/new-booking-dialog";
+import { BookingList } from "@/components/gestione/booking-list";
+import { InvoiceActions } from "@/components/gestione/invoice-actions";
 import { TYPES } from "@/components/gestione/member-form";
 
 type Member = components["schemas"]["MemberDetail"];
@@ -132,7 +139,9 @@ export default function Socio() {
   const { id } = useParams<{ id: string }>();
   const toast = useToast();
   const q = useMember(id);
-  const [dlg, setDlg] = useState<"fee" | "end" | null>(null);
+  const [dlg, setDlg] = useState<"fee" | "end" | "book" | "invoice" | null>(
+    null,
+  );
   const close = () => setDlg(null);
   const reactivate = useMutation({
     mutationFn: () =>
@@ -188,6 +197,16 @@ export default function Socio() {
                 Registra quota {year}
               </Button>
             )}
+            {m.status === "attivo" && (
+              <Button auto onClick={() => setDlg("book")}>
+                Nuova prenotazione
+              </Button>
+            )}
+            {invoiceable(m).length > 0 && (
+              <Button auto onClick={() => setDlg("invoice")}>
+                Fattura {invoiceable(m).length} prestazioni eseguite
+              </Button>
+            )}
             <ButtonLink
               variant="secondary"
               href={`/gestione/soci/${m.id}/modifica`}
@@ -236,21 +255,6 @@ export default function Socio() {
                 <dd>{v || "—"}</dd>
               </div>
             ))}
-            <div className="contents">
-              <dt className="font-bold">Utente collegato</dt>
-              <dd>
-                {m.client ? (
-                  <Link
-                    className="text-blu underline"
-                    href={`/gestione/utenti/${m.client.id}`}
-                  >
-                    {m.client.firstName} {m.client.lastName}
-                  </Link>
-                ) : (
-                  "—"
-                )}
-              </dd>
-            </div>
           </dl>
           <h2 className="mt-8 text-2xl font-extrabold text-bordeaux">
             Quote versate
@@ -280,6 +284,52 @@ export default function Socio() {
               </li>
             ))}
           </ul>
+          <h2 className="mt-8 text-2xl font-extrabold text-bordeaux">
+            Prenotazioni
+          </h2>
+          <BookingList items={m.bookings} />
+          <h2 className="mt-8 text-2xl font-extrabold text-bordeaux">
+            Trasporti
+          </h2>
+          {m.transports.length === 0 && (
+            <p className="mt-2">Nessun trasporto.</p>
+          )}
+          <ul className="mt-2 space-y-3">
+            {m.transports.map((t) => (
+              <li key={t.id} className="rounded-xl border-2 border-ink p-4">
+                <Link
+                  className="font-bold text-blu underline"
+                  href={`/gestione/trasporti/${t.id}`}
+                >
+                  {fmtDate(t.travelDate)}
+                  {t.toAddress && ` · ${t.toAddress}`}
+                </Link>{" "}
+                <Pill>{t.status}</Pill>
+              </li>
+            ))}
+          </ul>
+          <h2 className="mt-8 text-2xl font-extrabold text-bordeaux">
+            Fatture
+          </h2>
+          {m.invoices.length === 0 && <p className="mt-2">Nessuna fattura.</p>}
+          <ul className="mt-2 space-y-3">
+            {m.invoices.map((i) => (
+              <li key={i.id} className="rounded-xl border-2 border-ink p-4">
+                <p className="font-bold">
+                  Fattura n. {i.number}/{i.year} del {fmtDate(i.issuedOn)} ·{" "}
+                  {formatEuro(i.totalCents)}{" "}
+                  <Pill>
+                    {i.status === "emessa"
+                      ? "Da incassare"
+                      : i.status === "pagata"
+                        ? "Pagata"
+                        : "Annullata"}
+                  </Pill>
+                </p>
+                <InvoiceActions invoice={i} />
+              </li>
+            ))}
+          </ul>
           <Dialog
             open={dlg === "fee"}
             onClose={close}
@@ -287,6 +337,15 @@ export default function Socio() {
           >
             <FeeBody m={m} onClose={close} />
           </Dialog>
+          <NewBookingDialog
+            open={dlg === "book"}
+            onClose={close}
+            memberId={m.id}
+          />
+          <IssueInvoiceDialog
+            memberId={dlg === "invoice" ? m.id : null}
+            onClose={close}
+          />
           <Dialog
             open={dlg === "end"}
             onClose={close}

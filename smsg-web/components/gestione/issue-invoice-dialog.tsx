@@ -11,12 +11,12 @@ import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast";
 import { api, call } from "@/lib/api/call";
 import type { components } from "@/lib/api/schema";
-import { useClient, useGuardedMutation } from "@/lib/api/hooks";
+import { useMember, useGuardedMutation } from "@/lib/api/hooks";
 import { fmtDate } from "@/lib/dates";
 import { METHODS, orNull } from "@/lib/forms";
 import { formatEuro } from "@/lib/money";
 
-type Detail = components["schemas"]["ClientDetail"];
+type Detail = components["schemas"]["MemberDetail"];
 type Method = components["schemas"]["InvoicePay"]["method"];
 type Values = { taxCode: string; address: string; method: "" | Method };
 
@@ -24,23 +24,23 @@ export const invoiceable = (c: Detail) =>
   c.bookings.filter((b) => b.status === "eseguita" && !b.invoiceId);
 
 function Form({
-  client,
+  member,
   preselect,
   onClose,
 }: {
-  client: Detail;
+  member: Detail;
   preselect?: string;
   onClose: () => void;
 }) {
   const toast = useToast();
-  const list = invoiceable(client);
+  const list = invoiceable(member);
   const [picked, setPicked] = useState(
     () => new Set(preselect ? [preselect] : list.map((b) => b.id)),
   );
   const f = useForm<Values>({
     defaultValues: {
-      taxCode: client.taxCode ?? "",
-      address: client.address ?? "",
+      taxCode: member.taxCode ?? "",
+      address: member.address ?? "",
       method: "",
     },
   });
@@ -49,7 +49,7 @@ function Form({
       call(
         api.POST("/invoices", {
           body: {
-            clientId: client.id,
+            memberId: member.id,
             bookingIds: [...picked],
             customerTaxCode: orNull(v.taxCode),
             customerAddress: orNull(v.address),
@@ -69,7 +69,7 @@ function Form({
   return (
     <form onSubmit={f.handleSubmit(g.submit)} noValidate>
       <p className="mt-2 font-bold">
-        {client.firstName} {client.lastName}
+        {member.firstName} {member.lastName}
       </p>
       <fieldset className="mt-4">
         <legend className="font-bold">Prestazioni da fatturare</legend>
@@ -92,12 +92,12 @@ function Form({
       </fieldset>
       <p className="mt-2 font-bold">Totale prestazioni: {formatEuro(total)}</p>
       <Field
-        label="Codice fiscale del cliente"
+        label="Codice fiscale del socio"
         autoComplete="off"
         {...f.register("taxCode")}
       />
       <Field
-        label="Indirizzo del cliente"
+        label="Indirizzo del socio"
         autoComplete="off"
         {...f.register("address")}
       />
@@ -123,17 +123,17 @@ function Form({
 }
 
 function Body(props: {
-  clientId: string;
+  memberId: string;
   preselect?: string;
   onClose: () => void;
 }) {
-  const q = useClient(props.clientId);
+  const q = useMember(props.memberId);
   return (
     <>
       <Loading query={q} />
       {q.data && (
         <Form
-          client={q.data}
+          member={q.data}
           preselect={props.preselect}
           onClose={props.onClose}
         />
@@ -143,18 +143,18 @@ function Body(props: {
 }
 
 export function IssueInvoiceDialog({
-  clientId,
+  memberId,
   preselect,
   onClose,
 }: {
-  clientId: string | null;
+  memberId: string | null;
   preselect?: string;
   onClose: () => void;
 }) {
   return (
-    <Dialog open={!!clientId} onClose={onClose} title="Emetti fattura">
-      {clientId && (
-        <Body clientId={clientId} preselect={preselect} onClose={onClose} />
+    <Dialog open={!!memberId} onClose={onClose} title="Emetti fattura">
+      {memberId && (
+        <Body memberId={memberId} preselect={preselect} onClose={onClose} />
       )}
     </Dialog>
   );

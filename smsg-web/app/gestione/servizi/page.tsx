@@ -27,8 +27,7 @@ const schema = z.object({
   name: z.string().trim().min(1, "scriva il nome").max(120),
   description: optText(1000),
   scheduleNote: optText(200),
-  memberPrice: euro,
-  nonMemberPrice: euro,
+  price: euro,
   requiresTransport: z.boolean(),
   active: z.boolean(),
   sortOrder: z
@@ -51,8 +50,7 @@ function Body({
       name: service?.name ?? "",
       description: service?.description ?? "",
       scheduleNote: service?.scheduleNote ?? "",
-      memberPrice: service ? centsToInput(service.memberPriceCents) : "",
-      nonMemberPrice: service ? centsToInput(service.nonMemberPriceCents) : "",
+      price: service ? centsToInput(service.priceCents) : "",
       requiresTransport: service?.requiresTransport ?? false,
       active: service?.active ?? true,
       sortOrder: String(service?.sortOrder ?? 0),
@@ -66,8 +64,7 @@ function Body({
         name: v.name,
         description: orNull(v.description),
         scheduleNote: orNull(v.scheduleNote),
-        memberPriceCents: parseEuro(v.memberPrice)!,
-        nonMemberPriceCents: parseEuro(v.nonMemberPrice)!,
+        priceCents: parseEuro(v.price)!,
         requiresTransport: v.requiresTransport,
         active: v.active,
         sortOrder: Number(v.sortOrder),
@@ -105,16 +102,10 @@ function Body({
         error={e.scheduleNote?.message}
       />
       <Field
-        label="Prezzo per i soci (euro)"
+        label="Prezzo (euro)"
         inputMode="decimal"
-        {...f.register("memberPrice")}
-        error={e.memberPrice?.message}
-      />
-      <Field
-        label="Prezzo per i non soci (euro)"
-        inputMode="decimal"
-        {...f.register("nonMemberPrice")}
-        error={e.nonMemberPrice?.message}
+        {...f.register("price")}
+        error={e.price?.message}
       />
       <Field
         label="Posizione nell'elenco"
@@ -164,8 +155,7 @@ export default function Servizi() {
               <Pill>{s.active ? "Attivo" : "Non attivo"}</Pill>
             </div>
             <p>
-              Soci {formatEuro(s.memberPriceCents)} · Non soci{" "}
-              {formatEuro(s.nonMemberPriceCents)}
+              Prezzo {formatEuro(s.priceCents)}
               {s.requiresTransport && " · Richiede trasporto"}
               {s.scheduleNote && ` · ${s.scheduleNote}`}
             </p>

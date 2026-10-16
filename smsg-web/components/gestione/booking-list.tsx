@@ -43,7 +43,7 @@ function ConfirmBody({ b, onClose }: { b: Booking; onClose: () => void }) {
   return (
     <form onSubmit={handleSubmit((v) => m.mutate(v))}>
       <p className="mt-2">
-        {b.clientName} · {b.serviceName} · {fmtDate(b.day)}
+        {b.memberName} · {b.serviceName} · {fmtDate(b.day)}
       </p>
       <Field label="Orario (facoltativo)" type="time" {...register("time")} />
       <FormError message={m.error?.message} />
@@ -112,15 +112,14 @@ export function BookingList({ items }: { items: Booking[] }) {
             <p className="font-bold">
               <Link
                 className="text-blu underline"
-                href={`/gestione/utenti/${b.clientId}`}
+                href={`/gestione/soci/${b.memberId}`}
               >
-                {b.clientName}
+                {b.memberName}
               </Link>{" "}
-              · {b.clientPhone}
+              {b.memberPhone && ` · ${b.memberPhone}`}
             </p>
             <p>
-              {b.serviceName} · {formatEuro(b.priceAppliedCents)} ·{" "}
-              {b.isMember ? "Socio" : "Non socio"}
+              {b.serviceName} · {formatEuro(b.priceAppliedCents)}
               {b.invoiceNumber && ` · Fattura n. ${b.invoiceNumber}`}
             </p>
             {b.notes && <p>Note: {b.notes}</p>}
@@ -185,13 +184,13 @@ export function BookingList({ items }: { items: Booking[] }) {
       >
         {dlg && (
           <p>
-            {dlg.b.clientName} · {dlg.b.serviceName} · {fmtDate(dlg.b.day)}. Si
+            {dlg.b.memberName} · {dlg.b.serviceName} · {fmtDate(dlg.b.day)}. Si
             può ripristinare in seguito.
           </p>
         )}
       </ConfirmDialog>
       <IssueInvoiceDialog
-        clientId={dlg?.kind === "invoice" ? dlg.b.clientId : null}
+        memberId={dlg?.kind === "invoice" ? dlg.b.memberId : null}
         preselect={dlg?.b.id}
         onClose={close}
       />

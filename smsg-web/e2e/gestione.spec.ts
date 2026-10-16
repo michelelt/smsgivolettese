@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
-// Needs `make dev` with the seeded local database (services, members, clients).
+// Needs `make dev` with the seeded local database (services, members).
 const env = (k: string) => process.env[k]!;
 
 test.beforeEach(async ({ page }) => {
@@ -21,13 +21,22 @@ test("invoice issuance end to end", async ({ page }) => {
   const last = `Prova${Date.now()}`;
   const name = `E2E ${last}`;
 
-  // Phone booking for a brand new user.
+  // Phone booking for a brand new member created inline.
   await page.goto("/gestione/prenotazioni?nuova=1");
   const dlg = page.getByRole("dialog", { name: "Nuova prenotazione" });
-  await dlg.getByRole("button", { name: "Nuovo utente" }).click();
-  await dlg.getByLabel("Nome", { exact: true }).fill("E2E");
-  await dlg.getByLabel("Cognome").fill(last);
-  await dlg.getByLabel("Telefono").fill("3331112222");
+  const nm = page.getByRole("dialog", { name: "Nuovo socio" });
+  // Esc on the nested dialog closes only that one.
+  await dlg.getByRole("button", { name: "Nuovo socio" }).click();
+  await expect(nm).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(nm).toBeHidden();
+  await expect(dlg).toBeVisible();
+  await dlg.getByRole("button", { name: "Nuovo socio" }).click();
+  await nm.getByLabel("Nome", { exact: true }).fill("E2E");
+  await nm.getByLabel("Cognome").fill(last);
+  await nm.getByLabel("Telefono").fill("3331112222");
+  await nm.getByRole("button", { name: "Registra socio" }).click();
+  await expect(dlg.getByText(`Socio scelto: E2E ${last}`)).toBeVisible();
   await dlg
     .getByLabel("Servizio")
     .selectOption(
@@ -53,7 +62,7 @@ test("invoice issuance end to end", async ({ page }) => {
 
   // PDF, paid, void.
   await page.goto("/gestione/fatture");
-  await page.getByLabel("Cerca per cliente o numero").fill(last);
+  await page.getByLabel("Cerca per socio o numero").fill(last);
   const inv = card(page, name);
   const [dl] = await Promise.all([
     page.waitForEvent("download"),
@@ -83,17 +92,20 @@ test("invoice issuance end to end", async ({ page }) => {
 });
 
 test("a doubtful tax code can be saved anyway", async ({ page }) => {
-  await page.goto("/gestione/utenti");
-  await page.getByRole("button", { name: "Nuovo utente" }).click();
-  const dlg = page.getByRole("dialog", { name: "Nuovo utente" });
+  await page.goto("/gestione/prenotazioni?nuova=1");
+  await page.getByRole("button", { name: "Nuovo socio" }).click();
+  const dlg = page.getByRole("dialog", { name: "Nuovo socio" });
   await dlg.getByLabel("Nome", { exact: true }).fill("E2E");
-  await dlg.getByLabel("Cognome").fill(`Codice${Date.now()}`);
+  const last = `Codice${Date.now()}`;
+  await dlg.getByLabel("Cognome").fill(last);
   await dlg.getByLabel("Telefono").fill("3330001111");
-  await dlg.getByLabel("Codice fiscale (facoltativo)").fill("AAAAAA00A00A000A");
-  await dlg.getByRole("button", { name: "Salva" }).click();
+  await dlg
+    .getByLabel("Codice fiscale (facoltativo)")
+    .fill(`AAAAAA00A00A${String(Date.now()).slice(-3)}A`);
+  await dlg.getByRole("button", { name: "Registra socio" }).click();
   await expect(dlg.getByRole("alert")).toContainText("codice fiscale");
   await dlg.getByRole("button", { name: "Salva comunque" }).click();
-  await expect(page.getByText("Utente registrato")).toBeVisible();
+  await expect(page.getByText(`Socio scelto: E2E ${last}`)).toBeVisible();
 });
 
 async function axe(page: Page, path: string) {
@@ -110,7 +122,6 @@ for (const p of [
   "/gestione",
   "/gestione/prenotazioni",
   "/gestione/prenotazioni?nuova=1",
-  "/gestione/utenti",
   "/gestione/soci",
   "/gestione/soci/nuovo",
   "/gestione/fatture",
@@ -119,12 +130,11 @@ for (const p of [
 ])
   test(`axe: ${p}`, async ({ page }) => axe(page, p));
 
-test("axe: user and member detail pages", async ({ page }) => {
+test("axe: member detail pages", async ({ page }) => {
   const firstLink = async (list: string, name: RegExp) => {
     await page.goto(list);
     return page.getByRole("link", { name }).first().getAttribute("href");
   };
-  await axe(page, (await firstLink("/gestione/utenti", /Rossi/))!);
   const socio = (await firstLink("/gestione/soci", /Esposito/))!;
   await axe(page, socio);
   await axe(page, `${socio}/modifica`);

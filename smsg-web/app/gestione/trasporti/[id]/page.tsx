@@ -33,7 +33,7 @@ export default function Trasporto() {
       {t && (
         <>
           <h1 className="mt-2 text-4xl font-extrabold text-bordeaux">
-            Trasporto di {t.clientName}
+            Trasporto di {t.memberName}
           </h1>
           <p className="text-xl">{dayLabel(t.travelDate)}</p>
           <TransportPanel t={t} />

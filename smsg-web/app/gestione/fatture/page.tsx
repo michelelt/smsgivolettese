@@ -105,7 +105,7 @@ export default function Fatture() {
         }}
       />
       <Field
-        label="Cerca per cliente o numero"
+        label="Cerca per socio o numero"
         type="search"
         value={q}
         onChange={(e) => {

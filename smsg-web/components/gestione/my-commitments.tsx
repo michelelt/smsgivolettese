@@ -135,7 +135,18 @@ function TransportCard({
         {t.returnTime && ` · Ritorno ${fmtTime(t.returnTime)}`}
       </p>
       <p>
-        {t.clientFirstName} {t.clientLastName} · {t.clientPhone}
+        {t.memberFirstName} {t.memberLastName}
+        {open && t.memberPhone && (
+          <>
+            {" · "}
+            <a
+              className="font-bold text-blu underline"
+              href={`tel:${t.memberPhone}`}
+            >
+              Chiama {t.memberPhone}
+            </a>
+          </>
+        )}
       </p>
       <p>
         Da: {t.fromAddress ?? "—"}

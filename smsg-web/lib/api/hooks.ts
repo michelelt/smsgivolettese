@@ -18,12 +18,6 @@ export const useServices = () =>
     queryFn: () => call(api.GET("/services")),
   });
 
-export const useClient = (id: string) =>
-  useQuery({
-    queryKey: ["clients", id],
-    queryFn: () => call(api.GET("/clients/{id}", { params: { path: { id } } })),
-  });
-
 export const useOrgInfo = () =>
   useQuery({
     queryKey: ["org-info"],

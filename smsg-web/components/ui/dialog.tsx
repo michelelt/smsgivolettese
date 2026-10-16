@@ -53,7 +53,10 @@ export function Dialog({
     <dialog
       ref={ref}
       aria-labelledby={id}
-      onClose={onClose}
+      onClose={(e) => {
+        e.stopPropagation(); // a nested dialog must not close its parent through the React tree
+        onClose();
+      }}
       {...backdropClose()}
       className="m-auto max-h-[92vh] w-[calc(100%-2rem)] max-w-xl rounded-2xl border-2 border-ink bg-paper p-6 text-ink backdrop:bg-black/60"
     >
