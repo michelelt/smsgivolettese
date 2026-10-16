@@ -453,9 +453,10 @@ describe('last super admin: concurrent removal (committed, then cleaned up)', ()
             }),
           );
         const res = await Promise.all([run(A, B), run(B, A)]);
-        const [{ n }] =
+        const [row] =
           await sql`select count(*)::int as n from user_roles ur join profiles p on p.id = ur.user_id
         where ur.role = 'super_admin' and p.active and ur.user_id in (${A}, ${B})`;
+        const n = row!.n;
         expect(
           res.filter((r) => r.message?.match(/LAST_SUPER_ADMIN|deadlock/)).length,
         ).toBeGreaterThanOrEqual(1);
