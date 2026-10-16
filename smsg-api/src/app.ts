@@ -7,7 +7,6 @@ import { log } from './lib/logger.js';
 import { meRoutes } from './modules/me/me.routes.js';
 import { publicRoutes } from './modules/public/public.routes.js';
 import { bookingsRoutes } from './modules/bookings/bookings.routes.js';
-import { clientsRoutes } from './modules/clients/clients.routes.js';
 import { invoicesRoutes } from './modules/invoices/invoices.routes.js';
 import { membersRoutes } from './modules/members/members.routes.js';
 import { servicesRoutes } from './modules/services/services.routes.js';
@@ -53,7 +52,6 @@ app.route('/', healthRoutes);
 app.route('/', meRoutes);
 app.route('/', publicRoutes);
 app.route('/', bookingsRoutes);
-app.route('/', clientsRoutes);
 app.route('/', membersRoutes);
 app.route('/', invoicesRoutes);
 app.route('/', servicesRoutes);
@@ -73,7 +71,7 @@ app.openAPIRegistry.registerComponent('securitySchemes', 'bearerAuth', {
 
 app.doc('/openapi.json', {
   openapi: '3.1.0',
-  info: { title: 'SMS Givolettese API', version: '1.2.0' },
+  info: { title: 'SMS Givolettese API', version: '2.0.0' },
 });
 
 const body = (code: string, message: string, details?: unknown) => ({

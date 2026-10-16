@@ -1,6 +1,6 @@
 import { env } from '../../config/env.js';
 
-/** What an email may say about a commitment (ADR-057): type, date, time. Never client data. */
+/** What an email may say about a commitment (ADR-057): type, date, time. Never member data. */
 export type Item = { label: string; day: string; time: string | null };
 
 const dmy = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}`;

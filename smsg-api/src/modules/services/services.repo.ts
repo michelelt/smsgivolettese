@@ -6,15 +6,14 @@ const COLS = {
   name: 'name',
   description: 'description',
   scheduleNote: 'schedule_note',
-  memberPriceCents: 'member_price_cents',
-  nonMemberPriceCents: 'non_member_price_cents',
+  priceCents: 'price_cents',
   active: 'active',
   requiresTransport: 'requires_transport',
   sortOrder: 'sort_order',
 };
 
 const out = (tx: Tx) => tx`id, name, description, schedule_note as "scheduleNote",
-  member_price_cents as "memberPriceCents", non_member_price_cents as "nonMemberPriceCents",
+  price_cents as "priceCents",
   active, requires_transport as "requiresTransport", sort_order as "sortOrder"`;
 
 export const list = (tx: Tx) =>

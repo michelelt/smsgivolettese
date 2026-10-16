@@ -10,21 +10,19 @@ import type { BookingCreate, BookingsQuery } from './bookings.schemas.js';
 export const list = (ctx: Ctx, q: BookingsQuery) => asUser(ctx, (tx) => repo.list(tx, q));
 export const kpis = (ctx: Ctx) => asUser(ctx, repo.kpis);
 
-/** ADR-046/047: origin telefono; status by time; price snapshot by declared/actual membership. */
+/** ADR-046/047: origin telefono; status by time; price snapshot from the service; inactive member -> 422 from the DB trigger. */
 export const create = (ctx: Ctx, input: z.infer<typeof BookingCreate>) =>
   asUser(ctx, async (tx) => {
     const svc = await repo.serviceById(tx, input.serviceId);
     if (!svc) throw new NotFound('Servizio non trovato');
     if (!svc.active) throw new Unprocessable('Il servizio non è attivo', 'SERVICE_INACTIVE');
-    const cli = await repo.clientMembership(tx, input.clientId);
-    if (!cli) throw new DomainError(404, 'CLIENT_NOT_FOUND', 'Cliente non trovato');
-    const declaredMember = input.declaredMember ?? cli.isActiveMember;
+    if (!(await repo.memberExists(tx, input.memberId)))
+      throw new DomainError(404, 'MEMBER_NOT_FOUND', 'Socio non trovato');
     const id = await repo.insert(tx, {
       ...input,
       time: input.time ?? null,
       notes: input.notes ?? null,
-      declaredMember,
-      priceCents: declaredMember ? svc.memberPriceCents : svc.nonMemberPriceCents,
+      priceCents: svc.priceCents,
       createdBy: ctx.user.id,
     });
     return (await repo.byId(tx, id))!;

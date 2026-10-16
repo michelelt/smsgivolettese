@@ -100,12 +100,11 @@ describe('ownership and filtering', () => {
     const cols =
       await sql`select column_name from information_schema.columns where table_name = 'volunteer_transports_v'`;
     const names = cols.map((c) => c.column_name);
-    for (const bad of ['tax_code', 'reason', 'notes', 'address', 'client_id', 'booking_id'])
+    for (const bad of ['tax_code', 'reason', 'notes', 'address', 'member_id', 'booking_id'])
       expect(names).not.toContain(bad);
   });
-  it('volunteers cannot read transports or clients base tables', async () => {
+  it('volunteers cannot read transports base table', async () => {
     expect(await count('volontario', ID.vol, 'select 1 from transports')).toBe(0);
-    expect(await count('volontario', ID.vol, 'select 1 from clients')).toBe(0);
   });
   it('lower role cannot call staff functions', async () => {
     for (const role of ['anon', 'volontario'] as const) {

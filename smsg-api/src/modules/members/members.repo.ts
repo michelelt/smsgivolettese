@@ -2,7 +2,13 @@ import type { z } from '@hono/zod-openapi';
 import type { Tx } from '../../lib/db.js';
 import { containsPattern, offsetOf } from '../../lib/pagination.js';
 import { toRow } from '../../lib/sql.js';
-import type { Fee, Member, MemberDetail, MemberKpis, MembersQuery } from './members.schemas.js';
+import { bookingSelect } from '../bookings/bookings.repo.js';
+import type { Booking } from '../bookings/bookings.schemas.js';
+import { invoiceSelect } from '../invoices/invoices.repo.js';
+import type { Invoice } from '../invoices/invoices.schemas.js';
+import { select as transportSelect } from '../transports/transports.repo.js';
+import type { Transport } from '../transports/transports.schemas.js';
+import type { Fee, Member, MemberKpis, MembersQuery } from './members.schemas.js';
 
 const year = (tx: Tx) => tx`extract(year from now() at time zone 'Europe/Rome')`;
 
@@ -88,10 +94,20 @@ export const byId = async (tx: Tx, id: string) =>
 export async function detail(tx: Tx, id: string) {
   const m = await byId(tx, id);
   if (!m) return undefined;
-  const [client] = await tx<NonNullable<z.infer<typeof MemberDetail>['client']>[]>`
-    select id, first_name as "firstName", last_name as "lastName", phone
-    from public.clients where member_id = ${id}`;
-  return { ...m, fees: await fees(tx, id), client: client ?? null };
+  // History is unbounded for now (shortcut: add paging if a member exceeds a few hundred rows).
+  const [f, bookings, transports, invoices] = await Promise.all([
+    fees(tx, id),
+    tx<
+      Booking[]
+    >`${bookingSelect(tx)} where b.member_id = ${id} order by b.day desc, b.created_at desc`,
+    tx<
+      Transport[]
+    >`${transportSelect(tx)} where t.member_id = ${id} order by t.travel_date desc, t.created_at desc`,
+    tx<
+      Invoice[]
+    >`${invoiceSelect(tx)} where i.member_id = ${id} order by i.year desc, i.number desc`,
+  ]);
+  return { ...m, fees: f, bookings, transports, invoices };
 }
 
 export const register = async (tx: Tx, p: Record<string, unknown>, feeMethod: string | null) =>

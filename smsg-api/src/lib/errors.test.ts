@@ -30,7 +30,6 @@ describe('fromPostgres phase 4', () => {
     for (const [c, code] of [
       ['members_tax_code_key', 'MEMBER_TAX_CODE_EXISTS'],
       ['membership_fees_member_id_year_key', 'FEE_ALREADY_PAID'],
-      ['clients_member_id_key', 'CLIENT_ALREADY_LINKED'],
       ['other_key', 'DUPLICATE'],
     ] as const)
       expect(fromPostgres({ code: '23505', constraint_name: c })).toMatchObject({
@@ -43,7 +42,8 @@ describe('fromPostgres phase 4', () => {
       status: 400,
       code: 'VALIDATION_ERROR',
     });
-    expect(fromPostgres({ code: 'P0001', message: 'CLIENT_NOT_FOUND' })?.status).toBe(404);
+    expect(fromPostgres({ code: 'P0001', message: 'MEMBER_NOT_FOUND' })?.status).toBe(404);
+    expect(fromPostgres({ code: 'P0001', message: 'MEMBER_NOT_ACTIVE' })?.status).toBe(422);
     expect(fromPostgres({ code: 'P0001', message: 'VOID_REASON_REQUIRED' })?.status).toBe(400);
     expect(fromPostgres({ code: 'P0001', message: 'CARD_NUMBER_IMMUTABLE' })?.status).toBe(409);
   });

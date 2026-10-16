@@ -62,10 +62,11 @@ async function cleanup() {
   await sql.begin(async (t) => {
     await t`set local session_replication_role = replica`;
     const zu = t`select id from auth.users where email like 'zzp-%@t.test'`;
-    const zc = t`select id from clients where first_name = 'ZZP'`;
-    await t`delete from bookings where client_id in (${zc})`;
-    await t`delete from transports where client_id in (${zc})`;
-    await t`delete from clients where first_name = 'ZZP'`;
+    const zc = t`select id from members where first_name = 'ZZP'`;
+    await t`delete from bookings where member_id in (${zc})`;
+    await t`delete from transports where member_id in (${zc})`;
+    await t`delete from membership_fees where member_id in (${zc})`;
+    await t`delete from members where first_name = 'ZZP'`;
     await t`delete from services where name like 'ZZP%'`;
     await t`delete from shifts where shift_type_id in (select id from shift_types where name like 'ZZP%')`;
     await t`delete from shift_types where name like 'ZZP%'`;
@@ -366,11 +367,11 @@ describe('me', () => {
 });
 
 describe('transports', () => {
-  let client: string;
+  let member: string;
   const mkTransport = async (extra: object = {}) =>
     (
       await staff('POST', '/transports', {
-        clientId: client,
+        memberId: member,
         travelDate: tomorrow,
         departureTime: '08:00',
         returnTime: '10:00',
@@ -385,8 +386,8 @@ describe('transports', () => {
     ).data;
 
   beforeAll(async () => {
-    client = (
-      await staff('POST', '/clients', {
+    member = (
+      await staff('POST', '/members', {
         firstName: 'ZZP',
         lastName: `C${tag}`,
         phone: '3330000000',
@@ -395,7 +396,7 @@ describe('transports', () => {
   });
 
   it('create/patch rules; assign needs departure and addresses', async () => {
-    const bare = await staff('POST', '/transports', { clientId: client, travelDate: tomorrow });
+    const bare = await staff('POST', '/transports', { memberId: member, travelDate: tomorrow });
     expect(bare.status).toBe(201);
     const inc = await staff('POST', `/transports/${bare.data.id}/assign`, { driverId: ids.a });
     expect(inc.status).toBe(422);
@@ -404,9 +405,9 @@ describe('transports', () => {
       'TRANSPORT_INCOMPLETE',
     );
     expect(
-      (await staff('POST', '/transports', { clientId: crypto.randomUUID(), travelDate: tomorrow }))
+      (await staff('POST', '/transports', { memberId: crypto.randomUUID(), travelDate: tomorrow }))
         .data.error.code,
-    ).toBe('CLIENT_NOT_FOUND');
+    ).toBe('MEMBER_NOT_FOUND');
     const p = await staff('PATCH', `/transports/${bare.data.id}`, {
       departureTime: '14:00',
       fromAddress: 'A',
@@ -463,9 +464,9 @@ describe('transports', () => {
         'status',
         'km',
         'driverNotes',
-        'clientFirstName',
-        'clientLastName',
-        'clientPhone',
+        'memberFirstName',
+        'memberLastName',
+        'memberPhone',
         'vehiclePlate',
         'vehicleModel',
       ].sort(),
@@ -585,14 +586,13 @@ describe('transports', () => {
     const svc = (
       await staff('POST', '/services', {
         name: `ZZP svc ${tag}`,
-        memberPriceCents: 0,
-        nonMemberPriceCents: 0,
+        priceCents: 0,
         requiresTransport: true,
       })
     ).data;
     const b = (
       await staff('POST', '/bookings', {
-        clientId: client,
+        memberId: member,
         serviceId: svc.id,
         day: addDays(today, 3),
         slot: 'mattina',
@@ -631,10 +631,10 @@ describe('cron', () => {
     env.CRON_SECRET = secret;
     const s = await mkShift(tomorrow, '16:00', '17:00');
     expect((await assign(s.id, 'f')).status).toBe(201);
-    const cl = (await staff('GET', '/clients?q=ZZP')).data.items[0].id;
+    const memId = (await staff('GET', '/members?q=ZZP')).data.items[0].id;
     const t = (
       await staff('POST', '/transports', {
-        clientId: cl,
+        memberId: memId,
         travelDate: tomorrow,
         departureTime: '07:00',
         fromAddress: 'A',

@@ -16,7 +16,7 @@ const asStaff = async (tx: Tx) => {
 };
 const SEED_STAFF = 'a0000000-0000-4000-8000-000000000002'; // seed.sql staff user (FK targets must be committed)
 const BOOKING = 'fb000000-0000-4000-8000-000000000001';
-const CLIENT = 'f9000000-0000-4000-8000-000000000001';
+const CLIENT = 'f7000000-0000-4000-8000-000000000001';
 const issue = (ids = `'${BOOKING}'`, pay = 'null') =>
   `select * from issue_invoice('${CLIENT}', array[${ids}]::uuid[], null, null, ${pay})`;
 
@@ -177,7 +177,7 @@ describe('uniqueness', () => {
       expect(
         await err(
           tx,
-          `insert into invoices (year, number, issued_on, client_id, customer_name, issuer_name, vat_exemption_text, subtotal_cents, stamp_duty_cents, total_cents, status)
+          `insert into invoices (year, number, issued_on, member_id, customer_name, issuer_name, vat_exemption_text, subtotal_cents, stamp_duty_cents, total_cents, status)
         values (2020, 1, current_date, '${CLIENT}', 'c', 'i', 'v', 1, 0, 1, 'emessa')`,
         ),
       ).toMatch(/^23505/);
@@ -294,11 +294,11 @@ describe('concurrent numbering (10 parallel calls, committed then cleaned up)', 
   it('invoices: no gaps, no duplicates', async () => {
     const tag = `conc-${Date.now()}`;
     const [c] =
-      await sql`insert into clients (first_name, last_name, phone) values ('Conc', ${tag}, '3339990000') returning id`;
+      await sql`insert into members (card_number, first_name, last_name, joined_on) values ((select coalesce(max(card_number), 0) + 1 from members), 'Conc', ${tag}, current_date) returning id`;
     const [svc] = await sql`select id from services where active limit 1`;
     const bks =
-      await sql`insert into bookings (client_id, service_id, day, slot, declared_member, price_applied_cents, origin, status)
-      select ${c!.id}, ${svc!.id}, current_date, 'mattina', false, 100, 'telefono', 'eseguita' from generate_series(1, 10) returning id`;
+      await sql`insert into bookings (member_id, service_id, day, slot, price_applied_cents, origin, status)
+      select ${c!.id}, ${svc!.id}, current_date, 'mattina', 100, 'telefono', 'eseguita' from generate_series(1, 10) returning id`;
     const before = (
       await sql`select coalesce((select last_number from invoice_counters where year = extract(year from now() at time zone 'Europe/Rome')), -1) as n`
     )[0]!.n as number;
@@ -327,14 +327,14 @@ describe('concurrent numbering (10 parallel calls, committed then cleaned up)', 
         await tx.unsafe(
           'alter table invoice_lines disable trigger user; alter table invoices disable trigger user',
         );
-        await tx`delete from invoice_lines where invoice_id in (select id from invoices where client_id = ${c!.id})`;
-        await tx`update bookings set invoice_id = null where client_id = ${c!.id}`;
-        await tx`delete from invoices where client_id = ${c!.id}`;
+        await tx`delete from invoice_lines where invoice_id in (select id from invoices where member_id = ${c!.id})`;
+        await tx`update bookings set invoice_id = null where member_id = ${c!.id}`;
+        await tx`delete from invoices where member_id = ${c!.id}`;
         await tx.unsafe(
           'alter table invoice_lines enable trigger user; alter table invoices enable trigger user',
         );
-        await tx`delete from bookings where client_id = ${c!.id}`;
-        await tx`delete from clients where id = ${c!.id}`;
+        await tx`delete from bookings where member_id = ${c!.id}`;
+        await tx`delete from members where id = ${c!.id}`;
         if (before === -1)
           await tx`delete from invoice_counters where year = extract(year from now() at time zone 'Europe/Rome')`;
         else
@@ -518,8 +518,7 @@ describe('public functions', () => {
     await rolledBack(async (tx) => {
       await world(tx);
       await actAs(tx, 'anon');
-      expect(await err(tx, 'select member_price_cents from services')).toMatch(/^42501/);
-      expect(await err(tx, 'select non_member_price_cents from services')).toMatch(/^42501/);
+      expect(await err(tx, 'select price_cents from services')).toMatch(/^42501/);
       expect(await err(tx, 'select * from services')).toMatch(/^42501/);
       expect(await err(tx, 'select id, name, schedule_note from services')).toBe('OK');
       expect(await err(tx, 'select submit_public_booking()')).toMatch(/^42883/);
@@ -527,7 +526,7 @@ describe('public functions', () => {
   });
   describe('bookings_create_transport', () => {
     const ins = (svc: string) =>
-      `insert into bookings (client_id, service_id, day, slot, declared_member, price_applied_cents, origin) values ('${CLIENT}', '${svc}', current_date + 1, 'mattina', false, 0, 'telefono') returning id`;
+      `insert into bookings (member_id, service_id, day, slot, price_applied_cents, origin) values ('${CLIENT}', '${svc}', current_date + 1, 'mattina', 0, 'telefono') returning id`;
     it('staff booking for a transport service creates exactly one richiesto transport', async () => {
       await rolledBack(async (tx) => {
         await world(tx);
@@ -535,9 +534,9 @@ describe('public functions', () => {
         await actAs(tx, 'staff');
         const [r] = await tx.unsafe(ins('fa000000-0000-4000-8000-000000000001'));
         const t =
-          await tx`select status, client_id, driver_volunteer_id, travel_date = current_date + 1 as d from transports where booking_id = ${r!.id}`;
+          await tx`select status, member_id, driver_volunteer_id, travel_date = current_date + 1 as d from transports where booking_id = ${r!.id}`;
         expect(t).toEqual([
-          { status: 'richiesto', client_id: CLIENT, driver_volunteer_id: null, d: true },
+          { status: 'richiesto', member_id: CLIENT, driver_volunteer_id: null, d: true },
         ]);
       });
     });
@@ -715,5 +714,116 @@ describe('audit', () => {
         { actor_id: ID.staff, actor_role: 'staff', action: 'update', b: null, a: 'x' },
       ]);
     });
+  });
+});
+
+describe('members only (ADR-060)', () => {
+  const MEMBER = 'f7000000-0000-4000-8000-000000000001';
+  const end = (tx: Tx) =>
+    tx.unsafe(
+      `update members set status = 'cessato', ended_on = current_date where id = '${MEMBER}'`,
+    );
+  const newBooking = `insert into bookings (member_id, service_id, day, slot, price_applied_cents, origin)
+    values ('${MEMBER}', 'fa000000-0000-4000-8000-000000000001', current_date + 1, 'mattina', 0, 'telefono')`;
+
+  it('rejects new bookings and transports for a cessato member', async () => {
+    await rolledBack(async (tx) => {
+      await world(tx);
+      await end(tx);
+      await actAs(tx, 'staff');
+      expect(await err(tx, newBooking)).toMatch(/MEMBER_NOT_ACTIVE/);
+      expect(
+        await err(
+          tx,
+          `insert into transports (member_id, travel_date) values ('${MEMBER}', current_date)`,
+        ),
+      ).toMatch(/MEMBER_NOT_ACTIVE/);
+    });
+  });
+  it('never moves a booking to another member', async () => {
+    await rolledBack(async (tx) => {
+      await world(tx);
+      await actAs(tx, 'staff');
+      expect(
+        await err(
+          tx,
+          `update bookings set member_id = gen_random_uuid() where member_id = '${MEMBER}'`,
+        ),
+      ).toMatch(/MEMBER_IMMUTABLE/);
+    });
+  });
+  it('still invoices an existing booking of a member ended later', async () => {
+    await rolledBack(async (tx) => {
+      await world(tx);
+      await end(tx);
+      await actAs(tx, 'staff');
+      const [inv] = await tx.unsafe(issue());
+      expect(inv).toMatchObject({ member_id: MEMBER, total_cents: 300 });
+    });
+  });
+  it('snapshots the address from the member and saves a typed tax code on it', async () => {
+    await rolledBack(async (tx) => {
+      await world(tx);
+      await tx.unsafe(
+        `update members set address = 'Via Esempio 1', postal_code = '10040', city = 'Givoletto' where id = '${MEMBER}'`,
+      );
+      await actAs(tx, 'staff');
+      const [inv] = await tx.unsafe(
+        `select * from issue_invoice('${MEMBER}', array['${BOOKING}']::uuid[], 'RSSMRA80A01H501U', null, null)`,
+      );
+      expect(inv).toMatchObject({
+        customer_name: 'M Member',
+        customer_address: 'Via Esempio 1, 10040 Givoletto',
+        customer_tax_code: 'RSSMRA80A01H501U',
+      });
+      await reset(tx);
+      const [m] = await tx`select tax_code, address from members where id = ${MEMBER}`;
+      expect(m).toEqual({ tax_code: 'RSSMRA80A01H501U', address: 'Via Esempio 1' });
+    });
+  });
+  it('raises MEMBER_NOT_FOUND and denies lower roles', async () => {
+    await rolledBack(async (tx) => {
+      await world(tx);
+      await actAs(tx, 'staff');
+      expect(
+        await err(
+          tx,
+          `select * from issue_invoice(gen_random_uuid(), array['${BOOKING}']::uuid[], null, null, null)`,
+        ),
+      ).toMatch(/MEMBER_NOT_FOUND/);
+    });
+    for (const role of ['anon', 'volontario'] as const)
+      await rolledBack(async (tx) => {
+        await world(tx);
+        await actAs(tx, role);
+        expect(await err(tx, issue())).toMatch(/^42501/);
+      });
+  });
+  it('volunteer view exposes only member name and phone', async () => {
+    await rolledBack(async (tx) => {
+      await world(tx);
+      await tx.unsafe(
+        `update members set phone = '3330000009', address = 'Via X' where id = '${MEMBER}'`,
+      );
+      const cols =
+        await tx`select column_name from information_schema.columns where table_name = 'volunteer_transports_v'`;
+      expect(
+        cols
+          .map((c) => c.column_name)
+          .filter((n) => n.startsWith('member_'))
+          .sort(),
+      ).toEqual(['member_first_name', 'member_last_name', 'member_phone']);
+      await actAs(tx, 'volontario', ID.vol);
+      const [r] =
+        await tx`select member_first_name, member_last_name, member_phone from volunteer_transports_v`;
+      expect(r).toEqual({
+        member_first_name: 'M',
+        member_last_name: 'Member',
+        member_phone: '3330000009',
+      });
+    });
+  });
+  it('clients table is gone', async () => {
+    expect(await sql`select to_regclass('public.clients') as t`).toEqual([{ t: null }]);
   });
 });

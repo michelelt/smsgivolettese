@@ -16,11 +16,6 @@ const BACKING: Partial<Record<Action, [string, Op][]>> = {
     ['bookings', 'U'],
   ],
   'bookings.change_status': [['bookings', 'U']],
-  'clients.read': [['clients', 'S']],
-  'clients.write': [
-    ['clients', 'I'],
-    ['clients', 'U'],
-  ],
   'members.read': [['members', 'S']],
   'members.write': [['members', 'U']],
   'members.end': [['members', 'U']],

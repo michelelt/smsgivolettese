@@ -3,16 +3,16 @@ import { containsPattern, offsetOf } from '../../lib/pagination.js';
 import type { z } from '@hono/zod-openapi';
 import type { Booking, BookingKpis, BookingsQuery } from './bookings.schemas.js';
 
-/** Row shape shared with the client detail view. */
+/** Row shape shared with the member detail view. */
 export const bookingSelect = (tx: Tx) => tx`
-  select b.id, b.client_id as "clientId", c.first_name || ' ' || c.last_name as "clientName",
-         c.phone as "clientPhone", b.service_id as "serviceId", s.name as "serviceName",
+  select b.id, b.member_id as "memberId", c.first_name || ' ' || c.last_name as "memberName",
+         c.phone as "memberPhone", b.service_id as "serviceId", s.name as "serviceName",
          b.day::text as day, b.slot, to_char(b.time, 'HH24:MI') as time, b.status,
-         b.declared_member as "isMember", b.price_applied_cents as "priceAppliedCents",
+         b.price_applied_cents as "priceAppliedCents",
          b.origin, b.notes, b.cancelled_by as "cancelledBy", b.invoice_id as "invoiceId",
          case when i.id is not null then i.number || '/' || i.year end as "invoiceNumber"
   from public.bookings b
-  join public.clients c on c.id = b.client_id
+  join public.members c on c.id = b.member_id
   join public.services s on s.id = b.service_id
   left join public.invoices i on i.id = b.invoice_id`;
 
@@ -33,7 +33,7 @@ export async function list(tx: Tx, q: BookingsQuery) {
   const where = tx`where ${statusFilter(tx, q.status)}
     ${q.from ? tx`and b.day >= ${q.from}` : tx``}
     ${q.to ? tx`and b.day <= ${q.to}` : tx``}
-    ${q.clientId ? tx`and b.client_id = ${q.clientId}` : tx``}
+    ${q.memberId ? tx`and b.member_id = ${q.memberId}` : tx``}
     ${
       q.q
         ? tx`and (c.first_name || ' ' || c.last_name ilike ${containsPattern(q.q)}
@@ -47,7 +47,7 @@ export async function list(tx: Tx, q: BookingsQuery) {
     limit ${q.pageSize} offset ${offsetOf(q)}`;
   const [t] = await tx<{ total: number }[]>`
     select count(*)::int as total from public.bookings b
-    join public.clients c on c.id = b.client_id join public.services s on s.id = b.service_id ${where}`;
+    join public.members c on c.id = b.member_id join public.services s on s.id = b.service_id ${where}`;
   return { items, total: t!.total };
 }
 
@@ -75,28 +75,22 @@ export const kpis = async (tx: Tx) =>
 
 export const serviceById = async (tx: Tx, id: string) =>
   (
-    await tx<{ active: boolean; memberPriceCents: number; nonMemberPriceCents: number }[]>`
-      select active, member_price_cents as "memberPriceCents", non_member_price_cents as "nonMemberPriceCents"
+    await tx<{ active: boolean; priceCents: number }[]>`
+      select active, price_cents as "priceCents"
       from public.services where id = ${id}`
   )[0];
 
-/** undefined = no such client; else whether it is linked to an active member. */
-export const clientMembership = async (tx: Tx, id: string) =>
-  (
-    await tx<{ isActiveMember: boolean }[]>`
-      select coalesce(m.status = 'attivo', false) as "isActiveMember"
-      from public.clients c left join public.members m on m.id = c.member_id where c.id = ${id}`
-  )[0];
+export const memberExists = async (tx: Tx, id: string) =>
+  (await tx`select 1 from public.members where id = ${id}`).length > 0;
 
 export const insert = async (
   tx: Tx,
   b: {
-    clientId: string;
+    memberId: string;
     serviceId: string;
     day: string;
     slot: string;
     time: string | null;
-    declaredMember: boolean;
     priceCents: number;
     notes: string | null;
     createdBy: string;
@@ -104,10 +98,10 @@ export const insert = async (
 ) =>
   (
     await tx<{ id: string }[]>`
-      insert into public.bookings (client_id, service_id, day, slot, time, declared_member,
+      insert into public.bookings (member_id, service_id, day, slot, time,
         price_applied_cents, origin, status, notes, created_by)
-      values (${b.clientId}, ${b.serviceId}, ${b.day}, ${b.slot}::public.booking_slot, ${b.time}::time,
-        ${b.declaredMember}, ${b.priceCents}, 'telefono',
+      values (${b.memberId}, ${b.serviceId}, ${b.day}, ${b.slot}::public.booking_slot, ${b.time}::time,
+        ${b.priceCents}, 'telefono',
         ${b.time ? 'confermata' : 'attesa'}::public.booking_status, ${b.notes}, ${b.createdBy})
       returning id`
   )[0]!.id;

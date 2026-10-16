@@ -1,6 +1,8 @@
 import { z } from '@hono/zod-openapi';
 import { PageQuery, pageOf } from '../../lib/pagination.js';
-import { PaymentMethod } from '../invoices/invoices.schemas.js';
+import { Booking } from '../bookings/bookings.schemas.js';
+import { Transport } from '../transports/transports.schemas.js';
+import { Invoice, PaymentMethod } from '../invoices/invoices.schemas.js';
 
 const memberType = z.enum(['ordinario', 'familiare', 'sostenitore', 'onorario']);
 const endReason = z.enum([
@@ -52,9 +54,9 @@ export type Fee = z.infer<typeof Fee>;
 
 export const MemberDetail = Member.extend({
   fees: z.array(Fee),
-  client: z
-    .strictObject({ id: z.uuid(), firstName: z.string(), lastName: z.string(), phone: z.string() })
-    .nullable(),
+  bookings: z.array(Booking),
+  transports: z.array(Transport),
+  invoices: z.array(Invoice),
 }).openapi('MemberDetail');
 
 export const MembersQuery = PageQuery.extend({
@@ -98,7 +100,6 @@ export const MemberCreate = z
   .strictObject({
     ...fields,
     feeMethod: PaymentMethod.optional(),
-    clientId: z.uuid().optional(),
   })
   .openapi('MemberCreate');
 export const MemberPatch = z.strictObject(fields).partial().openapi('MemberPatch');

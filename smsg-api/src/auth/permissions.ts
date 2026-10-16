@@ -27,8 +27,6 @@ export const PERMISSIONS = {
   'bookings.read': S,
   'bookings.write': S,
   'bookings.change_status': S,
-  'clients.read': S,
-  'clients.write': S,
   'members.read': S,
   'members.write': S,
   'members.end': S,

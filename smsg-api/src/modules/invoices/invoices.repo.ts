@@ -4,7 +4,7 @@ import { containsPattern, offsetOf } from '../../lib/pagination.js';
 import type { Invoice, InvoiceDetail, InvoiceKpis, InvoicesQuery } from './invoices.schemas.js';
 
 const cols = (tx: Tx) => tx`
-         i.id, i.year, i.number, i.issued_on::text as "issuedOn", i.client_id as "clientId",
+         i.id, i.year, i.number, i.issued_on::text as "issuedOn", i.member_id as "memberId",
          i.customer_name as "customerName", i.customer_tax_code as "customerTaxCode",
          i.customer_address as "customerAddress", i.subtotal_cents as "subtotalCents",
          i.stamp_duty_cents as "stampDutyCents", i.total_cents as "totalCents", i.status,
@@ -63,7 +63,7 @@ export const exists = async (tx: Tx, id: string) =>
 export const issue = async (
   tx: Tx,
   a: {
-    clientId: string;
+    memberId: string;
     bookingIds: string[];
     taxCode: string | null;
     address: string | null;
@@ -72,7 +72,7 @@ export const issue = async (
 ) =>
   (
     await tx<{ id: string }[]>`
-      select id from public.issue_invoice(${a.clientId}::uuid, ${tx.array(a.bookingIds)}::uuid[],
+      select id from public.issue_invoice(${a.memberId}::uuid, ${tx.array(a.bookingIds)}::uuid[],
         ${a.taxCode}::text, ${a.address}::text, ${a.method}::public.payment_method)`
   )[0]!.id;
 

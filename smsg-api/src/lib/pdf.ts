@@ -135,8 +135,8 @@ export type TransportSheet = {
   departureTime: string | null;
   appointmentTime: string | null;
   returnTime: string | null;
-  clientName: string;
-  clientPhone: string;
+  memberName: string;
+  memberPhone: string | null;
   fromAddress: string | null;
   toAddress: string | null;
   wheelchair: boolean;
@@ -157,7 +157,7 @@ export const transportSheetPdf = (t: TransportSheet) =>
     f('Autista', t.driverName);
     f('Mezzo', t.vehicle);
     d.moveDown(0.5);
-    f('Assistito', `${t.clientName} (${t.clientPhone})`);
+    f('Assistito', t.memberPhone ? `${t.memberName} (${t.memberPhone})` : t.memberName);
     f('Partenza', t.departureTime);
     f('Appuntamento', t.appointmentTime);
     f('Ritorno', t.returnTime);

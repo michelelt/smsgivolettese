@@ -9,8 +9,8 @@ import { sql } from '../db/helpers.js';
 const SVC = 'fa000000-0000-4000-8000-0000000000aa';
 
 beforeEach(async () => {
-  await sql`insert into services (id, name, member_price_cents, non_member_price_cents, sort_order)
-            values (${SVC}, 'Test servizio', 1500, 2500, 1000) on conflict (id) do nothing`;
+  await sql`insert into services (id, name, price_cents, sort_order)
+            values (${SVC}, 'Test servizio', 1500, 1000) on conflict (id) do nothing`;
 });
 afterAll(async () => {
   await sql`delete from services where id = ${SVC}`;

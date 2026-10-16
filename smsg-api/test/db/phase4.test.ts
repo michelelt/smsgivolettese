@@ -128,9 +128,9 @@ describe('staff_org_info', () => {
 });
 
 describe('demo bookings seed', () => {
-  it('has one attesa and two eseguita for the example client', async () => {
+  it('has one attesa and two eseguita for the example member', async () => {
     const rows =
-      await sql`select b.status, count(*)::int n from bookings b join clients c on c.id = b.client_id
+      await sql`select b.status, count(*)::int n from bookings b join members c on c.id = b.member_id
       where c.last_name = 'Rossi (esempio)' group by 1`;
     expect(Object.fromEntries(rows.map((r) => [r.status, r.n]))).toEqual({
       attesa: 1,
@@ -140,21 +140,21 @@ describe('demo bookings seed', () => {
 });
 
 describe('phase 4 review fixes', () => {
-  it('audits clients, services and site_settings updates', async () => {
+  it('audits members, services and site_settings updates', async () => {
     await rolledBack(async (tx) => {
       await fixtures(tx);
       await tx.unsafe(
-        `update clients set notes = 'x' where id = 'f9000000-0000-4000-8000-000000000001'`,
+        `update members set notes = 'x' where id = 'f7000000-0000-4000-8000-000000000001'`,
       );
       await tx.unsafe(
         `update services set name = 'S2' where id = 'fa000000-0000-4000-8000-000000000001'`,
       );
       await tx.unsafe(`update site_settings set slogan = 'x'`);
       const rows = await tx.unsafe(
-        `select distinct table_name from audit_log where action = 'update' and table_name in ('clients','services','site_settings')`,
+        `select distinct table_name from audit_log where action = 'update' and table_name in ('members','services','site_settings')`,
       );
       expect(rows.map((r) => r.table_name).sort()).toEqual([
-        'clients',
+        'members',
         'services',
         'site_settings',
       ]);

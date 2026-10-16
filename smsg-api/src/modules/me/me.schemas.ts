@@ -53,9 +53,9 @@ export const MyTransport = z
     status: z.enum(['assegnato', 'confermato', 'svolto']),
     km: z.number().nullable(),
     driverNotes: z.string().nullable(),
-    clientFirstName: z.string(),
-    clientLastName: z.string(),
-    clientPhone: z.string(),
+    memberFirstName: z.string(),
+    memberLastName: z.string(),
+    memberPhone: z.string().nullable(),
     vehiclePlate: z.string().nullable(),
     vehicleModel: z.string().nullable(),
   })

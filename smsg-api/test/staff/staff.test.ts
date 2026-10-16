@@ -65,13 +65,12 @@ beforeAll(async () => {
 async function cleanup(restore: boolean) {
   await sql.begin(async (t) => {
     await t`set local session_replication_role = replica`; // bypass immutability/audit triggers for cleanup
-    const zc = t`select id from clients where first_name = 'ZZT'`;
+    const zc = t`select id from members where first_name = 'ZZT'`;
     const zu = t`select id from auth.users where email like 'zzt-%@t.test'`;
-    await t`delete from transports where client_id in (${zc})`;
-    await t`delete from invoice_lines where invoice_id in (select id from invoices where client_id in (${zc}))`;
-    await t`delete from invoices where client_id in (${zc})`;
-    await t`delete from bookings where client_id in (${zc})`;
-    await t`delete from clients where first_name = 'ZZT'`;
+    await t`delete from transports where member_id in (${zc})`;
+    await t`delete from invoice_lines where invoice_id in (select id from invoices where member_id in (${zc}))`;
+    await t`delete from invoices where member_id in (${zc})`;
+    await t`delete from bookings where member_id in (${zc})`;
     await t`delete from membership_fees where member_id in (select id from members where first_name = 'ZZT')`;
     await t`delete from members where first_name = 'ZZT'`;
     await t`delete from services where name like 'ZZT%'`;
@@ -123,27 +122,26 @@ const staff = (m: string, p: string, b?: unknown, h?: Record<string, string>) =>
   call('staff', m, p, b, h);
 
 let n = 0;
-const mkClient = async (extra: object = {}) =>
+const mkMember = async (extra: object = {}) =>
   (
-    await staff('POST', '/clients', {
+    await staff('POST', '/members', {
       firstName: 'ZZT',
       lastName: `C${tag}${n++}`,
       phone: '3330000000',
       ...extra,
     })
   ).data;
-const mkService = async (nonMember: number, extra: object = {}) =>
+const mkService = async (price: number, extra: object = {}) =>
   (
     await staff('POST', '/services', {
       name: `ZZT s${n++} ${tag}`,
-      memberPriceCents: 0,
-      nonMemberPriceCents: nonMember,
+      priceCents: price,
       ...extra,
     })
   ).data;
 const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome' }).format(new Date());
-const mkDone = async (clientId: string, serviceId: string) => {
-  const b = (await staff('POST', '/bookings', { clientId, serviceId, day: today, slot: 'mattina' }))
+const mkDone = async (memberId: string, serviceId: string) => {
+  const b = (await staff('POST', '/bookings', { memberId, serviceId, day: today, slot: 'mattina' }))
     .data;
   expect((await staff('POST', `/bookings/${b.id}/execute`)).status).toBe(200);
   return b.id as string;
@@ -160,8 +158,6 @@ describe('permissions', () => {
     ['GET', '/bookings'],
     ['POST', '/bookings'],
     ['GET', '/bookings/kpis'],
-    ['GET', '/clients'],
-    ['POST', '/clients'],
     ['GET', '/members'],
     ['GET', '/members/export.csv'],
     ['POST', '/members'],
@@ -183,8 +179,8 @@ describe('permissions', () => {
 describe('services and settings', () => {
   it('creates, lists and patches services, revalidating the cache', async () => {
     revalidate.mockClear();
-    const s = await mkService(2500, { memberPriceCents: 1000 });
-    expect(s).toMatchObject({ memberPriceCents: 1000, nonMemberPriceCents: 2500, active: true });
+    const s = await mkService(2500);
+    expect(s).toMatchObject({ priceCents: 2500, active: true });
     expect(revalidate).toHaveBeenCalledWith(['services']);
     const p = await staff('PATCH', `/services/${s.id}`, { active: false });
     expect(p.data.active).toBe(false);
@@ -195,10 +191,7 @@ describe('services and settings', () => {
       (await staff('PATCH', `/services/${crypto.randomUUID()}`, { active: true })).status,
     ).toBe(404);
     expect((await staff('PATCH', `/services/${s.id}`, {})).status).toBe(400);
-    expect(
-      (await staff('POST', '/services', { name: '', memberPriceCents: -1, nonMemberPriceCents: 1 }))
-        .status,
-    ).toBe(400);
+    expect((await staff('POST', '/services', { name: '', priceCents: -1 })).status).toBe(400);
   });
   it('PUT /site-settings validates and revalidates; org-info is readable', async () => {
     revalidate.mockClear();
@@ -231,33 +224,32 @@ describe('services and settings', () => {
   });
 });
 
-describe('clients and members', () => {
+describe('members', () => {
   it('validates tax codes: 400 shape, 422 checksum, confirmed ok, valid ok', async () => {
     const base = { firstName: 'ZZT', lastName: `T${tag}`, phone: '333' };
-    const short = await staff('POST', '/clients', { ...base, taxCode: 'ABC' });
+    const short = await staff('POST', '/members', { ...base, taxCode: 'ABC' });
     expect(short.status).toBe(400);
-    const bad = await staff('POST', '/clients', { ...base, taxCode: 'RSSMRA85T10A562T' });
+    const bad = await staff('POST', '/members', { ...base, taxCode: 'RSSMRA85T10A562T' });
     expect(bad.status).toBe(422);
     expect(bad.data.error).toMatchObject({
       code: 'TAX_CODE_INVALID',
       details: { field: 'taxCode' },
     });
-    const conf = await staff('POST', '/clients', {
+    const conf = await staff('POST', '/members', {
       ...base,
       taxCode: 'rssmra85t10a562t',
       taxCodeConfirmed: true,
     });
     expect(conf.status).toBe(201);
     expect(conf.data.taxCode).toBe('RSSMRA85T10A562T');
-    const okc = await staff('POST', '/clients', { ...base, taxCode: ' RSSMRA85T10A562S ' });
+    const okc = await staff('POST', '/members', { ...base, taxCode: ' RSSMRA85T10A562S ' });
     expect(okc.status).toBe(201);
-    const omo = await staff('POST', '/clients', { ...base, taxCode: 'RSSMRA85T10A56NS' });
+    const omo = await staff('POST', '/members', { ...base, taxCode: 'RSSMRA85T10A56NS' });
     expect(omo.status).toBe(422); // layout fine, check character is the plain code's
   });
 
   it('registers a member: card number, fee, audit, duplicates, link, patch, lists', async () => {
     const before = (await staff('GET', '/org-info')).data.nextCardNumber;
-    const client = await mkClient();
     const tc = fakeTax();
     const rid = `rid-${tag}-m`;
     const r = await staff(
@@ -269,7 +261,6 @@ describe('clients and members', () => {
         taxCode: tc,
         taxCodeConfirmed: true,
         feeMethod: 'contanti',
-        clientId: client.id,
       },
       { 'x-request-id': rid },
     );
@@ -277,7 +268,7 @@ describe('clients and members', () => {
     expect(r.data.cardNumber).toBe(before);
     expect(r.data.feePaidCurrentYear).toBe(true);
     expect(r.data.fees).toHaveLength(1);
-    expect(r.data.client.id).toBe(client.id);
+    expect(r.data).toMatchObject({ bookings: [], transports: [], invoices: [] });
 
     const dup = await staff('POST', '/members', {
       firstName: 'ZZT',
@@ -287,24 +278,11 @@ describe('clients and members', () => {
     });
     expect(dup.status).toBe(409);
     expect(dup.data.error.code).toBe('MEMBER_TAX_CODE_EXISTS');
-    const again = await staff('POST', '/members', {
-      firstName: 'ZZT',
-      lastName: 'Y',
-      clientId: client.id,
-    });
-    expect(again.status).toBe(409);
-    expect(again.data.error.code).toBe('CLIENT_ALREADY_LINKED');
-    // the failed registrations rolled back, so the card number was not burned
-    expect((await staff('GET', '/org-info')).data.nextCardNumber).toBe(before + 1);
     expect(
-      (
-        await staff('POST', '/members', {
-          firstName: 'ZZT',
-          lastName: 'Z',
-          clientId: crypto.randomUUID(),
-        })
-      ).data.error.code,
-    ).toBe('CLIENT_NOT_FOUND');
+      (await staff('POST', '/members', { firstName: 'ZZT', lastName: 'Y', clientId: 'x' })).status,
+    ).toBe(400);
+    // the failed registration rolled back, so the card number was not burned
+    expect((await staff('GET', '/org-info')).data.nextCardNumber).toBe(before + 1);
 
     const id = r.data.id;
     const p = await staff(
@@ -437,105 +415,96 @@ describe('clients and members', () => {
     expect(text).toContain(`"Quota ${year}"`);
   });
 
-  it('client detail, patch and unlink', async () => {
-    const c = await mkClient({ address: 'Via 1' });
-    const d = await staff('GET', `/clients/${c.id}`);
-    expect(d.data).toMatchObject({ id: c.id, member: null, bookings: [], invoices: [] });
-    const p = await staff('PATCH', `/clients/${c.id}`, { notes: 'nota', address: null });
-    expect(p.data).toMatchObject({ notes: 'nota', address: null });
-    expect((await staff('PATCH', `/clients/${c.id}`, {})).status).toBe(400);
-    expect((await staff('GET', `/clients/${crypto.randomUUID()}`)).data.error.code).toBe(
-      'CLIENT_NOT_FOUND',
-    );
-    const m = (
-      await staff('POST', '/members', { firstName: 'ZZT', lastName: `L${tag}`, clientId: c.id })
-    ).data;
-    const other = await mkClient();
-    const clash = await staff('PATCH', `/clients/${other.id}`, { memberId: m.id });
-    expect([clash.status, clash.data.error.code]).toEqual([409, 'CLIENT_ALREADY_LINKED']);
-    expect((await staff('PATCH', `/clients/${c.id}`, { memberId: null })).data.memberId).toBeNull();
-    expect(
-      (await staff('PATCH', `/clients/${other.id}`, { memberId: m.id })).data.memberCardNumber,
-    ).toBe(m.cardNumber);
-    expect(((await staff('GET', `/clients?q=${other.lastName}`)).data.items as J[])[0].id).toBe(
-      other.id,
-    );
+  it('member detail lists bookings, transports and invoices; q matches name, card, tax code, phone', async () => {
+    const tc = fakeTax();
+    const m = await mkMember({ taxCode: tc, taxCodeConfirmed: true, phone: `339${tag}` });
+    const svc = await mkService(1500);
+    const b = await mkDone(m.id, svc.id);
+    const inv = (await staff('POST', '/invoices', { memberId: m.id, bookingIds: [b] })).data;
+    const t = (await staff('POST', '/transports', { memberId: m.id, travelDate: today })).data;
+    const d = (await staff('GET', `/members/${m.id}`)).data;
+    expect(d.bookings.map((x: J) => x.id)).toEqual([b]);
+    expect(d.bookings[0]).toMatchObject({
+      memberId: m.id,
+      invoiceId: inv.id,
+      priceAppliedCents: 1500,
+    });
+    expect(d.transports.map((x: J) => x.id)).toEqual([t.id]);
+    expect(d.invoices.map((x: J) => x.id)).toEqual([inv.id]);
+    for (const q of [m.lastName, String(m.cardNumber), tc, `339${tag}`])
+      expect(
+        ((await staff('GET', `/members?q=${encodeURIComponent(q)}`)).data.items as J[]).map(
+          (x) => x.id,
+        ),
+      ).toContain(m.id);
+    expect((await staff('GET', `/members/${crypto.randomUUID()}`)).status).toBe(404);
+    expect((await staff('GET', `/clients`)).status).toBe(404);
   });
 });
 
 describe('bookings', () => {
-  it('prices by member status, declaredMember override, status by time', async () => {
-    const svc = await mkService(2500, { memberPriceCents: 1000 });
-    const plain = await mkClient();
-    const m = (await staff('POST', '/members', { firstName: 'ZZT', lastName: `B${tag}` })).data;
-    const linked = await mkClient({ memberId: m.id });
+  it('snapshots the service price, status by time, 422 for a cessato member', async () => {
+    const svc = await mkService(2500);
+    const plain = await mkMember();
+    const m = await mkMember();
     const day = '2031-05-06';
     const b1 = await staff('POST', '/bookings', {
-      clientId: plain.id,
+      memberId: plain.id,
       serviceId: svc.id,
       day,
       slot: 'mattina',
     });
     expect(b1.status).toBe(201);
     expect(b1.data).toMatchObject({
+      memberId: plain.id,
       priceAppliedCents: 2500,
-      isMember: false,
       status: 'attesa',
       origin: 'telefono',
       time: null,
     });
+    expect(b1.data).not.toHaveProperty('isMember');
     const b2 = await staff('POST', '/bookings', {
-      clientId: linked.id,
+      memberId: m.id,
       serviceId: svc.id,
       day,
       slot: 'pomeriggio',
       time: '15:30',
     });
-    expect(b2.data).toMatchObject({
-      priceAppliedCents: 1000,
-      isMember: true,
-      status: 'confermata',
-      time: '15:30',
-    });
-    const b3 = await staff('POST', '/bookings', {
-      clientId: plain.id,
-      serviceId: svc.id,
-      day,
-      slot: 'mattina',
-      declaredMember: true,
-    });
-    expect(b3.data.priceAppliedCents).toBe(1000);
-    const b4 = await staff('POST', '/bookings', {
-      clientId: linked.id,
-      serviceId: svc.id,
-      day,
-      slot: 'mattina',
-      declaredMember: false,
-    });
-    expect(b4.data.priceAppliedCents).toBe(2500);
-    // cessato member -> non-member price
-    await staff('POST', `/members/${m.id}/end`, { endReason: 'dimissioni' });
+    expect(b2.data).toMatchObject({ status: 'confermata', time: '15:30' });
     expect(
       (
         await staff('POST', '/bookings', {
-          clientId: linked.id,
+          memberId: m.id,
           serviceId: svc.id,
           day,
           slot: 'mattina',
+          declaredMember: true,
         })
-      ).data.priceAppliedCents,
-    ).toBe(2500);
+      ).status,
+    ).toBe(400);
+    // cessato member: no new bookings or transports, existing ones stay
+    await staff('POST', `/members/${m.id}/end`, { endReason: 'dimissioni' });
+    const ended = await staff('POST', '/bookings', {
+      memberId: m.id,
+      serviceId: svc.id,
+      day,
+      slot: 'mattina',
+    });
+    expect([ended.status, ended.data.error.code]).toEqual([422, 'MEMBER_NOT_ACTIVE']);
+    const endedT = await staff('POST', '/transports', { memberId: m.id, travelDate: day });
+    expect([endedT.status, endedT.data.error.code]).toEqual([422, 'MEMBER_NOT_ACTIVE']);
+    expect((await staff('POST', `/bookings/${b2.data.id}/execute`)).status).toBe(200);
     // price changes do not touch existing bookings
-    await staff('PATCH', `/services/${svc.id}`, { nonMemberPriceCents: 9999 });
+    await staff('PATCH', `/services/${svc.id}`, { priceCents: 9999 });
     expect(
-      ((await staff('GET', `/bookings?clientId=${plain.id}&status=tutte`)).data.items as J[])[0]
+      ((await staff('GET', `/bookings?memberId=${plain.id}&status=tutte`)).data.items as J[])[0]
         .priceAppliedCents,
     ).toBe(2500);
 
     expect(
       (
         await staff('POST', '/bookings', {
-          clientId: plain.id,
+          memberId: plain.id,
           serviceId: svc.id,
           day: 'x',
           slot: 'mattina',
@@ -545,7 +514,7 @@ describe('bookings', () => {
     expect(
       (
         await staff('POST', '/bookings', {
-          clientId: plain.id,
+          memberId: plain.id,
           serviceId: svc.id,
           day,
           slot: 'mattina',
@@ -556,7 +525,7 @@ describe('bookings', () => {
     expect(
       (
         await staff('POST', '/bookings', {
-          clientId: plain.id,
+          memberId: plain.id,
           serviceId: svc.id,
           day,
           slot: 'mattina',
@@ -567,17 +536,17 @@ describe('bookings', () => {
     expect(
       (
         await staff('POST', '/bookings', {
-          clientId: crypto.randomUUID(),
+          memberId: crypto.randomUUID(),
           serviceId: svc.id,
           day,
           slot: 'mattina',
         })
       ).data.error.code,
-    ).toBe('CLIENT_NOT_FOUND');
+    ).toBe('MEMBER_NOT_FOUND');
     expect(
       (
         await staff('POST', '/bookings', {
-          clientId: plain.id,
+          memberId: plain.id,
           serviceId: crypto.randomUUID(),
           day,
           slot: 'mattina',
@@ -587,7 +556,7 @@ describe('bookings', () => {
 
     await staff('PATCH', `/services/${svc.id}`, { active: false });
     const off = await staff('POST', '/bookings', {
-      clientId: plain.id,
+      memberId: plain.id,
       serviceId: svc.id,
       day,
       slot: 'mattina',
@@ -597,11 +566,11 @@ describe('bookings', () => {
 
   it('walks every transition and rejects the others with 409', async () => {
     const svc = await mkService(100);
-    const c = await mkClient();
+    const c = await mkMember();
     const mk = async () =>
       (
         await staff('POST', '/bookings', {
-          clientId: c.id,
+          memberId: c.id,
           serviceId: svc.id,
           day: '2031-06-01',
           slot: 'mattina',
@@ -651,10 +620,10 @@ describe('bookings', () => {
 
   it('cancel and restore sync the linked transport (ADR-046)', async () => {
     const svc = await mkService(100, { requiresTransport: true });
-    const c = await mkClient();
+    const c = await mkMember();
     const id = (
       await staff('POST', '/bookings', {
-        clientId: c.id,
+        memberId: c.id,
         serviceId: svc.id,
         day: '2031-07-01',
         slot: 'mattina',
@@ -671,17 +640,17 @@ describe('bookings', () => {
 
   it('lists with filters and kpis', async () => {
     const svc = await mkService(100);
-    const c = await mkClient();
+    const c = await mkMember();
     const id = (
       await staff('POST', '/bookings', {
-        clientId: c.id,
+        memberId: c.id,
         serviceId: svc.id,
         day: '2031-08-01',
         slot: 'mattina',
         time: '10:00',
       })
     ).data.id;
-    const list = (qs: string) => staff('GET', `/bookings?clientId=${c.id}&${qs}`);
+    const list = (qs: string) => staff('GET', `/bookings?memberId=${c.id}&${qs}`);
     expect((await list('')).data.total).toBe(1); // default aperte
     expect((await list('status=attesa')).data.total).toBe(0);
     expect((await list('status=confermata')).data.total).toBe(1);
@@ -704,11 +673,11 @@ describe('bookings', () => {
 });
 
 describe('invoices', () => {
-  const issue = (clientId: string, bookingIds: string[], extra: object = {}) =>
-    staff('POST', '/invoices', { clientId, bookingIds, ...extra });
+  const issue = (memberId: string, bookingIds: string[], extra: object = {}) =>
+    staff('POST', '/invoices', { memberId, bookingIds, ...extra });
 
   it('applies stamp duty above the threshold only (7747 none, 7748 yes)', async () => {
-    const c = await mkClient();
+    const c = await mkMember();
     const lo = await mkDone(c.id, (await mkService(7747)).id);
     const hi = await mkDone(c.id, (await mkService(7748)).id);
     const a = await issue(c.id, [lo]);
@@ -725,7 +694,7 @@ describe('invoices', () => {
   });
 
   it('numbers per year, creates only the current counter row, keeps numbers after void', async () => {
-    const c = await mkClient();
+    const c = await mkMember();
     const svc = await mkService(1000);
     const before = (await sql`select year, last_number from invoice_counters`).map((r) => ({
       ...r,
@@ -736,7 +705,7 @@ describe('invoices', () => {
     const i1 = await staff(
       'POST',
       '/invoices',
-      { clientId: c.id, bookingIds: [b1] },
+      { memberId: c.id, bookingIds: [b1] },
       { 'x-request-id': rid },
     );
     expect([i1.data.year, i1.data.number]).toEqual([year, cur0 + 1]);
@@ -748,7 +717,7 @@ describe('invoices', () => {
       before.some((r) => r.year === year) ? before.length : before.length + 1,
     );
     expect(
-      ((await staff('GET', `/bookings?clientId=${c.id}&status=tutte`)).data.items as J[])[0]
+      ((await staff('GET', `/bookings?memberId=${c.id}&status=tutte`)).data.items as J[])[0]
         .invoiceNumber,
     ).toBe(`${cur0 + 1}/${year}`);
 
@@ -768,7 +737,7 @@ describe('invoices', () => {
     );
     expect(v.data).toMatchObject({ status: 'annullata', voidReason: 'Errore', number: cur0 + 1 });
     expect(v.data.voidedOn).toBe(today);
-    const vb = (await staff('GET', `/bookings?clientId=${c.id}&status=da_fatturare`)).data
+    const vb = (await staff('GET', `/bookings?memberId=${c.id}&status=da_fatturare`)).data
       .items as J[];
     expect(vb.map((x) => x.id)).toEqual([b1]);
     expect(vb[0].invoiceId).toBeNull();
@@ -800,13 +769,13 @@ describe('invoices', () => {
     ).toBe('%PDF');
   });
 
-  it('issue edge cases, tax code saved on client, pay, list, kpis, csv', async () => {
-    const c = await mkClient();
+  it('issue edge cases, tax code saved on member, pay, list, kpis, csv', async () => {
+    const c = await mkMember();
     const svc = await mkService(4000);
     const b = await mkDone(c.id, svc.id);
     const open = (
       await staff('POST', '/bookings', {
-        clientId: c.id,
+        memberId: c.id,
         serviceId: svc.id,
         day: today,
         slot: 'mattina',
@@ -814,17 +783,19 @@ describe('invoices', () => {
     ).data.id;
     expect((await issue(c.id, [open])).data.error.code).toBe('BOOKINGS_NOT_INVOICEABLE');
     expect((await issue(c.id, [])).status).toBe(400);
-    expect((await issue(crypto.randomUUID(), [b])).data.error.code).toBe('CLIENT_NOT_FOUND');
-    const other = await mkClient();
+    expect((await issue(crypto.randomUUID(), [b])).data.error.code).toBe('MEMBER_NOT_FOUND');
+    const other = await mkMember();
     expect((await issue(other.id, [b])).data.error.code).toBe('BOOKINGS_NOT_INVOICEABLE');
     const bad = await issue(c.id, [b], { customerTaxCode: 'RSSMRA85T10A562T' });
     expect([bad.status, bad.data.error.code]).toEqual([422, 'TAX_CODE_INVALID']);
-    expect((await sql`select count(*)::int n from invoices where client_id = ${c.id}`)[0]!.n).toBe(
+    expect((await sql`select count(*)::int n from invoices where member_id = ${c.id}`)[0]!.n).toBe(
       0,
     );
 
+    const invTax = fakeTax();
     const i = await issue(c.id, [b], {
-      customerTaxCode: 'rssmra85t10a562s',
+      customerTaxCode: invTax,
+      taxCodeConfirmed: true,
       customerAddress: 'Via Fattura 3',
       paymentMethod: 'bonifico',
     });
@@ -833,18 +804,15 @@ describe('invoices', () => {
       status: 'pagata',
       paymentMethod: 'bonifico',
       paidOn: today,
-      customerTaxCode: 'RSSMRA85T10A562S',
+      customerTaxCode: invTax,
       customerAddress: 'Via Fattura 3',
     });
-    expect((await staff('GET', `/clients/${c.id}`)).data).toMatchObject({
-      taxCode: 'RSSMRA85T10A562S',
-      address: 'Via Fattura 3',
-    });
-
-    const cl = await staff('GET', `/clients/${c.id}`);
-    expect(cl.data.invoices).toHaveLength(1);
-    expect(cl.data.bookings.length).toBe(2);
-    expect(cl.data.invoicedCents).toBe(4000);
+    // the tax code is kept on the member, the address is not
+    const md = (await staff('GET', `/members/${c.id}`)).data;
+    expect(md.taxCode).toBe(invTax);
+    expect(md.address).toBeNull();
+    expect(md.invoices).toHaveLength(1);
+    expect(md.bookings.length).toBe(2);
 
     // pay
     const paid = await staff('POST', `/invoices/${i.data.id}/pay`, { method: 'pos' });
@@ -855,7 +823,7 @@ describe('invoices', () => {
     expect(
       (await staff('POST', `/invoices/${i2.data.id}/pay`, { method: 'pos', paidOn: today })).data,
     ).toMatchObject({ status: 'pagata', paymentMethod: 'pos', paidOn: today });
-    const c4 = await mkClient(); // separate client: keeps the counts below untouched
+    const c4 = await mkMember(); // separate member: keeps the counts below untouched
     const b4 = await mkDone(c4.id, svc.id);
     const i4 = await issue(c4.id, [b4]);
     const nextYear = `${year + 1}-01-01`;

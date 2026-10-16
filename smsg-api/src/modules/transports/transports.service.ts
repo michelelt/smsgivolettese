@@ -37,10 +37,10 @@ export const get = async (ctx: Ctx, id: string) => {
 
 export const create = (ctx: Ctx, input: z.infer<typeof TransportCreate>) =>
   asUser(ctx, async (tx) => {
-    const { clientId, ...f } = input;
-    if (!(await repo.clientExists(tx, clientId)))
-      throw new DomainError(404, 'CLIENT_NOT_FOUND', 'Cliente non trovato');
-    return (await repo.byId(tx, await repo.insert(tx, clientId, f, ctx.user.id)))!;
+    const { memberId, ...f } = input;
+    if (!(await repo.memberExists(tx, memberId)))
+      throw new DomainError(404, 'MEMBER_NOT_FOUND', 'Socio non trovato');
+    return (await repo.byId(tx, await repo.insert(tx, memberId, f, ctx.user.id)))!;
   });
 
 type Row = NonNullable<Awaited<ReturnType<typeof repo.byId>>>;
@@ -194,7 +194,7 @@ export const transportsCsv = (rows: CsvRow[]) =>
     rows.map((r) => [
       csvDate(r.travelDate),
       r.departureTime,
-      r.clientName,
+      r.memberName,
       r.fromAddress,
       r.toAddress,
       r.driverName,

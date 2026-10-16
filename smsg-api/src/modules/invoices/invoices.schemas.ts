@@ -10,7 +10,7 @@ export const Invoice = z
     year: z.number().int(),
     number: z.number().int(),
     issuedOn: z.string(),
-    clientId: z.uuid(),
+    memberId: z.uuid(),
     customerName: z.string(),
     customerTaxCode: z.string().nullable(),
     customerAddress: z.string().nullable(),
@@ -62,7 +62,7 @@ export const InvoiceKpis = z
 
 export const InvoiceIssue = z
   .strictObject({
-    clientId: z.uuid(),
+    memberId: z.uuid(),
     bookingIds: z.array(z.uuid()).min(1).max(100),
     customerTaxCode: z.string().trim().max(40).nullable().optional(),
     taxCodeConfirmed: z.boolean().optional(),

@@ -2,11 +2,10 @@ import type { z } from '@hono/zod-openapi';
 import { asUser, type Ctx } from '../../lib/ctx.js';
 import { csvDate, toCsv } from '../../lib/csv.js';
 import { assertPaidOn, romeToday, romeYear } from '../../lib/dates.js';
-import { Conflict, DomainError, NotFound, ValidationError } from '../../lib/errors.js';
+import { Conflict, NotFound, ValidationError } from '../../lib/errors.js';
 import { centsToDecimal } from '../../lib/money.js';
 import { receiptPdf } from '../../lib/pdf.js';
 import { assertTaxCode } from '../../lib/tax-code.js';
-import * as clients from '../clients/clients.repo.js';
 import { orgInfo } from '../settings/settings.repo.js';
 import * as repo from './members.repo.js';
 import type {
@@ -30,20 +29,15 @@ export const get = async (ctx: Ctx, id: string) => {
 const taxOf = (raw: string | null | undefined, confirmed?: boolean) =>
   raw ? assertTaxCode(raw, confirmed) : raw === '' ? null : raw;
 
-/** register_member allocates the card number; linking the client happens in the same transaction. */
+/** register_member allocates the card number. */
 export const create = (ctx: Ctx, input: z.infer<typeof MemberCreate>) =>
   asUser(ctx, async (tx) => {
-    const { feeMethod, clientId, taxCodeConfirmed, ...f } = input;
+    const { feeMethod, taxCodeConfirmed, ...f } = input;
     const snake = Object.fromEntries(
       Object.entries(repo.COLS).map(([k, c]) => [c, (f as Record<string, unknown>)[k]]),
     );
     snake.tax_code = taxOf(f.taxCode, taxCodeConfirmed);
     const id = await repo.register(tx, snake, feeMethod ?? null);
-    if (clientId && (await clients.linkMember(tx, clientId, id)).length === 0) {
-      if (!(await clients.exists(tx, clientId)))
-        throw new DomainError(404, 'CLIENT_NOT_FOUND', 'Cliente non trovato');
-      throw new Conflict('Il cliente è già collegato a un socio', 'CLIENT_ALREADY_LINKED');
-    }
     return (await repo.detail(tx, id))!;
   });
 

@@ -67,8 +67,8 @@ const T = (tx: Tx) => tx`
     to_char(appointment_at at time zone ${R}, 'HH24:MI') as "appointmentTime",
     to_char(return_at at time zone ${R}, 'HH24:MI') as "returnTime",
     from_address as "fromAddress", to_address as "toAddress", wheelchair, companion, status,
-    km::float8 as km, driver_notes as "driverNotes", client_first_name as "clientFirstName",
-    client_last_name as "clientLastName", client_phone as "clientPhone",
+    km::float8 as km, driver_notes as "driverNotes", member_first_name as "memberFirstName",
+    member_last_name as "memberLastName", member_phone as "memberPhone",
     vehicle_plate as "vehiclePlate", vehicle_model as "vehicleModel"
   from public.volunteer_transports_v`;
 

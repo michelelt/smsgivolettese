@@ -36,16 +36,17 @@ insert into public.vehicles (plate, model, seats, wheelchair_accessible) values
   ('AA000AA', 'Fiat Doblò (esempio)', 5, true), ('BB111BB', 'Fiat Panda (esempio)', 4, false);
 insert into public.shift_types (name, sort_order) values
   ('Sede', 1), ('Centralino', 2), ('Ambulatorio', 3), ('Accompagnamento', 4);
-insert into public.services (name, description, member_price_cents, non_member_price_cents, schedule_note, requires_transport, sort_order) values
-  ('Misurazione pressione (esempio)', 'Servizio di esempio', 0, 300, 'martedì mattina', false, 1),
-  ('Prelievi (esempio)', 'Servizio di esempio', 500, 1000, 'giovedì mattina', false, 2),
-  ('Accompagnamento (esempio)', 'Servizio di esempio', 1000, 2000, 'su richiesta', true, 3);
+insert into public.services (name, description, price_cents, schedule_note, requires_transport, sort_order) values
+  ('Misurazione pressione (esempio)', 'Servizio di esempio', 0, 'martedì mattina', false, 1),
+  ('Prelievi (esempio)', 'Servizio di esempio', 500, 'giovedì mattina', false, 2),
+  ('Accompagnamento (esempio)', 'Servizio di esempio', 1000, 'su richiesta', true, 3);
 insert into public.members (card_number, first_name, last_name, joined_on) values
   (1, 'Maria', 'Esposito (esempio)', current_date - 400), (2, 'Carlo', 'Ferrari (esempio)', current_date - 200);
-update public.org_settings set last_card_number = 2;
-insert into public.clients (first_name, last_name, phone, address) values
-  ('Mario', 'Rossi (esempio)', '3330000001', 'Via Esempio 1, Givoletto'),
-  ('Rosa', 'Gialli (esempio)', '3330000002', 'Via Esempio 2, Givoletto');
+insert into public.members (card_number, first_name, last_name, phone, address, joined_on)
+select 2 + row_number() over (), f, l, ph, a, current_date - 100
+from (values ('Mario', 'Rossi (esempio)', '3330000001', 'Via Esempio 1, Givoletto'),
+             ('Rosa', 'Gialli (esempio)', '3330000002', 'Via Esempio 2, Givoletto')) v (f, l, ph, a);
+update public.org_settings set last_card_number = (select max(card_number) from public.members);
 insert into public.shifts (shift_type_id, starts_at, ends_at, required_slots)
 select id, date_trunc('day', now()) + interval '2 days 9 hours', date_trunc('day', now()) + interval '2 days 12 hours', 2
 from public.shift_types where name = 'Sede';
@@ -62,9 +63,9 @@ update public.site_settings set slogan = 'Sito di esempio', vat_number = '000000
     {"group":"utili","label":"Comune di esempio","url":"https://example.test/comune"},
     {"group":"utili","label":"ASL di esempio","url":"https://example.test/asl"}]';
 
-insert into public.bookings (client_id, service_id, day, slot, declared_member, price_applied_cents, origin, status, executed_at)
-select c.id, s.id, current_date + d.off, 'mattina', false, s.non_member_price_cents, 'telefono', d.st::public.booking_status,
+insert into public.bookings (member_id, service_id, day, slot, price_applied_cents, origin, status, executed_at)
+select c.id, s.id, current_date + d.off, 'mattina', s.price_cents, 'telefono', d.st::public.booking_status,
   case when d.st = 'eseguita' then now() end
-from public.clients c, public.services s,
+from public.members c, public.services s,
   (values (1, 'attesa'), (-7, 'eseguita'), (-3, 'eseguita')) d (off, st)
 where c.last_name = 'Rossi (esempio)' and s.name = 'Prelievi (esempio)';

@@ -82,18 +82,16 @@ export async function fixtures(tx: Tx) {
     insert into membership_fees (id, member_id, year, amount_cents, paid_on, method) values
       ('f8000000-0000-4000-8000-000000000001','f7000000-0000-4000-8000-000000000001',2025,2000,current_date,'contanti'),
       ('f8000000-0000-4000-8000-000000000002','f7000000-0000-4000-8000-000000000001',2024,2000,current_date,'contanti');
-    insert into clients (id, first_name, last_name, phone) values
-      ('f9000000-0000-4000-8000-000000000001','C','Client','3331112222');
-    insert into services (id, name, member_price_cents, non_member_price_cents, active) values
-      ('fa000000-0000-4000-8000-000000000001','S-active',0,300,true),('fa000000-0000-4000-8000-000000000002','S-inactive',0,300,false),
-      ('fa000000-0000-4000-8000-000000000003','S-spare',0,300,true);
-    insert into bookings (id, client_id, service_id, day, slot, declared_member, price_applied_cents, origin, status) values
-      ('fb000000-0000-4000-8000-000000000001','f9000000-0000-4000-8000-000000000001','fa000000-0000-4000-8000-000000000001',current_date,'mattina',false,300,'telefono','eseguita');
-    insert into transports (id, client_id, travel_date, departure_at, from_address, to_address, driver_volunteer_id, status) values
-      ('fc000000-0000-4000-8000-000000000001','f9000000-0000-4000-8000-000000000001',current_date, now()+interval '10 days','a','b','${ID.vol}','assegnato'),
-      ('fc000000-0000-4000-8000-000000000002','f9000000-0000-4000-8000-000000000001',current_date, null,null,null,null,'richiesto');
-    insert into invoices (id, year, number, issued_on, client_id, customer_name, issuer_name, vat_exemption_text, subtotal_cents, stamp_duty_cents, total_cents, status) values
-      ('fd000000-0000-4000-8000-000000000001', 2020, 1, current_date, 'f9000000-0000-4000-8000-000000000001','C','I','v',300,0,300,'emessa');
+    insert into services (id, name, price_cents, active) values
+      ('fa000000-0000-4000-8000-000000000001','S-active',0,true),('fa000000-0000-4000-8000-000000000002','S-inactive',0,false),
+      ('fa000000-0000-4000-8000-000000000003','S-spare',0,true);
+    insert into bookings (id, member_id, service_id, day, slot, price_applied_cents, origin, status) values
+      ('fb000000-0000-4000-8000-000000000001','f7000000-0000-4000-8000-000000000001','fa000000-0000-4000-8000-000000000001',current_date,'mattina',300,'telefono','eseguita');
+    insert into transports (id, member_id, travel_date, departure_at, from_address, to_address, driver_volunteer_id, status) values
+      ('fc000000-0000-4000-8000-000000000001','f7000000-0000-4000-8000-000000000001',current_date, now()+interval '10 days','a','b','${ID.vol}','assegnato'),
+      ('fc000000-0000-4000-8000-000000000002','f7000000-0000-4000-8000-000000000001',current_date, null,null,null,null,'richiesto');
+    insert into invoices (id, year, number, issued_on, member_id, customer_name, issuer_name, vat_exemption_text, subtotal_cents, stamp_duty_cents, total_cents, status) values
+      ('fd000000-0000-4000-8000-000000000001', 2020, 1, current_date, 'f7000000-0000-4000-8000-000000000001','C','I','v',300,0,300,'emessa');
     insert into invoice_lines (id, invoice_id, position, description, amount_cents) values
       ('fd100000-0000-4000-8000-000000000001','fd000000-0000-4000-8000-000000000001',1,'d',300);
     insert into invoice_counters (year, last_number) values (2020, 1);

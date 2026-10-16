@@ -54,7 +54,10 @@ const get = createRoute({
   path: '/members/{id}',
   middleware: [requirePermission('members.read')] as const,
   request: { params: IdParam },
-  responses: { 200: ok(MemberDetail, 'Socio con quote e cliente collegato'), ...errs(404) },
+  responses: {
+    200: ok(MemberDetail, 'Socio con quote e storico (prenotazioni, trasporti, fatture)'),
+    ...errs(404),
+  },
 });
 const create = createRoute({
   ...base,

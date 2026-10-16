@@ -3,9 +3,9 @@ import type { Transport, TransportsQuery } from './transports.schemas.js';
 
 const R = 'Europe/Rome';
 
-const select = (tx: Tx) => tx`
-  select t.id, t.client_id as "clientId", c.first_name || ' ' || c.last_name as "clientName",
-    c.phone as "clientPhone", t.travel_date::text as "travelDate",
+export const select = (tx: Tx) => tx`
+  select t.id, t.member_id as "memberId", c.first_name || ' ' || c.last_name as "memberName",
+    c.phone as "memberPhone", t.travel_date::text as "travelDate",
     to_char(t.departure_at at time zone ${R}, 'HH24:MI') as "departureTime",
     to_char(t.appointment_at at time zone ${R}, 'HH24:MI') as "appointmentTime",
     to_char(t.return_at at time zone ${R}, 'HH24:MI') as "returnTime",
@@ -15,7 +15,7 @@ const select = (tx: Tx) => tx`
     t.vehicle_id as "vehicleId", v.plate as "vehiclePlate",
     t.km::float8 as km, t.driver_notes as "driverNotes", t.booking_id as "bookingId"
   from public.transports t
-  join public.clients c on c.id = t.client_id
+  join public.members c on c.id = t.member_id
   left join public.profiles dp on dp.id = t.driver_volunteer_id
   left join public.vehicles v on v.id = t.vehicle_id`;
 
@@ -28,8 +28,8 @@ export const list = (tx: Tx, q: TransportsQuery) => tx<Transport[]>`
 export const byId = async (tx: Tx, id: string) =>
   (await tx<Transport[]>`${select(tx)} where t.id = ${id}`)[0];
 
-export const clientExists = async (tx: Tx, id: string) =>
-  (await tx`select 1 from public.clients where id = ${id}`).length > 0;
+export const memberExists = async (tx: Tx, id: string) =>
+  (await tx`select 1 from public.members where id = ${id}`).length > 0;
 
 /** `date + time` in Rome as timestamptz; null time -> null. */
 const at = (tx: Tx, date: string, time: string | null | undefined) =>
@@ -49,12 +49,12 @@ type Fields = {
   notes?: string | null;
 };
 
-export const insert = async (tx: Tx, clientId: string, f: Fields, by: string) =>
+export const insert = async (tx: Tx, memberId: string, f: Fields, by: string) =>
   (
     await tx<{ id: string }[]>`
-      insert into public.transports (client_id, travel_date, departure_at, appointment_at, return_at,
+      insert into public.transports (member_id, travel_date, departure_at, appointment_at, return_at,
         from_address, to_address, requested_by, reason, wheelchair, companion, notes, created_by)
-      values (${clientId}, ${f.travelDate}, ${at(tx, f.travelDate, f.departureTime)},
+      values (${memberId}, ${f.travelDate}, ${at(tx, f.travelDate, f.departureTime)},
         ${at(tx, f.travelDate, f.appointmentTime)}, ${at(tx, f.travelDate, f.returnTime)},
         ${f.fromAddress ?? null}, ${f.toAddress ?? null}, ${f.requestedBy ?? null}, ${f.reason ?? null},
         ${f.wheelchair ?? false}, ${f.companion ?? false}, ${f.notes ?? null}, ${by})
@@ -136,7 +136,7 @@ export const csvRows = (tx: Tx, month: string) => tx<
   {
     travelDate: string;
     departureTime: string | null;
-    clientName: string;
+    memberName: string;
     fromAddress: string | null;
     toAddress: string | null;
     driverName: string | null;
@@ -149,11 +149,11 @@ export const csvRows = (tx: Tx, month: string) => tx<
 >`
   select t.travel_date::text as "travelDate",
     to_char(t.departure_at at time zone ${R}, 'HH24:MI') as "departureTime",
-    c.first_name || ' ' || c.last_name as "clientName", t.from_address as "fromAddress",
+    c.first_name || ' ' || c.last_name as "memberName", t.from_address as "fromAddress",
     t.to_address as "toAddress", dp.first_name || ' ' || dp.last_name as "driverName",
     v.plate as "vehiclePlate", t.km::float8 as km, t.wheelchair, t.companion, t.driver_notes as "driverNotes"
   from public.transports t
-  join public.clients c on c.id = t.client_id
+  join public.members c on c.id = t.member_id
   left join public.profiles dp on dp.id = t.driver_volunteer_id
   left join public.vehicles v on v.id = t.vehicle_id
   where t.status = 'svolto'

@@ -8,16 +8,15 @@ const status = z.enum(['attesa', 'confermata', 'eseguita', 'annullata']);
 export const Booking = z
   .strictObject({
     id: z.uuid(),
-    clientId: z.uuid(),
-    clientName: z.string(),
-    clientPhone: z.string(),
+    memberId: z.uuid(),
+    memberName: z.string(),
+    memberPhone: z.string().nullable(),
     serviceId: z.uuid(),
     serviceName: z.string(),
     day: z.string(),
     slot,
     time: z.string().nullable(),
     status,
-    isMember: z.boolean(),
     priceAppliedCents: z.number().int(),
     origin: z.enum(['online', 'telefono']),
     notes: z.string().nullable(),
@@ -36,7 +35,7 @@ export const BookingsQuery = PageQuery.extend({
   q: z.string().trim().max(100).optional(),
   from: z.iso.date().optional(),
   to: z.iso.date().optional(),
-  clientId: z.uuid().optional(),
+  memberId: z.uuid().optional(),
 });
 export type BookingsQuery = z.infer<typeof BookingsQuery>;
 
@@ -52,12 +51,11 @@ export const BookingKpis = z
 
 export const BookingCreate = z
   .strictObject({
-    clientId: z.uuid(),
+    memberId: z.uuid(),
     serviceId: z.uuid(),
     day: z.iso.date(),
     slot,
     time: time.optional(),
-    declaredMember: z.boolean().optional(),
     notes: z.string().trim().max(600).optional(),
   })
   .openapi('BookingCreate');

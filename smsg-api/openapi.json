@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "SMS Givolettese API",
-    "version": "1.2.0"
+    "version": "2.0.0"
   },
   "components": {
     "securitySchemes": {
@@ -327,14 +327,15 @@
             "type": "string",
             "nullable": true
           },
-          "clientFirstName": {
+          "memberFirstName": {
             "type": "string"
           },
-          "clientLastName": {
+          "memberLastName": {
             "type": "string"
           },
-          "clientPhone": {
-            "type": "string"
+          "memberPhone": {
+            "type": "string",
+            "nullable": true
           },
           "vehiclePlate": {
             "type": "string",
@@ -358,9 +359,9 @@
           "status",
           "km",
           "driverNotes",
-          "clientFirstName",
-          "clientLastName",
-          "clientPhone",
+          "memberFirstName",
+          "memberLastName",
+          "memberPhone",
           "vehiclePlate",
           "vehicleModel"
         ],
@@ -422,15 +423,16 @@
             "type": "string",
             "format": "uuid"
           },
-          "clientId": {
+          "memberId": {
             "type": "string",
             "format": "uuid"
           },
-          "clientName": {
+          "memberName": {
             "type": "string"
           },
-          "clientPhone": {
-            "type": "string"
+          "memberPhone": {
+            "type": "string",
+            "nullable": true
           },
           "serviceId": {
             "type": "string",
@@ -461,9 +463,6 @@
               "eseguita",
               "annullata"
             ]
-          },
-          "isMember": {
-            "type": "boolean"
           },
           "priceAppliedCents": {
             "type": "integer"
@@ -500,16 +499,15 @@
         },
         "required": [
           "id",
-          "clientId",
-          "clientName",
-          "clientPhone",
+          "memberId",
+          "memberName",
+          "memberPhone",
           "serviceId",
           "serviceName",
           "day",
           "slot",
           "time",
           "status",
-          "isMember",
           "priceAppliedCents",
           "origin",
           "notes",
@@ -550,7 +548,7 @@
       "BookingCreate": {
         "type": "object",
         "properties": {
-          "clientId": {
+          "memberId": {
             "type": "string",
             "format": "uuid"
           },
@@ -573,16 +571,13 @@
             "type": "string",
             "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
           },
-          "declaredMember": {
-            "type": "boolean"
-          },
           "notes": {
             "type": "string",
             "maxLength": 600
           }
         },
         "required": [
-          "clientId",
+          "memberId",
           "serviceId",
           "day",
           "slot"
@@ -613,339 +608,6 @@
         "required": [
           "by"
         ],
-        "additionalProperties": false
-      },
-      "ClientPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Client"
-            }
-          },
-          "total": {
-            "type": "integer"
-          }
-        },
-        "required": [
-          "items",
-          "total"
-        ]
-      },
-      "Client": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "firstName": {
-            "type": "string"
-          },
-          "lastName": {
-            "type": "string"
-          },
-          "phone": {
-            "type": "string"
-          },
-          "taxCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "address": {
-            "type": "string",
-            "nullable": true
-          },
-          "notes": {
-            "type": "string",
-            "nullable": true
-          },
-          "memberId": {
-            "type": "string",
-            "nullable": true,
-            "format": "uuid"
-          },
-          "memberCardNumber": {
-            "type": "integer",
-            "nullable": true
-          },
-          "bookingsCount": {
-            "type": "integer"
-          },
-          "toInvoiceCount": {
-            "type": "integer"
-          },
-          "invoicedCents": {
-            "type": "integer"
-          },
-          "toCollectCents": {
-            "type": "integer"
-          }
-        },
-        "required": [
-          "id",
-          "firstName",
-          "lastName",
-          "phone",
-          "taxCode",
-          "address",
-          "notes",
-          "memberId",
-          "memberCardNumber",
-          "bookingsCount",
-          "toInvoiceCount",
-          "invoicedCents",
-          "toCollectCents"
-        ],
-        "additionalProperties": false
-      },
-      "ClientDetail": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Client"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "member": {
-                "type": "object",
-                "nullable": true,
-                "properties": {
-                  "id": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "cardNumber": {
-                    "type": "integer"
-                  },
-                  "firstName": {
-                    "type": "string"
-                  },
-                  "lastName": {
-                    "type": "string"
-                  },
-                  "status": {
-                    "type": "string",
-                    "enum": [
-                      "attivo",
-                      "cessato"
-                    ]
-                  }
-                },
-                "required": [
-                  "id",
-                  "cardNumber",
-                  "firstName",
-                  "lastName",
-                  "status"
-                ],
-                "additionalProperties": false
-              },
-              "bookings": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/Booking"
-                }
-              },
-              "invoices": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/Invoice"
-                }
-              }
-            },
-            "required": [
-              "member",
-              "bookings",
-              "invoices"
-            ],
-            "additionalProperties": false
-          }
-        ]
-      },
-      "Invoice": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "year": {
-            "type": "integer"
-          },
-          "number": {
-            "type": "integer"
-          },
-          "issuedOn": {
-            "type": "string"
-          },
-          "clientId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "customerName": {
-            "type": "string"
-          },
-          "customerTaxCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "customerAddress": {
-            "type": "string",
-            "nullable": true
-          },
-          "subtotalCents": {
-            "type": "integer"
-          },
-          "stampDutyCents": {
-            "type": "integer"
-          },
-          "totalCents": {
-            "type": "integer"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "emessa",
-              "pagata",
-              "annullata"
-            ]
-          },
-          "paymentMethod": {
-            "type": "string",
-            "nullable": true,
-            "enum": [
-              "contanti",
-              "pos",
-              "bonifico",
-              null
-            ]
-          },
-          "paidOn": {
-            "type": "string",
-            "nullable": true
-          },
-          "voidedOn": {
-            "type": "string",
-            "nullable": true
-          },
-          "voidReason": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "id",
-          "year",
-          "number",
-          "issuedOn",
-          "clientId",
-          "customerName",
-          "customerTaxCode",
-          "customerAddress",
-          "subtotalCents",
-          "stampDutyCents",
-          "totalCents",
-          "status",
-          "paymentMethod",
-          "paidOn",
-          "voidedOn",
-          "voidReason"
-        ],
-        "additionalProperties": false
-      },
-      "ClientCreate": {
-        "type": "object",
-        "properties": {
-          "firstName": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 80
-          },
-          "lastName": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 80
-          },
-          "phone": {
-            "type": "string",
-            "minLength": 3,
-            "maxLength": 30
-          },
-          "taxCode": {
-            "type": "string",
-            "nullable": true,
-            "maxLength": 40
-          },
-          "taxCodeConfirmed": {
-            "type": "boolean"
-          },
-          "address": {
-            "type": "string",
-            "nullable": true,
-            "maxLength": 200
-          },
-          "notes": {
-            "type": "string",
-            "nullable": true,
-            "maxLength": 600
-          },
-          "memberId": {
-            "type": "string",
-            "nullable": true,
-            "format": "uuid"
-          }
-        },
-        "required": [
-          "firstName",
-          "lastName",
-          "phone"
-        ],
-        "additionalProperties": false
-      },
-      "ClientPatch": {
-        "type": "object",
-        "properties": {
-          "firstName": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 80
-          },
-          "lastName": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 80
-          },
-          "phone": {
-            "type": "string",
-            "minLength": 3,
-            "maxLength": 30
-          },
-          "taxCode": {
-            "type": "string",
-            "nullable": true,
-            "maxLength": 40
-          },
-          "taxCodeConfirmed": {
-            "type": "boolean"
-          },
-          "address": {
-            "type": "string",
-            "nullable": true,
-            "maxLength": 200
-          },
-          "notes": {
-            "type": "string",
-            "nullable": true,
-            "maxLength": 600
-          },
-          "memberId": {
-            "type": "string",
-            "nullable": true,
-            "format": "uuid"
-          }
-        },
         "additionalProperties": false
       },
       "MemberPage": {
@@ -1123,36 +785,30 @@
                   "$ref": "#/components/schemas/MembershipFee"
                 }
               },
-              "client": {
-                "type": "object",
-                "nullable": true,
-                "properties": {
-                  "id": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "firstName": {
-                    "type": "string"
-                  },
-                  "lastName": {
-                    "type": "string"
-                  },
-                  "phone": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "id",
-                  "firstName",
-                  "lastName",
-                  "phone"
-                ],
-                "additionalProperties": false
+              "bookings": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Booking"
+                }
+              },
+              "transports": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Transport"
+                }
+              },
+              "invoices": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Invoice"
+                }
               }
             },
             "required": [
               "fees",
-              "client"
+              "bookings",
+              "transports",
+              "invoices"
             ],
             "additionalProperties": false
           }
@@ -1194,6 +850,225 @@
           "amountCents",
           "paidOn",
           "method"
+        ],
+        "additionalProperties": false
+      },
+      "Transport": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "memberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "memberName": {
+            "type": "string"
+          },
+          "memberPhone": {
+            "type": "string",
+            "nullable": true
+          },
+          "travelDate": {
+            "type": "string"
+          },
+          "departureTime": {
+            "type": "string",
+            "nullable": true
+          },
+          "appointmentTime": {
+            "type": "string",
+            "nullable": true
+          },
+          "returnTime": {
+            "type": "string",
+            "nullable": true
+          },
+          "fromAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "toAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "requestedBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "wheelchair": {
+            "type": "boolean"
+          },
+          "companion": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "richiesto",
+              "assegnato",
+              "confermato",
+              "svolto",
+              "annullato"
+            ]
+          },
+          "driverId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "driverName": {
+            "type": "string",
+            "nullable": true
+          },
+          "vehicleId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "vehiclePlate": {
+            "type": "string",
+            "nullable": true
+          },
+          "km": {
+            "type": "number",
+            "nullable": true
+          },
+          "driverNotes": {
+            "type": "string",
+            "nullable": true
+          },
+          "bookingId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id",
+          "memberId",
+          "memberName",
+          "memberPhone",
+          "travelDate",
+          "departureTime",
+          "appointmentTime",
+          "returnTime",
+          "fromAddress",
+          "toAddress",
+          "requestedBy",
+          "reason",
+          "wheelchair",
+          "companion",
+          "notes",
+          "status",
+          "driverId",
+          "driverName",
+          "vehicleId",
+          "vehiclePlate",
+          "km",
+          "driverNotes",
+          "bookingId"
+        ],
+        "additionalProperties": false
+      },
+      "Invoice": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "year": {
+            "type": "integer"
+          },
+          "number": {
+            "type": "integer"
+          },
+          "issuedOn": {
+            "type": "string"
+          },
+          "memberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "customerTaxCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "customerAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "subtotalCents": {
+            "type": "integer"
+          },
+          "stampDutyCents": {
+            "type": "integer"
+          },
+          "totalCents": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "emessa",
+              "pagata",
+              "annullata"
+            ]
+          },
+          "paymentMethod": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "contanti",
+              "pos",
+              "bonifico",
+              null
+            ]
+          },
+          "paidOn": {
+            "type": "string",
+            "nullable": true
+          },
+          "voidedOn": {
+            "type": "string",
+            "nullable": true
+          },
+          "voidReason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "year",
+          "number",
+          "issuedOn",
+          "memberId",
+          "customerName",
+          "customerTaxCode",
+          "customerAddress",
+          "subtotalCents",
+          "stampDutyCents",
+          "totalCents",
+          "status",
+          "paymentMethod",
+          "paidOn",
+          "voidedOn",
+          "voidReason"
         ],
         "additionalProperties": false
       },
@@ -1284,10 +1159,6 @@
               "pos",
               "bonifico"
             ]
-          },
-          "clientId": {
-            "type": "string",
-            "format": "uuid"
           }
         },
         "required": [
@@ -1541,7 +1412,7 @@
       "InvoiceIssue": {
         "type": "object",
         "properties": {
-          "clientId": {
+          "memberId": {
             "type": "string",
             "format": "uuid"
           },
@@ -1577,7 +1448,7 @@
           }
         },
         "required": [
-          "clientId",
+          "memberId",
           "bookingIds"
         ],
         "additionalProperties": false
@@ -1649,10 +1520,7 @@
             "type": "string",
             "nullable": true
           },
-          "memberPriceCents": {
-            "type": "integer"
-          },
-          "nonMemberPriceCents": {
+          "priceCents": {
             "type": "integer"
           },
           "active": {
@@ -1670,8 +1538,7 @@
           "name",
           "description",
           "scheduleNote",
-          "memberPriceCents",
-          "nonMemberPriceCents",
+          "priceCents",
           "active",
           "requiresTransport",
           "sortOrder"
@@ -1696,12 +1563,7 @@
             "nullable": true,
             "maxLength": 200
           },
-          "memberPriceCents": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 10000000
-          },
-          "nonMemberPriceCents": {
+          "priceCents": {
             "type": "integer",
             "minimum": 0,
             "maximum": 10000000
@@ -1720,8 +1582,7 @@
         },
         "required": [
           "name",
-          "memberPriceCents",
-          "nonMemberPriceCents"
+          "priceCents"
         ],
         "additionalProperties": false
       },
@@ -1743,12 +1604,7 @@
             "nullable": true,
             "maxLength": 200
           },
-          "memberPriceCents": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 10000000
-          },
-          "nonMemberPriceCents": {
+          "priceCents": {
             "type": "integer",
             "minimum": 0,
             "maximum": 10000000
@@ -2566,137 +2422,10 @@
           "total"
         ]
       },
-      "Transport": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "clientId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "clientName": {
-            "type": "string"
-          },
-          "clientPhone": {
-            "type": "string"
-          },
-          "travelDate": {
-            "type": "string"
-          },
-          "departureTime": {
-            "type": "string",
-            "nullable": true
-          },
-          "appointmentTime": {
-            "type": "string",
-            "nullable": true
-          },
-          "returnTime": {
-            "type": "string",
-            "nullable": true
-          },
-          "fromAddress": {
-            "type": "string",
-            "nullable": true
-          },
-          "toAddress": {
-            "type": "string",
-            "nullable": true
-          },
-          "requestedBy": {
-            "type": "string",
-            "nullable": true
-          },
-          "reason": {
-            "type": "string",
-            "nullable": true
-          },
-          "wheelchair": {
-            "type": "boolean"
-          },
-          "companion": {
-            "type": "boolean"
-          },
-          "notes": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "richiesto",
-              "assegnato",
-              "confermato",
-              "svolto",
-              "annullato"
-            ]
-          },
-          "driverId": {
-            "type": "string",
-            "nullable": true,
-            "format": "uuid"
-          },
-          "driverName": {
-            "type": "string",
-            "nullable": true
-          },
-          "vehicleId": {
-            "type": "string",
-            "nullable": true,
-            "format": "uuid"
-          },
-          "vehiclePlate": {
-            "type": "string",
-            "nullable": true
-          },
-          "km": {
-            "type": "number",
-            "nullable": true
-          },
-          "driverNotes": {
-            "type": "string",
-            "nullable": true
-          },
-          "bookingId": {
-            "type": "string",
-            "nullable": true,
-            "format": "uuid"
-          }
-        },
-        "required": [
-          "id",
-          "clientId",
-          "clientName",
-          "clientPhone",
-          "travelDate",
-          "departureTime",
-          "appointmentTime",
-          "returnTime",
-          "fromAddress",
-          "toAddress",
-          "requestedBy",
-          "reason",
-          "wheelchair",
-          "companion",
-          "notes",
-          "status",
-          "driverId",
-          "driverName",
-          "vehicleId",
-          "vehiclePlate",
-          "km",
-          "driverNotes",
-          "bookingId"
-        ],
-        "additionalProperties": false
-      },
       "TransportCreate": {
         "type": "object",
         "properties": {
-          "clientId": {
+          "memberId": {
             "type": "string",
             "format": "uuid"
           },
@@ -2757,7 +2486,7 @@
           }
         },
         "required": [
-          "clientId",
+          "memberId",
           "travelDate"
         ],
         "additionalProperties": false
@@ -3832,7 +3561,7 @@
               "format": "uuid"
             },
             "required": false,
-            "name": "clientId",
+            "name": "memberId",
             "in": "query"
           }
         ],
@@ -4376,353 +4105,6 @@
         }
       }
     },
-    "/clients": {
-      "get": {
-        "tags": [
-          "clients"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 10000,
-              "default": 1
-            },
-            "required": false,
-            "name": "page",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 50
-            },
-            "required": false,
-            "name": "pageSize",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "maxLength": 100
-            },
-            "required": false,
-            "name": "q",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Clienti",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientPage"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Dati non validi",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Non autenticato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permesso negato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "clients"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ClientCreate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Cliente creato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Client"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Dati non validi",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Non autenticato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permesso negato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflitto con lo stato attuale",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Richiede conferma o non elaborabile",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/clients/{id}": {
-      "get": {
-        "tags": [
-          "clients"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "required": true,
-            "name": "id",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Scheda cliente",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientDetail"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Dati non validi",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Non autenticato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permesso negato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Non trovato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "clients"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "required": true,
-            "name": "id",
-            "in": "path"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ClientPatch"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Cliente aggiornato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Client"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Dati non validi",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Non autenticato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permesso negato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Non trovato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflitto con lo stato attuale",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Richiede conferma o non elaborabile",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/members": {
       "get": {
         "tags": [
@@ -5049,7 +4431,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Socio con quote e cliente collegato",
+            "description": "Socio con quote e storico (prenotazioni, trasporti, fatture)",
             "content": {
               "application/json": {
                 "schema": {

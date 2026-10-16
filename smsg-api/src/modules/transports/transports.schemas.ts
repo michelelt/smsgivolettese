@@ -6,9 +6,9 @@ const status = z.enum(['richiesto', 'assegnato', 'confermato', 'svolto', 'annull
 export const Transport = z
   .strictObject({
     id: z.uuid(),
-    clientId: z.uuid(),
-    clientName: z.string(),
-    clientPhone: z.string(),
+    memberId: z.uuid(),
+    memberName: z.string(),
+    memberPhone: z.string().nullable(),
     travelDate: z.string(),
     departureTime: z.string().nullable(),
     appointmentTime: z.string().nullable(),
@@ -62,7 +62,7 @@ const returnAfterDeparture = (t: { departureTime?: string | null; returnTime?: s
 const returnMsg = { message: 'Il ritorno deve seguire la partenza' };
 
 export const TransportCreate = z
-  .strictObject({ clientId: z.uuid(), ...fields })
+  .strictObject({ memberId: z.uuid(), ...fields })
   .refine(returnAfterDeparture, returnMsg)
   .openapi('TransportCreate');
 export const TransportPatch = z

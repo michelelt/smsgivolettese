@@ -8,7 +8,7 @@ describe('transports csv (ADR-055)', () => {
       {
         travelDate: '2026-10-05',
         departureTime: '08:30',
-        clientName: 'Anna Verdi',
+        memberName: 'Anna Verdi',
         fromAddress: 'Via Roma 1',
         toAddress: 'Ospedale',
         driverName: 'Mario Rossi',

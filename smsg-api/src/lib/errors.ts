@@ -60,7 +60,6 @@ const PG_UNIQUE: Record<string, [string, string]> = {
     'FEE_ALREADY_PAID',
     "La quota di quell'anno è già registrata",
   ],
-  clients_member_id_key: ['CLIENT_ALREADY_LINKED', 'Il socio è già collegato a un altro cliente'],
   shift_types_name_key: ['SHIFT_TYPE_EXISTS', 'Esiste già un tipo di turno con questo nome'],
   vehicles_plate_key: ['VEHICLE_PLATE_EXISTS', 'Esiste già un mezzo con questa targa'],
   shift_assignments_shift_id_volunteer_id_key: [
@@ -88,7 +87,8 @@ const PG_RAISE: Record<string, [ErrorStatus, string]> = {
     'Operazione non consentita nello stato attuale del trasporto',
   ],
   TRANSPORT_NOT_COMPLETABLE: [409, 'Il trasporto non può essere completato'],
-  CLIENT_NOT_FOUND: [404, 'Cliente non trovato'],
+  MEMBER_NOT_FOUND: [404, 'Socio non trovato'],
+  MEMBER_NOT_ACTIVE: [422, 'Il socio non è attivo: riattivalo prima di prenotare'],
   VOID_REASON_REQUIRED: [400, "Indica il motivo dell'annullamento"],
   CARD_NUMBER_IMMUTABLE: [409, 'Il numero di tessera non è modificabile'],
 };

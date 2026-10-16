@@ -6,7 +6,6 @@ import { Conflict, NotFound } from '../../lib/errors.js';
 import { centsToDecimal } from '../../lib/money.js';
 import { invoicePdf } from '../../lib/pdf.js';
 import { assertTaxCode } from '../../lib/tax-code.js';
-import { saveFiscal } from '../clients/clients.repo.js';
 import * as repo from './invoices.repo.js';
 import type { InvoiceIssue, InvoicesQuery } from './invoices.schemas.js';
 
@@ -20,7 +19,7 @@ export const get = async (ctx: Ctx, id: string) => {
   return inv;
 };
 
-/** issue_invoice numbers atomically; the tax code/address typed here are kept on the client too. */
+/** issue_invoice numbers atomically; the tax code/address typed here are kept on the member by issue_invoice (the address is not). */
 export const issue = (ctx: Ctx, input: z.infer<typeof InvoiceIssue>) =>
   asUser(ctx, async (tx) => {
     const taxCode = input.customerTaxCode
@@ -28,13 +27,12 @@ export const issue = (ctx: Ctx, input: z.infer<typeof InvoiceIssue>) =>
       : null;
     const address = input.customerAddress || null;
     const id = await repo.issue(tx, {
-      clientId: input.clientId,
+      memberId: input.memberId,
       bookingIds: input.bookingIds,
       taxCode,
       address,
       method: input.paymentMethod ?? null,
     });
-    if (taxCode || address) await saveFiscal(tx, input.clientId, taxCode, address);
     return (await repo.detail(tx, id))!;
   });
 
