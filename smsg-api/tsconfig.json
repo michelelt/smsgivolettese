@@ -10,5 +10,5 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["src", "api", "scripts", "*.config.*"]
+  "include": ["src", "test", "api", "scripts", "*.config.*"]
 }
