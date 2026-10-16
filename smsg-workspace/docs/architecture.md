@@ -125,8 +125,9 @@ Web serves images with `next/image` (`remotePatterns` = Supabase Storage host). 
 Read-only: `GET /public/services`, `GET /public/site-settings` (contract ADR-044: never prices, phone or email), `GET /public/posts*` (phase 6). Write: only `/public/proposals*` (phase 6; no public booking, ADR-043): Turnstile token verified server-side, one token per call; rate limit per IP via `app.consume_rate_limit` (`proposal:<ip>`, 3 / hour). Client IP forwarded by `proxy.ts` as `x-client-ip` + `x-proxy-secret` (ADR-040). Web sets CSP (static on public pages, nonce on private ones, ADR-036), HSTS, `frame-ancestors 'none'`.
 
 ## Notifications and cron
-- On assignment (shift or transport) the service sends a Resend email after commit (failure logged, not fatal).
-- `vercel.json` cron `0 16 * * *` (UTC ≈ 17–18 Rome) → `GET /cron/daily` with `Authorization: Bearer ${CRON_SECRET}`: reminders for tomorrow's `proposto|confermato` assignments and `assegnato|confermato` transports where `reminder_sent_at is null` (set after send → idempotent), rate-limit table cleanup, orphan media cleanup.
+- On assignment, change, cancellation (shift or transport, incl. booking cancel) the service emails the volunteer after commit; refusals email active staff (failure logged, not fatal; plain `fetch` to Resend, log-only without key outside production, minimised content: ADR-057).
+- API `vercel.json` cron `0 16 * * *` (UTC ≈ 17–18 Rome) → `GET /cron/daily` with `Authorization: Bearer ${CRON_SECRET}`: one reminder per volunteer for tomorrow's `proposto|confermato` assignments and `assegnato|confermato` transports where `reminder_sent_at is null` (set after send → idempotent, ADR-058). Orphan media cleanup joins in phase 6; rate-limit purge already lives in `consume_rate_limit`.
+- Phase 5 routes: ADR-053..056.
 
 ## Environment variables (overview; each repo ships a documented `.env.example`)
 | Var | api | web | Notes |

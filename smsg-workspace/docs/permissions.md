@@ -55,7 +55,7 @@ Notes: `org_settings` is read by `issue_invoice`/receipts internally (definer), 
 | Route under `/gestione` | Min role |
 |---|---|
 | `/` (dashboard by role; volunteer = "I miei impegni"), `/disponibilita` (own grid; staff see all) | volontario |
-| `prenotazioni`, `utenti`, `soci`, `fatture`, `bacheca`, `servizi`, `sito` (Info del sito), `turni`, `trasporti`, `volontari` | staff |
+| `prenotazioni`, `utenti`, `soci`, `fatture`, `bacheca`, `servizi`, `sito` (Info del sito), `turni`, `trasporti`, `volontari`, `mezzi` (ADR-059) | staff |
 | `impostazioni`, `utenti-e-ruoli`, `registro-attivita` | super_admin |
 Navigation hides what the role cannot do; the API is the enforcement point.
 
