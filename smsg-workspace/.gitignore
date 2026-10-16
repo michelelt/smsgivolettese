@@ -2,6 +2,8 @@ secrets.env
 .env
 .env.*
 !.env.example
+supabase/.temp
+supabase/.branches
 
 # Claude Code: never versioned
 .claude/

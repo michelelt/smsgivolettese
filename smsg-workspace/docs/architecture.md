@@ -75,7 +75,7 @@ Web serves images with `next/image` (`remotePatterns` = Supabase Storage host). 
 ## OpenAPI contract flow
 - Routes defined with `@hono/zod-openapi`; `GET /openapi.json` served by the API; `info.version` semver.
 - `pnpm openapi:export` writes `openapi.json` (committed). API CI: (a) regenerate and `git diff --exit-code`; (b) `oasdiff breaking` against `main`'s `openapi.json` — breaking changes fail unless the major version is bumped.
-- Web: `pnpm gen:api` → `openapi-typescript ${OPENAPI_URL:-http://localhost:3001/openapi.json} -o lib/api/schema.d.ts` (committed); `make gen-api` runs it. Web CI typechecks against the committed file.
+- Web: `pnpm gen:api` → `openapi-typescript ${OPENAPI_URL:-http://localhost:3001/openapi.json} -o lib/api/schema.d.ts` (committed); `make gen-api` exports `api/openapi.json` first and passes it as `OPENAPI_URL` (ADR-033). Web CI typechecks against the committed file.
 - Rule: ship API changes backward-compatible (add, then remove after web is deployed); then deploy order between repos does not matter.
 
 ## ISR revalidation

@@ -120,3 +120,29 @@ Consequences: needs confirmation by the association's privacy officer (open ques
 ### ADR-027 Local secrets file and super admin password
 Decision: workspace `secrets.env` (git-ignored, `chmod 600`, template `secrets.env.example`) holds `SUPERADMIN_EMAIL`, `SUPERADMIN_PASSWORD`, `SUPABASE_DB_PASSWORD_{STAGING,PROD}`; Makefile sources it. The super admin password from the file is set only when the account is created; afterwards only the super admin can change it (self-service with reauthentication). Claude Code is denied reading the file.
 Consequences: the file password goes stale after the first change (expected); a forgotten password is reset from the Supabase dashboard; CI keeps using GitHub secrets.
+
+### ADR-028 Submodules created in place with relative URLs
+Context: no remotes may be added or pushed; a fresh clone must work once the owner pushes.
+Decision: `git init -b main` inside `api/` and `web/`, commit, then `git submodule add ../smsg-api api` / `../smsg-web web` (git adopts the existing repo; no clone, no remote). `.gitmodules` URLs are relative, so they resolve against the workspace's GitHub URL once pushed (all three repos under the same owner, named `smsg-api`, `smsg-web`).
+Consequences: zero remote config now; the owner must push api/web before the workspace (pinned SHAs must exist); a local fresh-clone test needs `git -c submodule.api.url=<abs>/api ...` overrides.
+
+### ADR-029 Default branch `main` everywhere
+Decision: new repos `git init -b main`; workspace renamed locally `git branch -m master main` (safe: no remote). API `staging` branch created in the phase that needs it.
+Consequences: matches CI triggers (`main` = production) and ADR-017.
+
+### ADR-030 `make dev` process runner
+Decision: `pnpm dlx concurrently@<exact 9.x> -k -n api,web -c blue,magenta "pnpm -C api dev" "pnpm -C web dev"`; no workspace package.json.
+Consequences: prefixed coloured output and Ctrl+C/kill-others for free; first run downloads the tool (cached afterwards).
+
+### ADR-031 Toolchain and local API entrypoint
+Decision: Node 24 (`.nvmrc`, `engines`), `packageManager: pnpm@12.9.1` in each repo, caret ranges + committed lockfile, CI `--frozen-lockfile`. Latest stable majors at scaffold time: Next 16, React 19, Tailwind 4 (`@tailwindcss/postcss`, tokens via `@theme`), Hono 4 + `@hono/zod-openapi` + Zod 4, Vitest, TypeScript strict, ESLint 9 flat config (`eslint` CLI; `next lint` is gone in 16) + Prettier. API: `api/index.ts` (Vercel) and `src/server.ts` (local only, `@hono/node-server` on :3001, run with `tsx watch`) both import `src/app.ts`. No `vercel dev`.
+Consequences: no Vercel login for local dev; confirm in phase 8 that Vercel's build image supports pnpm 12 (else pin the newest supported major).
+
+### ADR-032 Local env files
+Decision: `make setup` copies each repo's `.env.example` → `.env.local` only if missing (hand-edited). `make dev`, after `supabase start` (run in `api/`), regenerates `.env.development.local` in api and web from `supabase status -o env` (Supabase URL, keys, DB URL only; mapped to our names). Next loads it natively with precedence over `.env.local`; API loads both via `node --env-file-if-exists` (generated first, then `.env.local`). Supabase CLI config lives only in `api/supabase/`; workspace root `supabase/` (CLI link cache only) is deleted.
+Consequences: local keys are never typed by hand or committed; both env files git-ignored.
+
+### ADR-033 OpenAPI generation from the exported file
+Context: `make dev` must regenerate the web client before the API is running.
+Decision: `pnpm -C api openapi:export` writes `api/openapi.json` by importing the app (no server); `make gen-api` = export, then `OPENAPI_URL=../api/openapi.json pnpm -C web gen:api`.
+Consequences: no start-up race; web CI still uses the committed `schema.d.ts`.
