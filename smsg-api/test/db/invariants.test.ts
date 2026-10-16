@@ -514,70 +514,40 @@ describe('last super admin', () => {
 });
 
 describe('public functions', () => {
-  const book = (day: string, svc = 'fa000000-0000-4000-8000-000000000001', member = 'false') =>
-    `select submit_public_booking('Zed', 'Client', '333 111 2222', '${svc}', ${day}, 'mattina', ${member})`;
-  const futureDay =
-    "(select d from generate_series(current_date + 1, current_date + 8, '1 day') d where extract(isodow from d) <> 7 limit 1)::date";
-  const sunday =
-    "(select d from generate_series(current_date + 1, current_date + 8, '1 day') d where extract(isodow from d) = 7)::date";
-  it('anon booking attaches to existing client, snapshots price, validates inputs', async () => {
+  it('anon cannot read price columns or call the dropped booking function', async () => {
     await rolledBack(async (tx) => {
       await world(tx);
       await actAs(tx, 'anon');
-      expect(await err(tx, book(futureDay))).toBe('OK');
-      expect(await err(tx, book(futureDay, 'fa000000-0000-4000-8000-000000000001', 'true'))).toBe(
-        'OK',
-      );
-      expect(await err(tx, book('current_date'))).toMatch(/INVALID_DAY/);
-      expect(await err(tx, book('current_date + 90'))).toMatch(/INVALID_DAY/);
-      expect(await err(tx, book(sunday))).toMatch(/INVALID_DAY/);
-      expect(await err(tx, book(futureDay, 'fa000000-0000-4000-8000-000000000002'))).toMatch(
-        /SERVICE_NOT_BOOKABLE/,
-      );
-      await reset(tx);
-      const rows =
-        await tx`select client_id, price_applied_cents, status, origin from bookings where client_id = ${CLIENT} order by price_applied_cents`;
-      expect(rows.map((r) => r.price_applied_cents)).toEqual([0, 300, 300]);
-      expect(rows.at(-1)).toMatchObject({ status: 'attesa', origin: 'online' }); // fixture booking is 'eseguita'
-      expect(
-        (await tx`select count(*)::int as n from clients where phone_normalized = '3331112222'`)[0]!
-          .n,
-      ).toBe(1);
+      expect(await err(tx, 'select member_price_cents from services')).toMatch(/^42501/);
+      expect(await err(tx, 'select non_member_price_cents from services')).toMatch(/^42501/);
+      expect(await err(tx, 'select * from services')).toMatch(/^42501/);
+      expect(await err(tx, 'select id, name, schedule_note from services')).toBe('OK');
+      expect(await err(tx, 'select submit_public_booking()')).toMatch(/^42883/);
     });
   });
-  it('booking edge days, notes limit; existing client attached and not updated', async () => {
-    await rolledBack(async (tx) => {
-      await world(tx);
-      const before =
-        await tx`select first_name, last_name, phone, address from clients where id = ${CLIENT}`;
-      const [c] =
-        await tx`select phone_normalized as p, last_name as l from clients where id = ${CLIENT}`;
-      await actAs(tx, 'anon');
-      const q = (day: string, notes = 'null') =>
-        `select submit_public_booking('Altro', '${c!.l}', '${c!.p}', 'fa000000-0000-4000-8000-000000000001', ${day}, 'mattina', false, ${notes})`;
-      expect(await err(tx, q('current_date + 61'))).toMatch(/INVALID_DAY/);
-      expect(await err(tx, q('current_date'))).toMatch(/INVALID_DAY/);
-      expect(await err(tx, q(futureDay, `'${'x'.repeat(601)}'`))).toMatch(/INVALID_INPUT/);
-      expect(await err(tx, q(futureDay, `'${'x'.repeat(600)}'`))).toBe('OK');
-      await reset(tx);
-      expect(
-        await tx`select first_name, last_name, phone, address from clients where id = ${CLIENT}`,
-      ).toEqual(before);
-      expect(
-        (await tx`select count(*)::int n from clients where phone_normalized = ${c!.p}`)[0]!.n,
-      ).toBe(1);
+  describe('bookings_create_transport', () => {
+    const ins = (svc: string) =>
+      `insert into bookings (client_id, service_id, day, slot, declared_member, price_applied_cents, origin) values ('${CLIENT}', '${svc}', current_date + 1, 'mattina', false, 0, 'telefono') returning id`;
+    it('staff booking for a transport service creates exactly one richiesto transport', async () => {
+      await rolledBack(async (tx) => {
+        await world(tx);
+        await tx`update services set requires_transport = true where id = 'fa000000-0000-4000-8000-000000000001'`;
+        await actAs(tx, 'staff');
+        const [r] = await tx.unsafe(ins('fa000000-0000-4000-8000-000000000001'));
+        const t =
+          await tx`select status, client_id, driver_volunteer_id, travel_date = current_date + 1 as d from transports where booking_id = ${r!.id}`;
+        expect(t).toEqual([
+          { status: 'richiesto', client_id: CLIENT, driver_volunteer_id: null, d: true },
+        ]);
+      });
     });
-  });
-  it('booking a transport service creates a richiesto transport', async () => {
-    await rolledBack(async (tx) => {
-      await world(tx);
-      await tx`update services set requires_transport = true where id = 'fa000000-0000-4000-8000-000000000001'`;
-      await actAs(tx, 'anon');
-      const [r] = await tx.unsafe(book(futureDay));
-      await reset(tx);
-      const t =
-        await tx`select status, driver_volunteer_id, from_address from transports where booking_id = ${Object.values(r!)[0] as string}`;
-      expect(t).toEqual([{ status: 'richiesto', driver_volunteer_id: null, from_address: null }]);
+    it('non-transport service creates none', async () => {
+      await rolledBack(async (tx) => {
+        await world(tx);
+        await actAs(tx, 'staff');
+        const [r] = await tx.unsafe(ins('fa000000-0000-4000-8000-000000000001'));
+        expect(await tx`select 1 from transports where booking_id = ${r!.id}`).toEqual([]);
+      });
     });
   });
   it('anon proposal submission works; direct insert is denied', async () => {

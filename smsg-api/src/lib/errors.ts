@@ -58,8 +58,6 @@ const PG_RAISE: Record<string, [ErrorStatus, string]> = {
   INVOICE_NOT_VOIDABLE: [409, 'La fattura non può essere annullata'],
   INVOICE_IMMUTABLE: [409, 'La fattura emessa non è modificabile'],
   COUNTER_BELOW_MAX: [409, 'Il contatore non può essere inferiore al numero più alto già emesso'],
-  INVALID_DAY: [422, 'Giorno non valido'],
-  SERVICE_NOT_BOOKABLE: [422, 'Il servizio non è prenotabile'],
   INVALID_INPUT: [400, 'Dati non validi'],
   ASSIGNMENT_NOT_FOUND: [404, 'Assegnazione non trovata'],
   TRANSPORT_NOT_FOUND: [404, 'Trasporto non trovato'],

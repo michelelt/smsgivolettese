@@ -42,7 +42,7 @@ app.openAPIRegistry.registerComponent('securitySchemes', 'bearerAuth', {
 
 app.doc('/openapi.json', {
   openapi: '3.1.0',
-  info: { title: 'SMS Givolettese API', version: '0.1.0' },
+  info: { title: 'SMS Givolettese API', version: '1.0.0' },
 });
 
 const body = (code: string, message: string, details?: unknown) => ({

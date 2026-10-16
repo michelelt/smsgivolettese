@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "SMS Givolettese API",
-    "version": "0.1.0"
+    "version": "1.0.0"
   },
   "components": {
     "securitySchemes": {
@@ -130,39 +130,25 @@
                             "type": "string",
                             "nullable": true
                           },
-                          "memberPriceCents": {
-                            "type": "integer"
-                          },
-                          "nonMemberPriceCents": {
-                            "type": "integer"
-                          },
                           "scheduleNote": {
                             "type": "string",
                             "nullable": true
-                          },
-                          "bookable": {
-                            "type": "boolean"
-                          },
-                          "requiresTransport": {
-                            "type": "boolean"
                           }
                         },
                         "required": [
                           "id",
                           "name",
                           "description",
-                          "memberPriceCents",
-                          "nonMemberPriceCents",
-                          "scheduleNote",
-                          "bookable",
-                          "requiresTransport"
-                        ]
+                          "scheduleNote"
+                        ],
+                        "additionalProperties": false
                       }
                     }
                   },
                   "required": [
                     "items"
-                  ]
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -183,19 +169,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "phone": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "email": {
-                      "type": "string",
-                      "nullable": true
-                    },
                     "address": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "openingHours": {
                       "type": "string",
                       "nullable": true
                     },
@@ -207,122 +181,77 @@
                       "type": "string",
                       "nullable": true
                     },
-                    "membershipInfo": {
+                    "vatNumber": {
                       "type": "string",
                       "nullable": true
+                    },
+                    "conventions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "title": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "url": {
+                            "type": "string",
+                            "maxLength": 500,
+                            "format": "uri"
+                          }
+                        },
+                        "required": [
+                          "title",
+                          "description"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "footerLinks": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "group": {
+                            "type": "string",
+                            "enum": [
+                              "associazioni",
+                              "mutuo_soccorso",
+                              "utili"
+                            ]
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "url": {
+                            "type": "string",
+                            "maxLength": 500,
+                            "format": "uri"
+                          }
+                        },
+                        "required": [
+                          "group",
+                          "label",
+                          "url"
+                        ],
+                        "additionalProperties": false
+                      }
                     }
                   },
                   "required": [
-                    "phone",
-                    "email",
                     "address",
-                    "openingHours",
                     "slogan",
                     "homeIntro",
-                    "membershipInfo"
-                  ]
+                    "vatNumber",
+                    "conventions",
+                    "footerLinks"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/public/bookings": {
-      "post": {
-        "tags": [
-          "public"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "serviceId": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "day": {
-                    "type": "string",
-                    "format": "date"
-                  },
-                  "slot": {
-                    "type": "string",
-                    "enum": [
-                      "mattina",
-                      "pomeriggio"
-                    ]
-                  },
-                  "firstName": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 100
-                  },
-                  "lastName": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 100
-                  },
-                  "phone": {
-                    "type": "string",
-                    "maxLength": 30
-                  },
-                  "declaredMember": {
-                    "type": "boolean"
-                  },
-                  "notes": {
-                    "type": "string",
-                    "maxLength": 600
-                  },
-                  "turnstileToken": {
-                    "type": "string",
-                    "maxLength": 4096
-                  }
-                },
-                "required": [
-                  "serviceId",
-                  "day",
-                  "slot",
-                  "firstName",
-                  "lastName",
-                  "phone",
-                  "declaredMember",
-                  "turnstileToken"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Prenotazione creata",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "format": "uuid"
-                    }
-                  },
-                  "required": [
-                    "id"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "VALIDATION_ERROR o TURNSTILE_FAILED"
-          },
-          "422": {
-            "description": "INVALID_DAY o SERVICE_NOT_BOOKABLE"
-          },
-          "429": {
-            "description": "RATE_LIMITED"
           }
         }
       }

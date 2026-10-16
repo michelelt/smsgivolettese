@@ -13,7 +13,6 @@ export const PERMISSIONS = {
   'services.read_public': A,
   'posts.read_public': A,
   'site_settings.read': A,
-  'bookings.submit_public': A,
   'proposals.submit_public': A,
   'me.read': V,
   'profile.write_own': V,
