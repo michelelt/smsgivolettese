@@ -28,7 +28,7 @@ async function run<T>(
 
 export const db = {
   asUser: <T>(claims: Claims, fn: (tx: Tx) => Promise<T>, requestId?: string) =>
-    run('authenticated', { role: 'authenticated', ...claims }, requestId, fn),
+    run('authenticated', { ...claims, role: 'authenticated' }, requestId, fn),
   asAnon: <T>(fn: (tx: Tx) => Promise<T>, requestId?: string) =>
     run('anon', { role: 'anon' }, requestId, fn),
   // No app_role claim: app.has_role() is false. Only cron, invites, bootstrap, rate limiting.

@@ -1,4 +1,4 @@
-import { verifyWithJwks } from 'hono/jwt';
+import { createRemoteJWKSet, jwtVerify } from 'jose';
 import { createMiddleware } from 'hono/factory';
 import { env } from '../config/env.js';
 import { Forbidden, Unauthorized } from '../lib/errors.js';
@@ -7,6 +7,9 @@ import { can, isAppRole, type Action, type AppRole } from './permissions.js';
 export type AuthUser = { id: string; role: AppRole | null };
 export type AuthEnv = { Variables: { user: AuthUser | null } };
 
+// Cached across requests (jose refetches only on unknown kid, with a cooldown).
+let jwks: ReturnType<typeof createRemoteJWKSet> | undefined;
+
 /** Verifies the bearer token against the Supabase JWKS. Anonymous (no header) -> user null. */
 export const authenticate = createMiddleware<AuthEnv>(async (c, next) => {
   const m = /^Bearer (.+)$/.exec(c.req.header('authorization') ?? '');
@@ -14,10 +17,11 @@ export const authenticate = createMiddleware<AuthEnv>(async (c, next) => {
   if (m) {
     if (!env.SUPABASE_URL) throw new Error('SUPABASE_URL is not set');
     try {
-      const p = await verifyWithJwks(m[1]!, {
-        jwks_uri: `${env.SUPABASE_URL}/auth/v1/.well-known/jwks.json`,
-        allowedAlgorithms: ['ES256', 'RS256'],
-        verification: { iss: `${env.SUPABASE_URL}/auth/v1`, aud: 'authenticated' },
+      jwks ??= createRemoteJWKSet(new URL(`${env.SUPABASE_URL}/auth/v1/.well-known/jwks.json`));
+      const { payload: p } = await jwtVerify(m[1]!, jwks, {
+        algorithms: ['ES256', 'RS256'],
+        issuer: `${env.SUPABASE_URL}/auth/v1`,
+        audience: 'authenticated',
       });
       if (typeof p.sub !== 'string') throw new Error('no sub');
       user = { id: p.sub, role: isAppRole(p.app_role) ? p.app_role : null };

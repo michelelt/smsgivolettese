@@ -12,7 +12,9 @@
     "build": "tsc --noEmit",
     "lint": "eslint . && prettier --check .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "pnpm test:unit && pnpm test:db",
+    "test:unit": "vitest run src",
+    "test:db": "vitest run test",
     "openapi:export": "tsx scripts/export-openapi.ts",
     "superadmin": "tsx --env-file-if-exists=.env.development.local --env-file-if-exists=.env.local scripts/bootstrap-superadmin.ts"
   },
@@ -21,6 +23,7 @@
     "@hono/zod-openapi": "^1.6.3",
     "@supabase/supabase-js": "^2.117.3",
     "hono": "^4.13.13",
+    "jose": "^6.2.12",
     "postgres": "^3.4.9",
     "zod": "^4.6.7"
   },
