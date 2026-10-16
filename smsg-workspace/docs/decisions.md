@@ -26,7 +26,7 @@ Consequences: race-free (a trigger-only check races under READ COMMITTED; a matv
 Decision: `user_roles.user_id` is the PK; `app_role` enum ordered `volontario < staff < super_admin`; `permissions.ts` maps action → minimum role; SQL `app.has_role(min)` mirrors it.
 Consequences: hierarchy is trivial to check in TS and SQL; an action that is not monotonic in the hierarchy would need a different model (none today).
 
-### ADR-006 Public writes through definer functions; client matching
+### ADR-006 Public writes through definer functions; client matching (booking part superseded by ADR-043)
 Context: no account for public users; anon must not get table insert rights.
 Decision: `submit_public_booking` / `submit_post_proposal` (granted to anon) called by the API after Turnstile + rate limit. Booking attaches to an existing client by normalised phone + last name, never updating that client; otherwise creates one.
 Consequences: no anonymous overwrites; possible duplicates are fixed by staff (merge not in scope).
@@ -99,7 +99,7 @@ Consequences: none functional; update brief references mentally.
 Decision: BlockNote in the editor; content stored as BlockNote JSON; custom blocks for gallery, video embed, button, divider where BlockNote lacks them; Zod whitelist on write; small own server renderer (switch per block type → React + `next/image`), not BlockNote's HTML export.
 Consequences: full control over accessibility/images; renderer must be extended when a block type is added.
 
-### ADR-023 Prototype features dropped
+### ADR-023 Prototype features dropped (moot for bookings since ADR-043)
 Context: prototype shows "Le mie prenotazioni", self-cancel and "Le sue proposte", which require an identity; brief says no account for the public.
 Decision: not implemented; success screens tell people they will be called back; cancellations by phone.
 Consequences: simpler public flow; no public personal data exposure.
@@ -169,23 +169,36 @@ Consequences: ISR kept; the nonce intent is kept where sessions and personal dat
 Decision: A/A+/A++ stored in `localStorage["text-size"]` (`m|l|xl`); a fixed inline script in the root layout `<head>` sets `document.documentElement.dataset.textSize` before paint; CSS sizes `html` from that attribute (default 19px). Script text is one exported constant; its sha256 goes into the private CSP (ADR-036).
 Consequences: pages stay static (no cookie read); no flash; per device, which is what elderly users expect.
 
-### ADR-038 Home "prossimi appuntamenti" deferred to phase 6
+### ADR-038 Home "prossimi appuntamenti" deferred to phase 6 (superseded by ADR-043)
 Decision: phase 3 home has no appointments block (no placeholder); phase 6 adds it from published posts (`evento`, `event_date >= today`). Services' `schedule_note` stays on service cards only.
 Consequences: no throwaway data source; home = intro, services, "Prenotare in tre passi", phone.
 
-### ADR-039 Public API contract (phase 3)
+### ADR-039 Public API contract (phase 3) (superseded by ADR-044)
 Decision: JSON fields camelCase. `GET /public/services` → `{ items: [{ id, name, description, memberPriceCents, nonMemberPriceCents, scheduleNote, bookable, requiresTransport }] }` (active, by `sort_order, name`). `GET /public/site-settings` → `{ phone, email, address, openingHours, slogan, homeIntro, membershipInfo }`. `POST /public/bookings` body `{ serviceId, day (YYYY-MM-DD), slot (mattina|pomeriggio), firstName, lastName, phone, declaredMember, notes? (≤ 600), turnstileToken }` → 201 `{ id }`. No tax code online (collected by staff at invoicing) and no consent checkbox (art. 6.1.b GDPR: a short notice with a link to `/privacy` above the confirm button). Phone: strip spaces `.-/()`, drop `+39`/`0039`, then must match `^(0\d{5,10}|3\d{8,9})$`; the API passes the normalised national form so client matching works. Order: Zod → rate limit → Turnstile → `submit_public_booking`. Errors: 400 `VALIDATION_ERROR`, 400 `TURNSTILE_FAILED` (also for an empty token, without calling Cloudflare), 429 `RATE_LIMITED`, 422 `INVALID_DAY` / `SERVICE_NOT_BOOKABLE`.
 Consequences: the rate limit counts failed attempts too; the Turnstile failure e2e blanks the token via `page.route`.
 
-### ADR-040 Client IP through the web proxy
+### ADR-040 Client IP through the web proxy (rate key amended by ADR-043)
 Context: on Vercel the API sees the web deployment, not the browser, behind the external rewrite.
 Decision: `proxy.ts` also matches `/api/public/:path*` and does `NextResponse.rewrite(API_URL + path, { request: { headers } })` with `x-client-ip` = first `x-forwarded-for` entry (else `x-real-ip`, else `local`) and `x-proxy-secret: API_PROXY_SECRET` (both overwrite incoming values). The API trusts `x-client-ip` only with a constant-time-equal secret; otherwise it uses `x-real-ip`, first `x-forwarded-for`, else `local`. Rate key `booking:<ip>`, 5 per 600 s.
 Consequences: one new secret in both repos; direct API callers cannot spoof the IP; locally all requests may share one bucket (tests clear `rate_limit_hits` first).
 
-### ADR-041 Booking days: no capacity model
+### ADR-041 Booking days: no capacity model (superseded by ADR-043)
 Decision: the wizard offers the next 12 non-Sunday days from tomorrow (Europe/Rome) as in the prototype; the DB allows tomorrow..+60, no Sunday. No capacity, holidays or closed days: staff confirm the time by phone.
 Consequences: overbooking is handled by staff calling back; a closed-days list can be added later if staff ask.
 
 ### ADR-042 PWA without service worker
 Decision: `public/manifest.webmanifest` (name, short_name, `start_url: "/"` (user choice: public visitors may install it too; volunteers reach `/gestione` from the menu), `scope: "/"`, `display: standalone`, brand colours) + 192/512 and maskable icons + apple-touch-icon. No service worker, no offline cache.
 Consequences: installable on phones for volunteers; never serves stale bookings/shifts; no SW update bugs to maintain.
+
+### ADR-043 Public site is a showcase; bookings are staff-only
+Context: owner requirement 2026-10-16 (overrides brief "Sito pubblico" and phase 3 as shipped): site modelled on sms-sangilliese.org; no public element may point to phone calls or price lists; all bookings entered by staff.
+Decision: remove `POST /public/bookings`, the `/prenota` wizard and the phone bar; a new migration drops `submit_public_booking` (drop, not revoke: no caller left). Transport auto-creation moves to an AFTER INSERT trigger `bookings_create_transport` on `bookings` (security invoker: staff already have I on `transports`) that inserts a `richiesto` transport (`booking_id`, `client_id`, `travel_date = day`) when the service `requires_transport`; phase 4 staff bookings are plain inserts. `services.bookable` dropped (no wizard). Enum value `booking_origin.online` kept unused (dropping enum values is costly).
+Menu: Home, Chi siamo, Servizi, Convenzioni, Dove siamo (+ Privacy in footer); Eventi e novità (`/notizie`) and Galleria appear in phase 6, hidden until then with no placeholders. Phase 3 home = intro (slogan + `home_intro`, e.g. art. 1 law 3818/1886), link to Servizi, Dove siamo address. Phase 6 home adds upcoming events, link to all news, gallery carousel; Galleria = cover images of published posts linking to the post (no new table).
+Kept for "Proponi una notizia" (phase 6): Turnstile web component, API `turnstile`, client-IP (ADR-040) and rate-limit libs, Turnstile in the public CSP; rate key becomes `proposal:<ip>`, 3 per 3600 s. PWA `start_url` stays `/`. Text size and accessibility goals unchanged.
+Supersedes ADR-038, ADR-041, the booking part of ADR-006 and ADR-023; ADR-015 nullable times/addresses now serve staff-created `richiesto` transports.
+Consequences: no anonymous write path until phase 6; staff must enter every booking (by phone or at the desk).
+
+### ADR-044 Public content and API contract without prices or contacts
+Decision: prices stay in `services.member_price_cents/non_member_price_cents` (staff, invoices) but anon gets column-level select only on `services (id, name, description, schedule_note, sort_order, active)`, so price leaks fail in the DB too. `site_settings` drops `phone`, `email`, `opening_hours`, `membership_info` (no public consumer; avoids a quota price on the site) and adds `vat_number text`, `conventions jsonb not null default '[]'` (`[{ title, description, url? }]`) and `footer_links jsonb not null default '[]'` (`[{ group: associazioni|mutuo_soccorso|utili, label, url }]`), both `check (jsonb_typeof(..) = 'array')`, items validated by Zod on write (https URLs only). Smallest option: no new tables; ADR-007 "whole row is public" stays true.
+Contract (supersedes ADR-039): `GET /public/services` → `{ items: [{ id, name, description, scheduleNote }] }`; `GET /public/site-settings` → `{ address, slogan, homeIntro, vatNumber, conventions, footerLinks }`; strict Zod response schemas. Major `info.version` bump (ADR-018).
+Consequences: Convenzioni and footer lists are edited by staff in "site info" (phase 4), seeded until then; downloadable per-service PDFs (reference site) are out of scope until asked.

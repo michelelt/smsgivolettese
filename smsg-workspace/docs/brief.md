@@ -203,6 +203,8 @@ smsg-web/
 
 ### Sito pubblico (priorità: accessibilità)
 
+> **Aggiornamento 2026-10-16 (prevale su questa sezione):** il sito pubblico è solo vetrina, sul modello di sms-sangilliese.org. Niente prenotazione online, niente telefono/email, niente prezzi; le prenotazioni le inserisce solo lo staff in gestione. Resta "Proponi una notizia". Dettagli: `docs/decisions.md` ADR-043 e ADR-044.
+
 Ricalca il prototipo:
 - colori sociali **bordeaux `#7A1E2C`, bianco, blu `#1F3F7A`**;
 - testo base 19px e pulsanti per ingrandirlo (A / A+ / A++), con la scelta ricordata;

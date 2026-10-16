@@ -22,7 +22,6 @@ export const can = (role: AppRole | null, action: Action) => rank(role) >= rank(
 | Action | anon | vol. | staff | s.admin | Min |
 |---|---|---|---|---|---|
 | `services.read_public`, `posts.read_public`, `site_settings.read` | ✔ | ✔ | ✔ | ✔ | anon |
-| `bookings.submit_public` (Turnstile + rate limit) | ✔ | ✔ | ✔ | ✔ | anon |
 | `proposals.submit_public` (Turnstile + rate limit) | ✔ | ✔ | ✔ | ✔ | anon |
 | `me.read`, `profile.write_own` (phone) | – | own | own | own | volontario |
 | `availability.read_own`, `availability.write_own` | – | own | own | own | volontario |
@@ -77,8 +76,8 @@ API queries run as `authenticated`/`anon` with the caller's JWT claims (ADR-002)
 | `transports` | – | – (use view) | S/I/U (no D; cancel = `annullato`) | |
 | `volunteer_transports_v` (view) | – | S (filtered in view) | – | |
 | `clients` | – | – | S/I/U | |
-| `services` | S `active` | S `active` | S/I/U/D | |
-| `bookings` | – | – | S/I/U (no D; cancel = status) | |
+| `services` | S `active`, columns without prices only (column grant, ADR-044) | S `active` | S/I/U/D | |
+| `bookings` | – | – | S/I/U (no D; cancel = status; only write path, ADR-043) | |
 | `members` | – | – | S/U (I via `register_member`) | |
 | `membership_fees` | – | – | S/I/U | D |
 | `invoices` | – | – | S/U (trigger restricts columns; I via `issue_invoice`) | |

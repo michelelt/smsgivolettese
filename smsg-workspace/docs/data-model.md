@@ -56,7 +56,7 @@ erDiagram
   volunteer_commitments { uuid id PK uuid volunteer_id FK tstzrange period uuid shift_assignment_id FK uuid transport_id FK }
   transports { uuid id PK uuid client_id FK date travel_date timestamptz departure_at uuid driver_volunteer_id FK uuid vehicle_id FK transport_status status uuid booking_id FK }
   clients { uuid id PK text first_name text last_name text phone text tax_code uuid member_id FK }
-  services { uuid id PK text name int member_price_cents int non_member_price_cents bool bookable bool requires_transport }
+  services { uuid id PK text name int member_price_cents int non_member_price_cents bool requires_transport }
   bookings { uuid id PK uuid client_id FK uuid service_id FK date day booking_slot slot booking_status status uuid invoice_id FK }
   members { uuid id PK int card_number UK text tax_code UK member_status status }
   membership_fees { uuid id PK uuid member_id FK int year int amount_cents }
@@ -127,16 +127,17 @@ Checks:
 - `return_at is null or return_at > departure_at`
 Indexes `(travel_date)`, `(driver_volunteer_id, travel_date)`.
 Busy period (ADR-015): `tstzrange(departure_at, coalesce(return_at, appointment_at + interval '1 hour', departure_at + interval '2 hours'), '[)')`.
-A public booking for a service with `requires_transport` creates a `richiesto` row with null addresses/times; staff completes it.
+Trigger `bookings_create_transport` (AFTER INSERT on `bookings`, security invoker, ADR-043): when the service `requires_transport`, inserts a `richiesto` row (`booking_id`, `client_id`, `travel_date = day`) with null addresses/times; staff completes it.
+The trigger fires on insert only: staff reconcile the transport when a booking's service/day changes or is cancelled (phase 4 may add an update branch).
 
 **volunteer_transports_v** (view, minimisation — `permissions.md`): `id, travel_date, departure_at, appointment_at, return_at, from_address, to_address, wheelchair, companion, status, km, driver_notes, client_first_name, client_last_name, client_phone, vehicle_plate, vehicle_model` filtered `driver_volunteer_id = auth.uid() and status in ('assegnato','confermato','svolto')`.
 
 ### Bookings, clients, services
 **clients** — `first_name text not null`, `last_name text not null`, `phone text not null`, `phone_normalized text generated always as (regexp_replace(phone,'\D','','g')) stored`, `tax_code text check (tax_code ~ '^[A-Z0-9]{16}$')`, `address text`, `notes text`, `member_id uuid unique FK members`, `anonymized_at timestamptz`, timestamps. Indexes `(phone_normalized)`, `(lower(last_name))`, `(tax_code)`.
 
-**services** — `name text not null`, `description text`, `member_price_cents int not null check (>= 0)`, `non_member_price_cents int not null check (>= 0)`, `schedule_note text` ("quando", e.g. "martedì mattina"), `active bool default true` (shown on site), `bookable bool default true` (offered in the online wizard), `requires_transport bool default false`, `sort_order int default 99`.
+**services** — `name text not null`, `description text`, `member_price_cents int not null check (>= 0)`, `non_member_price_cents int not null check (>= 0)` (staff/invoices only; anon has no column grant, ADR-044), `schedule_note text` ("quando", e.g. "martedì mattina"), `active bool default true` (shown on site, offered in the staff booking form), `requires_transport bool default false`, `sort_order int default 99`. (`bookable` dropped, ADR-043.)
 
-**bookings** — `client_id uuid not null FK`, `service_id uuid not null FK`, `day date not null`, `slot booking_slot not null`, `time time` (set on confirmation), `declared_member bool not null` (wizard "È socio?"), `price_applied_cents int not null` (snapshot at creation), `origin booking_origin not null`, `status booking_status not null default 'attesa'` (`telefono` bookings start `confermata`), `notes text`, `invoice_id uuid FK invoices` (current non-void invoice; cleared on void), `executed_at timestamptz`, `cancelled_by text check in ('staff','utente')`, `created_by uuid FK profiles` (null for online), timestamps. `check (invoice_id is null or status = 'eseguita')`. Indexes `(day)`, `(client_id)`, partial `(status) where status in ('attesa','confermata')`.
+**bookings** — `client_id uuid not null FK`, `service_id uuid not null FK`, `day date not null`, `slot booking_slot not null`, `time time` (set on confirmation), `declared_member bool not null` (set by staff), `price_applied_cents int not null` (snapshot at creation), `origin booking_origin not null` (`online` unused since ADR-043), `status booking_status not null default 'attesa'` (`telefono` bookings start `confermata`), `notes text`, `invoice_id uuid FK invoices` (current non-void invoice; cleared on void), `executed_at timestamptz`, `cancelled_by text check in ('staff','utente')`, `created_by uuid FK profiles`, timestamps. `check (invoice_id is null or status = 'eseguita')`. Indexes `(day)`, `(client_id)`, partial `(status) where status in ('attesa','confermata')`.
 
 ### Members
 **members** — `card_number int not null unique` (tessera, never reused), `first_name`, `last_name text not null`, `tax_code text unique check (~ '^[A-Z0-9]{16}$')` (NULLs allowed; checksum validated in the API with explicit "save anyway"), `birth_date date`, `birth_place text`, `address text`, `postal_code text check (~ '^\d{5}$')`, `city text`, `phone text`, `email text`, `member_type member_type not null default 'ordinario'`, `joined_on date not null`, `status member_status not null default 'attivo'`, `ended_on date`, `end_reason member_end_reason`, `privacy_signed_on date`, `notes text`, `anonymized_at`, timestamps. `check ((status = 'cessato') = (ended_on is not null))`. Index `(last_name, first_name)`.
@@ -158,7 +159,7 @@ A public booking for a service with `requires_transport` creates a `richiesto` r
 **post_proposals** — `title text not null`, `category post_category not null`, `event_date date`, `location text`, `body text not null` (≤ 3000), `photo_path text` (private bucket `proposals`), `video_url text`, `submitter_name text not null`, `submitter_contact text`, `status proposal_status not null default 'attesa'`, `post_id uuid FK posts`, `reviewed_by uuid`, `reviewed_at`, `created_at`.
 
 ### Settings, infrastructure
-**site_settings** (public, single row: `id bool PK default true check (id)`) — `phone`, `email`, `address`, `opening_hours`, `slogan`, `home_intro`, `membership_info` (public text about the quota), `updated_at`.
+**site_settings** (public, single row: `id bool PK default true check (id)`) — `address`, `slogan`, `home_intro`, `vat_number`, `conventions jsonb not null default '[]'` (`[{title, description, url?}]`), `footer_links jsonb not null default '[]'` (`[{group: associazioni|mutuo_soccorso|utili, label, url}]`), both `check (jsonb_typeof(..) = 'array')`, `updated_at`. No phone, email, opening hours or quota text (ADR-044).
 
 **org_settings** (private, single row) — `legal_name`, `tax_code`, `address`, `vat_exemption_text default 'Operazione esente IVA ai sensi dell''art. 10, comma 1, n. 18 del D.P.R. 633/1972'`, `stamp_duty_threshold_cents int not null default 7747`, `stamp_duty_amount_cents int not null default 200`, `membership_fee_cents int not null default 2000`, `last_card_number int not null default 0`, `video_max_mb int not null default 50 check (video_max_mb between 1 and 50)` (Supabase free-tier cap), `updated_at`.
 
@@ -194,10 +195,8 @@ A public booking for a service with `requires_transport` creates a `richiesto` r
 ## Public (anon) readable rows
 | Table | anon `select` policy |
 |---|---|
-| `services` | `active = true` |
+| `services` | `active = true`; column grant only `id, name, description, schedule_note, sort_order, active` (no prices, ADR-044) |
 | `posts` | `status = 'pubblicata' and published_at <= now()` |
 | `site_settings` | the single row (all columns are public by design) |
 | `media` | `bucket = 'media'` (public bucket; metadata only) |
-All other tables: no anon access. Anon writes only via `submit_public_booking(...)` and `submit_post_proposal(...)` (security definer, `grant execute to anon`), called by the API after Turnstile + rate limit (ADR-006).
-
-`submit_public_booking`: finds a client by `phone_normalized` + `lower(last_name)` (attaches, never updates it) or creates one; inserts booking (`origin='online'`, `status='attesa'`, price by `declared_member`); if service `requires_transport`, inserts a `richiesto` transport with `booking_id`. Service must be `active and bookable`; `day` between tomorrow and +60 days, not Sunday.
+All other tables: no anon access. Anon writes only via `submit_post_proposal(...)` (security definer, `grant execute to anon`, phase 6), called by the API after Turnstile + rate limit (ADR-006). `submit_public_booking` was dropped (ADR-043).

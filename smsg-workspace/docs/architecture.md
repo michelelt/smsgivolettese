@@ -53,7 +53,7 @@ smsg-web/                  layout as in brief.md §smsg-web, plus:
   public/manifest.webmanifest, icons
 ```
 
-API module list (`src/modules/*`): `health`, `public` (services, posts, settings, booking submit, proposal submit + upload URL), `me` (profile, availability, commitments), `bookings`, `clients`, `members`, `invoices`, `services`, `settings`, `posts`, `proposals`, `media`, `shifts`, `transports`, `volunteers`, `vehicles`, `users`, `audit`, `gdpr`, `cron`. Layers: routes → service → repo (one-way). PDFs (invoice, fee receipt, travel sheet) rendered in services with `pdfkit`, streamed, never stored.
+API module list (`src/modules/*`): `health`, `public` (services without prices, posts, site settings without contacts, proposal submit + upload URL; no booking, ADR-043/044), `me` (profile, availability, commitments), `bookings`, `clients`, `members`, `invoices`, `services`, `settings`, `posts`, `proposals`, `media`, `shifts`, `transports`, `volunteers`, `vehicles`, `users`, `audit`, `gdpr`, `cron`. Layers: routes → service → repo (one-way). PDFs (invoice, fee receipt, travel sheet) rendered in services with `pdfkit`, streamed, never stored.
 
 ## Request and auth flow
 1. Login in the browser with `@supabase/ssr` (`signInWithPassword` for staff/admin, `signInWithOtp({shouldCreateUser:false})` for volunteers, optional password set at `/imposta-password`). Session in cookies.
@@ -63,7 +63,7 @@ API module list (`src/modules/*`): `health`, `public` (services, posts, settings
 5. API `auth` middleware verifies the JWT with `jose` against `${SUPABASE_URL}/auth/v1/.well-known/jwks.json` (cached), extracts `sub`, `app_role`. Missing/invalid token on a protected route → 401.
 6. `requirePermission(action)` → 403. Zod validates params/body/query (`@hono/zod-openapi`).
 7. Repo runs inside `db.asUser(claims, fn)`: `sql.begin(async tx => { await tx\`select set_config('request.jwt.claims', ${json}, true), set_config('role','authenticated', true), set_config('app.request_id', ${id}, true)\`; … })`. Public endpoints use `db.asAnon`, cron/invites `db.asService`. `postgres(DATABASE_URL, { prepare: false })` (transaction pooler).
-8. Critical writes call SQL functions (`issue_invoice`, `register_member`, `submit_public_booking`, …); exclusion/unique/check violations are mapped to domain errors.
+8. Critical writes call SQL functions (`issue_invoice`, `register_member`, `submit_post_proposal`, …); exclusion/unique/check violations are mapped to domain errors.
 
 ## Signed upload flow
 1. `POST /media/upload-url {kind: image|video, mime, size}` (staff) or `POST /public/proposals/upload-url` (anon, Turnstile, image only, ≤ 5 MB). API checks mime whitelist (`image/webp`, `image/jpeg`, `image/png`, `video/mp4`, `video/webm`) and size (`org_settings.video_max_mb` for video). Returns `{ bucket, path, token, signedUrl }` from `storage.from(bucket).createSignedUploadUrl(path)`; path = `<yyyy>/<uuid>.<ext>`.
@@ -90,7 +90,7 @@ Web serves images with `next/image` (`remotePatterns` = Supabase Storage host). 
 - Audit: DB triggers (`data-model.md` §audit_log) — captures every write including SQL-function writes, actor from JWT claims, `request_id` from `app.request_id`. Viewable/filterable at `/gestione/registro-attivita` (`GET /audit?table=&actor=&from=&to=`).
 
 ## Public endpoints protection
-`/public/bookings`, `/public/proposals*`: Turnstile token (`cf-turnstile-response` in body) verified server-side, one token per call; rate limit per IP via `app.consume_rate_limit` (e.g. 5 bookings / 10 min / IP, 3 proposals / hour / IP). Client IP forwarded by `proxy.ts` as `x-client-ip` + `x-proxy-secret` (ADR-040). Web sets CSP (static on public pages, nonce on private ones, ADR-036), HSTS, `frame-ancestors 'none'`.
+Read-only: `GET /public/services`, `GET /public/site-settings` (contract ADR-044: never prices, phone or email), `GET /public/posts*` (phase 6). Write: only `/public/proposals*` (phase 6; no public booking, ADR-043): Turnstile token verified server-side, one token per call; rate limit per IP via `app.consume_rate_limit` (`proposal:<ip>`, 3 / hour). Client IP forwarded by `proxy.ts` as `x-client-ip` + `x-proxy-secret` (ADR-040). Web sets CSP (static on public pages, nonce on private ones, ADR-036), HSTS, `frame-ancestors 'none'`.
 
 ## Notifications and cron
 - On assignment (shift or transport) the service sends a Resend email after commit (failure logged, not fatal).
