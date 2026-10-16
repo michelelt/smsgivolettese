@@ -1,0 +1,13 @@
+secrets.env
+.env
+.env.*
+!.env.example
+
+# Claude Code: never versioned
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+**/CLAUDE.md
+**/CLAUDE.local.md
+.mcp.json
+LEGGIMI.md
