@@ -65,3 +65,69 @@ describe('custom access token hook (real login through Auth)', () => {
     expect(res.status).toBeGreaterThanOrEqual(400);
   });
 });
+
+describe('custom access token hook: no link sessions for staff/super_admin', () => {
+  const url = process.env.SUPABASE_URL ?? 'http://127.0.0.1:54321';
+  const key =
+    process.env.SUPABASE_PUBLISHABLE_KEY ?? 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH';
+  const secret = process.env.SUPABASE_SECRET_KEY ?? 'sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz';
+  const post = (path: string, apikey: string, body: object, auth = false) =>
+    fetch(`${url}/auth/v1/${path}`, {
+      method: 'POST',
+      headers: {
+        apikey,
+        'content-type': 'application/json',
+        ...(auth ? { authorization: `Bearer ${apikey}` } : {}),
+      },
+      body: JSON.stringify(body),
+    });
+  const verify = async (type: 'magiclink' | 'recovery' | 'invite', email: string) => {
+    const g = (await (await post('admin/generate_link', secret, { type, email }, true)).json()) as {
+      hashed_token: string;
+    };
+    return post('verify', key, { type, token_hash: g.hashed_token });
+  };
+  const staffLike = ['admin.esempio@example.test', 'staff.esempio@example.test'];
+
+  for (const email of staffLike)
+    for (const type of ['magiclink', 'recovery'] as const)
+      it(`${type} for ${email} issues no session`, async () => {
+        const res = await verify(type, email);
+        expect(res.status).toBeGreaterThanOrEqual(400);
+        expect(await res.text()).not.toContain('access_token');
+      });
+
+  it('password login still works for staff', async () => {
+    const res = await post('token?grant_type=password', key, {
+      email: staffLike[1],
+      password: 'Esempio-Locale-123!',
+    });
+    expect(res.status).toBe(200);
+  });
+  it('volunteer magic link and recovery work, and refresh keeps working', async () => {
+    for (const type of ['magiclink', 'recovery'] as const) {
+      const res = await verify(type, 'volontario.esempio@example.test');
+      expect(res.status).toBe(200);
+      const { refresh_token } = (await res.json()) as { refresh_token: string };
+      expect((await post('token?grant_type=refresh_token', key, { refresh_token })).status).toBe(
+        200,
+      );
+    }
+  });
+  it('hook refuses refresh of a link-born staff session (function level, amr otp)', async () => {
+    await rolledBack(async (tx) => {
+      await fixtures(tx);
+      await tx`update auth.users set encrypted_password = 'x' where id = ${ID.staff}`;
+      const event = {
+        user_id: ID.staff,
+        authentication_method: 'token_refresh',
+        claims: { sub: ID.staff, amr: [{ method: 'otp', timestamp: 1 }] },
+      };
+      const [r] = await tx`select app.custom_access_token_hook(${tx.json(event)}) as e`;
+      expect(r!.e.error.http_code).toBe(403);
+      await tx`update auth.users set encrypted_password = '' where id = ${ID.staff}`; // invite: no password yet
+      const [r2] = await tx`select app.custom_access_token_hook(${tx.json(event)}) as e`;
+      expect(r2!.e.claims.app_role).toBe('staff');
+    });
+  });
+});

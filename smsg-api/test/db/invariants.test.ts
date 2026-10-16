@@ -424,39 +424,50 @@ describe('last super admin: concurrent removal (committed, then cleaned up)', ()
   const B = 'f0000000-0000-4000-8000-0000000000a2';
   type Op = (tx: Tx, me: string, other: string) => Promise<unknown>;
   const ops: Record<string, Op> = {
-    'demote the other': (tx, _m, o) => tx`update user_roles set role = 'staff' where user_id = ${o}`,
+    'demote the other': (tx, _m, o) =>
+      tx`update user_roles set role = 'staff' where user_id = ${o}`,
     'deactivate the other': (tx, _m, o) => tx`update profiles set active = false where id = ${o}`,
     'remove themselves': (tx, m) => tx`delete from user_roles where user_id = ${m}`,
     'deactivate themselves': (tx, m) => tx`update profiles set active = false where id = ${m}`,
   };
-  it.each(Object.entries(ops))('two super admins each trying to %s: at least one fails', async (_n, op) => {
-    for (const [id, mail] of [[A, 'a'], [B, 'b']] as const) {
-      await sql`insert into auth.users (id, email, aud, role) values (${id}, ${mail + '@race.test'}, 'authenticated', 'authenticated') on conflict do nothing`;
-      await sql`insert into profiles (id, first_name, last_name, email) values (${id}, ${mail}, 'Race', ${mail + '@race.test'}) on conflict do nothing`;
-      await sql`insert into user_roles values (${id}, 'super_admin') on conflict do nothing`;
-    }
-    // park every other super admin (seed, local dev users) so that A and B are the only ones (files run serially)
-    const parked = await sql`update user_roles set role = 'staff' where role = 'super_admin' and user_id not in (${A}, ${B}) returning user_id`;
-    try {
-      const run = (me: string, other: string) =>
-        sqlCode(
-          sql.begin(async (tx) => {
-            await op(tx, me, other);
-            await tx`select pg_sleep(0.3)`; // keep the tx open so both overlap
-          }),
-        );
-      const res = await Promise.all([run(A, B), run(B, A)]);
-      const [{ n }] = await sql`select count(*)::int as n from user_roles ur join profiles p on p.id = ur.user_id
+  it.each(Object.entries(ops))(
+    'two super admins each trying to %s: at least one fails',
+    async (_n, op) => {
+      for (const [id, mail] of [
+        [A, 'a'],
+        [B, 'b'],
+      ] as const) {
+        await sql`insert into auth.users (id, email, aud, role) values (${id}, ${mail + '@race.test'}, 'authenticated', 'authenticated') on conflict do nothing`;
+        await sql`insert into profiles (id, first_name, last_name, email) values (${id}, ${mail}, 'Race', ${mail + '@race.test'}) on conflict do nothing`;
+        await sql`insert into user_roles values (${id}, 'super_admin') on conflict do nothing`;
+      }
+      // park every other super admin (seed, local dev users) so that A and B are the only ones (files run serially)
+      const parked =
+        await sql`update user_roles set role = 'staff' where role = 'super_admin' and user_id not in (${A}, ${B}) returning user_id`;
+      try {
+        const run = (me: string, other: string) =>
+          sqlCode(
+            sql.begin(async (tx) => {
+              await op(tx, me, other);
+              await tx`select pg_sleep(0.3)`; // keep the tx open so both overlap
+            }),
+          );
+        const res = await Promise.all([run(A, B), run(B, A)]);
+        const [{ n }] =
+          await sql`select count(*)::int as n from user_roles ur join profiles p on p.id = ur.user_id
         where ur.role = 'super_admin' and p.active and ur.user_id in (${A}, ${B})`;
-      expect(res.filter((r) => r.message?.match(/LAST_SUPER_ADMIN|deadlock/)).length).toBeGreaterThanOrEqual(1);
-      expect(n).toBeGreaterThanOrEqual(1);
-    } finally {
-      await sql`update user_roles set role = 'super_admin' where user_id in ${sql(parked.map((r) => r.user_id))}`;
-      await sql`delete from user_roles where user_id in (${A}, ${B})`;
-      await sql`delete from profiles where id in (${A}, ${B})`;
-      await sql`delete from auth.users where id in (${A}, ${B})`;
-    }
-  });
+        expect(
+          res.filter((r) => r.message?.match(/LAST_SUPER_ADMIN|deadlock/)).length,
+        ).toBeGreaterThanOrEqual(1);
+        expect(n).toBeGreaterThanOrEqual(1);
+      } finally {
+        await sql`update user_roles set role = 'super_admin' where user_id in ${sql(parked.map((r) => r.user_id))}`;
+        await sql`delete from user_roles where user_id in (${A}, ${B})`;
+        await sql`delete from profiles where id in (${A}, ${B})`;
+        await sql`delete from auth.users where id in (${A}, ${B})`;
+      }
+    },
+  );
 });
 
 describe('last super admin', () => {
