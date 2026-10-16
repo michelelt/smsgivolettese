@@ -26,6 +26,7 @@ export const SECTIONS = [
   { slug: "fatture", label: "Fatture", min: "staff" },
   { slug: "bacheca", label: "Bacheca", min: "staff" },
   { slug: "servizi", label: "Servizi", min: "staff" },
+  { slug: "sito", label: "Info del sito", min: "staff" },
   { slug: "turni", label: "Turni", min: "staff" },
   { slug: "trasporti", label: "Trasporti", min: "staff" },
   { slug: "volontari", label: "Volontari", min: "staff" },

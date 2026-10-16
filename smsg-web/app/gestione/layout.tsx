@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { hasRole, SECTIONS } from "@/lib/auth/roles";
+import { Providers } from "./providers";
 import { NavLink } from "./nav-link";
 import { getSessionRole } from "@/lib/supabase/server";
 
@@ -39,7 +40,9 @@ export default async function GestioneLayout({
           </li>
         </ul>
       </nav>
-      <main className="mt-6">{children}</main>
+      <main className="mt-6">
+        <Providers>{children}</Providers>
+      </main>
     </div>
   );
 }

@@ -54,13 +54,17 @@ test("anonymous visitor is sent to /accedi", async ({ page }) => {
 
 test("staff login reaches /gestione", async ({ page }) => {
   await login(page, env("E2E_STAFF_EMAIL"), PASSWORD);
-  await expect(page.getByRole("link", { name: "Soci" })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Soci", exact: true }),
+  ).toBeVisible();
   await expect(page.getByRole("link", { name: "Impostazioni" })).toHaveCount(0);
 });
 
 test("volunteer is blocked from staff pages", async ({ page }) => {
   await login(page, env("E2E_VOLUNTEER_EMAIL"), PASSWORD);
-  await expect(page.getByRole("link", { name: "Soci" })).toHaveCount(0);
+  await expect(
+    page.getByRole("link", { name: "Soci", exact: true }),
+  ).toHaveCount(0);
   await page.goto("/gestione/soci");
   await expect(page).toHaveURL(/\/gestione\?negato=1/);
   await expect(page.getByText("non hai il permesso")).toBeVisible();
