@@ -1,4 +1,7 @@
 import type { NextConfig } from "next";
+import { parseEnv } from "./lib/env";
+
+const { API_URL } = parseEnv(process.env);
 
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -23,7 +26,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: `${process.env.API_URL ?? "http://localhost:3001"}/:path*`,
+        destination: `${API_URL}/:path*`,
       },
     ];
   },
