@@ -54,7 +54,7 @@ test("magic link from Mailpit signs the user in", async ({ page, request }) => {
     const msg = await (
       await request.get(`${mail}/message/${list.messages[0].ID}`)
     ).json();
-    link = /http:\/\/127\.0\.0\.1:54321\/auth\/v1\/verify\?[^\s"<)]+/
+    link = /https?:\/\/[^\s"<)]+\/auth\/callback\?token_hash=[^\s"<)]+/
       .exec(msg.Text + msg.HTML)![0]
       .replaceAll("&amp;", "&");
   }).toPass();
