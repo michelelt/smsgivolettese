@@ -90,7 +90,7 @@ Web serves images with `next/image` (`remotePatterns` = Supabase Storage host). 
 - Audit: DB triggers (`data-model.md` §audit_log) — captures every write including SQL-function writes, actor from JWT claims, `request_id` from `app.request_id`. Viewable/filterable at `/gestione/registro-attivita` (`GET /audit?table=&actor=&from=&to=`).
 
 ## Public endpoints protection
-`/public/bookings`, `/public/proposals*`: Turnstile token (`cf-turnstile-response` in body) verified server-side, one token per call; rate limit per IP via `app.consume_rate_limit` (e.g. 5 bookings / 10 min / IP, 3 proposals / hour / IP). Client IP from `x-real-ip` / first `x-forwarded-for` (to verify behind the web rewrite in phase 3; fall back to Vercel Firewall rate limit if not available). Web sets CSP (Turnstile, Supabase, YouTube/Vimeo frames), HSTS, `frame-ancestors 'none'`.
+`/public/bookings`, `/public/proposals*`: Turnstile token (`cf-turnstile-response` in body) verified server-side, one token per call; rate limit per IP via `app.consume_rate_limit` (e.g. 5 bookings / 10 min / IP, 3 proposals / hour / IP). Client IP forwarded by `proxy.ts` as `x-client-ip` + `x-proxy-secret` (ADR-040). Web sets CSP (static on public pages, nonce on private ones, ADR-036), HSTS, `frame-ancestors 'none'`.
 
 ## Notifications and cron
 - On assignment (shift or transport) the service sends a Resend email after commit (failure logged, not fatal).
@@ -111,6 +111,7 @@ Web serves images with `next/image` (`remotePatterns` = Supabase Storage host). 
 | `API_URL` | | ✔ | rewrite target + server fetch |
 | `SUPERADMIN_EMAIL`, `SUPERADMIN_PASSWORD` | ✔ (script) | | workspace `secrets.env`, used only on creation |
 | `SUPABASE_DB_PASSWORD_{STAGING,PROD}` | | | workspace `secrets.env` (local CLI); GitHub secrets in CI |
+| `API_PROXY_SECRET` | ✔ | ✔ | web proxy → API, trusts `x-client-ip` (ADR-040) |
 | `LOG_LEVEL` | ✔ | | |
 | CI secrets | `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD_{STAGING,PROD}`, `SUPABASE_{STAGING,PROD}_REF`, `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` | | |
 
@@ -124,5 +125,5 @@ Web serves images with `next/image` (`remotePatterns` = Supabase Storage host). 
 ## Open questions
 1. ~~Supabase refs and region~~ resolved: `smsg-prod` `vcpmnpsfcgebhmgqlqeu`, `smsg-staging` `ydqdnicpfspqewclqrgk`, both `eu-central-1` (EU).
 2. Vercel plan: Hobby terms are for non-commercial personal use; confirm the association's account/plan (Pro if required).
-3. Client IP availability behind the external rewrite (rate limiting) — verify in phase 3.
+3. ~~Client IP behind the external rewrite~~ resolved by ADR-040 (verify on staging in phase 8).
 4. GDPR retention of invoices and of the members' register — confirm with the privacy officer (ADR-026).

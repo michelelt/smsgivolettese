@@ -43,6 +43,11 @@ test: ## Run lint, typecheck and tests of both repos
 
 db-reset: ## Reset the local database (migrations + seed)
 	cd api && supabase db reset --local
+	@# new seed ids: drop the web's cached public data if the dev server is running (secret read from web/.env.local, never printed)
+	@secret=$$(grep -m1 '^REVALIDATE_SECRET=' web/.env.local | cut -d= -f2-); \
+	  curl -sf -o /dev/null -X POST http://localhost:3000/hooks/revalidate -H "x-revalidate-secret: $$secret" \
+	  -H 'content-type: application/json' -d '{"tags":["services","site-settings"]}' \
+	  && echo 'Web cache revalidated' || true
 
 gen-api: ## Regenerate the web API client from the API OpenAPI schema
 	pnpm -C api openapi:export

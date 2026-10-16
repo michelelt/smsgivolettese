@@ -43,3 +43,14 @@ EOF
 chmod 600 api/.env.development.local web/.env.development.local # umask skips existing files
 
 echo "local-env: wrote api/.env.development.local and web/.env.development.local"
+
+# Fill keys missing or empty in .env.local from .env.example; non-empty local values are never changed.
+for repo in api web; do
+  touch "$repo/.env.local"
+  added=$(awk -F= 'NR==FNR { if ($2 != "") have[$1]=1; next }
+    /^[A-Za-z_][A-Za-z0-9_]*=./ && !($1 in have) { print; n++ } END { exit n == 0 }' \
+    "$repo/.env.local" "$repo/.env.example") || continue
+  for key in $(cut -d= -f1 <<<"$added"); do sed -i "/^${key}=\$/d" "$repo/.env.local"; done
+  printf '\n%s\n' "$added" >>"$repo/.env.local"
+  echo "local-env: set in $repo/.env.local: $(cut -d= -f1 <<<"$added" | paste -sd' ')"
+done

@@ -159,3 +159,33 @@ Consequences: staff/super_admin created through the admin API must be created em
 Context: reinforces ADR-003; removing only `public` still exposes `graphql_public` and any future schema.
 Decision: `[api] schemas = ["api"]` in `api/supabase/config.toml`, where `api` is an empty schema with no objects or grants (`schemas = []` makes PostgREST fall back to `public`); the same setting is applied by hand in the dashboard (API settings → Exposed schemas only the empty `api` schema, GraphQL off) of both remote projects (phase 8 checklist).
 Consequences: no Data API surface at all; the publishable key alone can reach only Auth and Storage.
+
+### ADR-036 CSP: static on public pages, nonce on private pages
+Context: a nonce CSP forces dynamic rendering and breaks ISR; Next's inline flight scripts vary per page, so hashes cannot cover them. Phase 1 deferred "full CSP with nonces".
+Decision: public routes get a static CSP from `next.config.ts` headers (source `/:path((?!gestione|accedi|imposta-password).*)`): `default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: <SUPABASE_URL>; connect-src 'self' <SUPABASE_URL>; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'` (+ `'unsafe-eval'` in dev only; `upgrade-insecure-requests` in prod only). `/gestione/**`, `/accedi`, `/imposta-password` get the same policy built per request in `proxy.ts`, but `script-src 'self' 'nonce-<random>' 'sha256-<text-size script>'` (no `unsafe-inline`), set on request and response headers so Next applies the nonce. YouTube/Vimeo frames added in phase 6.
+Consequences: ISR kept; the nonce intent is kept where sessions and personal data live; public pages rely on React escaping + the block whitelist (ADR-022) for XSS; the public CSP must never contain a hash or nonce (that would disable `'unsafe-inline'` and break Next).
+
+### ADR-037 Text size persisted in localStorage, applied before paint
+Decision: A/A+/A++ stored in `localStorage["text-size"]` (`m|l|xl`); a fixed inline script in the root layout `<head>` sets `document.documentElement.dataset.textSize` before paint; CSS sizes `html` from that attribute (default 19px). Script text is one exported constant; its sha256 goes into the private CSP (ADR-036).
+Consequences: pages stay static (no cookie read); no flash; per device, which is what elderly users expect.
+
+### ADR-038 Home "prossimi appuntamenti" deferred to phase 6
+Decision: phase 3 home has no appointments block (no placeholder); phase 6 adds it from published posts (`evento`, `event_date >= today`). Services' `schedule_note` stays on service cards only.
+Consequences: no throwaway data source; home = intro, services, "Prenotare in tre passi", phone.
+
+### ADR-039 Public API contract (phase 3)
+Decision: JSON fields camelCase. `GET /public/services` → `{ items: [{ id, name, description, memberPriceCents, nonMemberPriceCents, scheduleNote, bookable, requiresTransport }] }` (active, by `sort_order, name`). `GET /public/site-settings` → `{ phone, email, address, openingHours, slogan, homeIntro, membershipInfo }`. `POST /public/bookings` body `{ serviceId, day (YYYY-MM-DD), slot (mattina|pomeriggio), firstName, lastName, phone, declaredMember, notes? (≤ 600), turnstileToken }` → 201 `{ id }`. No tax code online (collected by staff at invoicing) and no consent checkbox (art. 6.1.b GDPR: a short notice with a link to `/privacy` above the confirm button). Phone: strip spaces `.-/()`, drop `+39`/`0039`, then must match `^(0\d{5,10}|3\d{8,9})$`; the API passes the normalised national form so client matching works. Order: Zod → rate limit → Turnstile → `submit_public_booking`. Errors: 400 `VALIDATION_ERROR`, 400 `TURNSTILE_FAILED` (also for an empty token, without calling Cloudflare), 429 `RATE_LIMITED`, 422 `INVALID_DAY` / `SERVICE_NOT_BOOKABLE`.
+Consequences: the rate limit counts failed attempts too; the Turnstile failure e2e blanks the token via `page.route`.
+
+### ADR-040 Client IP through the web proxy
+Context: on Vercel the API sees the web deployment, not the browser, behind the external rewrite.
+Decision: `proxy.ts` also matches `/api/public/:path*` and does `NextResponse.rewrite(API_URL + path, { request: { headers } })` with `x-client-ip` = first `x-forwarded-for` entry (else `x-real-ip`, else `local`) and `x-proxy-secret: API_PROXY_SECRET` (both overwrite incoming values). The API trusts `x-client-ip` only with a constant-time-equal secret; otherwise it uses `x-real-ip`, first `x-forwarded-for`, else `local`. Rate key `booking:<ip>`, 5 per 600 s.
+Consequences: one new secret in both repos; direct API callers cannot spoof the IP; locally all requests may share one bucket (tests clear `rate_limit_hits` first).
+
+### ADR-041 Booking days: no capacity model
+Decision: the wizard offers the next 12 non-Sunday days from tomorrow (Europe/Rome) as in the prototype; the DB allows tomorrow..+60, no Sunday. No capacity, holidays or closed days: staff confirm the time by phone.
+Consequences: overbooking is handled by staff calling back; a closed-days list can be added later if staff ask.
+
+### ADR-042 PWA without service worker
+Decision: `public/manifest.webmanifest` (name, short_name, `start_url: "/"` (user choice: public visitors may install it too; volunteers reach `/gestione` from the menu), `scope: "/"`, `display: standalone`, brand colours) + 192/512 and maskable icons + apple-touch-icon. No service worker, no offline cache.
+Consequences: installable on phones for volunteers; never serves stale bookings/shifts; no SW update bugs to maintain.
