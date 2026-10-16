@@ -545,6 +545,29 @@ describe('public functions', () => {
       ).toBe(1);
     });
   });
+  it('booking edge days, notes limit; existing client attached and not updated', async () => {
+    await rolledBack(async (tx) => {
+      await world(tx);
+      const before =
+        await tx`select first_name, last_name, phone, address from clients where id = ${CLIENT}`;
+      const [c] =
+        await tx`select phone_normalized as p, last_name as l from clients where id = ${CLIENT}`;
+      await actAs(tx, 'anon');
+      const q = (day: string, notes = 'null') =>
+        `select submit_public_booking('Altro', '${c!.l}', '${c!.p}', 'fa000000-0000-4000-8000-000000000001', ${day}, 'mattina', false, ${notes})`;
+      expect(await err(tx, q('current_date + 61'))).toMatch(/INVALID_DAY/);
+      expect(await err(tx, q('current_date'))).toMatch(/INVALID_DAY/);
+      expect(await err(tx, q(futureDay, `'${'x'.repeat(601)}'`))).toMatch(/INVALID_INPUT/);
+      expect(await err(tx, q(futureDay, `'${'x'.repeat(600)}'`))).toBe('OK');
+      await reset(tx);
+      expect(
+        await tx`select first_name, last_name, phone, address from clients where id = ${CLIENT}`,
+      ).toEqual(before);
+      expect(
+        (await tx`select count(*)::int n from clients where phone_normalized = ${c!.p}`)[0]!.n,
+      ).toBe(1);
+    });
+  });
   it('booking a transport service creates a richiesto transport', async () => {
     await rolledBack(async (tx) => {
       await world(tx);
@@ -573,6 +596,16 @@ describe('public functions', () => {
           `select submit_post_proposal('', 'avviso', null, null, 'body', null, null, 'Nome', null)`,
         ),
       ).toMatch(/INVALID_INPUT/);
+    });
+  });
+  it('rate limit: purges rows older than 1 day on each call', async () => {
+    await rolledBack(async (tx) => {
+      await world(tx);
+      await tx.unsafe(
+        `insert into rate_limit_hits values ('ip-old', now() - interval '2 days', 1)`,
+      );
+      await tx.unsafe(`select app.consume_rate_limit('k-test', 2, 60)`);
+      expect(await tx.unsafe(`select 1 from rate_limit_hits where key = 'ip-old'`)).toHaveLength(0);
     });
   });
   it('rate limit: service only, third hit over the limit', async () => {

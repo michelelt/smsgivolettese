@@ -26,3 +26,17 @@ describe('health', () => {
     expect(res.headers.get('x-content-type-options')).toBe('nosniff');
   });
 });
+
+describe('malformed input', () => {
+  it('malformed JSON returns 400 VALIDATION_ERROR without details', async () => {
+    const res = await app.request('/public/bookings', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: '{bad',
+    });
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({
+      error: { code: 'VALIDATION_ERROR', message: 'Dati non validi' },
+    });
+  });
+});

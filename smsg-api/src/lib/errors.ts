@@ -42,6 +42,12 @@ export class RateLimited extends DomainError {
   }
 }
 
+export class TurnstileFailed extends DomainError {
+  constructor(message = 'Verifica anti-spam non riuscita, riprova') {
+    super(400, 'TURNSTILE_FAILED', message);
+  }
+}
+
 // Stable RAISE EXCEPTION message codes from the DB -> [HTTP status, Italian message].
 const PG_RAISE: Record<string, [ErrorStatus, string]> = {
   DRIVER_NOT_ELIGIBLE: [409, 'Il volontario non è idoneo alla guida (patente o autorizzazione)'],

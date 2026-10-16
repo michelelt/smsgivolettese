@@ -1,9 +1,11 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
+import { HTTPException } from 'hono/http-exception';
 import { secureHeaders } from 'hono/secure-headers';
 import { authenticate } from './auth/middleware.js';
 import { DomainError, fromPostgres } from './lib/errors.js';
 import { log } from './lib/logger.js';
 import { meRoutes } from './modules/me/me.routes.js';
+import { publicRoutes } from './modules/public/public.routes.js';
 import { healthRoutes } from './modules/health/health.routes.js';
 
 export const app = new OpenAPIHono();
@@ -30,6 +32,7 @@ app.use(authenticate);
 
 app.route('/', healthRoutes);
 app.route('/', meRoutes);
+app.route('/', publicRoutes);
 
 app.openAPIRegistry.registerComponent('securitySchemes', 'bearerAuth', {
   type: 'http',
@@ -51,6 +54,10 @@ app.notFound((c) => c.json(body('NOT_FOUND', 'Risorsa non trovata'), 404));
 app.onError((err, c) => {
   if (err instanceof DomainError) {
     return c.json(body(err.code, err.message, err.details), err.status);
+  }
+  if (err instanceof HTTPException && err.status < 500) {
+    if (err.status === 400) return c.json(body('VALIDATION_ERROR', 'Dati non validi'), 400);
+    return c.json(body('HTTP_ERROR', 'Richiesta non valida'), err.status);
   }
   const pg = fromPostgres(err as { code?: string; message?: string });
   if (pg) return c.json(body(pg.code, pg.message), pg.status);

@@ -100,6 +100,232 @@
           }
         }
       }
+    },
+    "/public/services": {
+      "get": {
+        "tags": [
+          "public"
+        ],
+        "responses": {
+          "200": {
+            "description": "Servizi attivi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "memberPriceCents": {
+                            "type": "integer"
+                          },
+                          "nonMemberPriceCents": {
+                            "type": "integer"
+                          },
+                          "scheduleNote": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "bookable": {
+                            "type": "boolean"
+                          },
+                          "requiresTransport": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "description",
+                          "memberPriceCents",
+                          "nonMemberPriceCents",
+                          "scheduleNote",
+                          "bookable",
+                          "requiresTransport"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/site-settings": {
+      "get": {
+        "tags": [
+          "public"
+        ],
+        "responses": {
+          "200": {
+            "description": "Impostazioni del sito",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "phone": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "email": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "address": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "openingHours": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "slogan": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "homeIntro": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "membershipInfo": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "phone",
+                    "email",
+                    "address",
+                    "openingHours",
+                    "slogan",
+                    "homeIntro",
+                    "membershipInfo"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/bookings": {
+      "post": {
+        "tags": [
+          "public"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "serviceId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "day": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "slot": {
+                    "type": "string",
+                    "enum": [
+                      "mattina",
+                      "pomeriggio"
+                    ]
+                  },
+                  "firstName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "phone": {
+                    "type": "string",
+                    "maxLength": 30
+                  },
+                  "declaredMember": {
+                    "type": "boolean"
+                  },
+                  "notes": {
+                    "type": "string",
+                    "maxLength": 600
+                  },
+                  "turnstileToken": {
+                    "type": "string",
+                    "maxLength": 4096
+                  }
+                },
+                "required": [
+                  "serviceId",
+                  "day",
+                  "slot",
+                  "firstName",
+                  "lastName",
+                  "phone",
+                  "declaredMember",
+                  "turnstileToken"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Prenotazione creata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR o TURNSTILE_FAILED"
+          },
+          "422": {
+            "description": "INVALID_DAY o SERVICE_NOT_BOOKABLE"
+          },
+          "429": {
+            "description": "RATE_LIMITED"
+          }
+        }
+      }
     }
   }
 }
