@@ -1,0 +1,28 @@
+name: ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version-file: .nvmrc, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm openapi:export
+      - run: git diff --exit-code openapi.json
+      - name: Breaking changes vs main
+        if: github.event_name == 'pull_request'
+        run: |
+          if git show origin/main:openapi.json > /tmp/base.json 2>/dev/null; then
+            docker run --rm -v /tmp:/t -v "$PWD":/w tufin/oasdiff breaking /t/base.json /w/openapi.json --fail-on ERR
+          else
+            echo "No openapi.json on main, skipping"
+          fi

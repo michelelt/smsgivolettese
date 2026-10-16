@@ -1,0 +1,5 @@
+{
+  "regions": ["fra1"],
+  "git": { "deploymentEnabled": { "main": false } },
+  "rewrites": [{ "source": "/(.*)", "destination": "/api" }]
+}
