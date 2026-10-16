@@ -13,14 +13,20 @@ it("validates login and password setting", () => {
   ).toBe(false);
   expect(
     setPasswordSchema.safeParse({
-      password: "lunghissima1",
-      confirm: "diversa123",
+      password: "undici11111",
+      confirm: "undici11111",
     }).success,
   ).toBe(false);
   expect(
     setPasswordSchema.safeParse({
-      password: "lunghissima1",
-      confirm: "lunghissima1",
+      password: "lunghissima12",
+      confirm: "diversa12345",
+    }).success,
+  ).toBe(false);
+  expect(
+    setPasswordSchema.safeParse({
+      password: "lunghissima12",
+      confirm: "lunghissima12",
     }).success,
   ).toBe(true);
 });

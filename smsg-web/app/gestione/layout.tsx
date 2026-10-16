@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { hasRole, SECTIONS } from "@/lib/auth/roles";
+import { NavLink } from "./nav-link";
 import { getSessionRole } from "@/lib/supabase/server";
 
 export default async function GestioneLayout({
@@ -30,14 +31,12 @@ export default async function GestioneLayout({
         <ul className="flex flex-wrap gap-3">
           {items.map((s) => (
             <li key={s.slug}>
-              <Link
-                href={`/gestione/${s.slug}`}
-                className="inline-flex min-h-12 items-center rounded-xl border-2 border-blu px-4 font-bold text-blu"
-              >
-                {s.label}
-              </Link>
+              <NavLink href={`/gestione/${s.slug}`}>{s.label}</NavLink>
             </li>
           ))}
+          <li>
+            <NavLink href="/gestione/account/password">Cambia password</NavLink>
+          </li>
         </ul>
       </nav>
       <main className="mt-6">{children}</main>

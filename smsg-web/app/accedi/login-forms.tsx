@@ -38,8 +38,10 @@ export function LoginForms({ next }: { next?: string }) {
         emailRedirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(safeNext(next))}`,
       },
     });
-    // Same answer whether or not the account exists (no user enumeration).
-    if (error && error.status !== 400)
+    // Same answer for every 4xx but 429, so account existence is not revealed.
+    if (error?.status === 429)
+      return setErr("Troppe richieste. Riprova più tardi.");
+    if (error && !(error.status && error.status < 500))
       return setErr("Non riusciamo a inviare il link. Riprova più tardi.");
     setMsg(
       "Se l'indirizzo è registrato, ti abbiamo inviato un'email con il link per entrare.",
@@ -48,7 +50,7 @@ export function LoginForms({ next }: { next?: string }) {
 
   return (
     <>
-      <div aria-live="polite">
+      <div>
         {err && (
           <p
             role="alert"
@@ -106,9 +108,12 @@ export function LoginForms({ next }: { next?: string }) {
         className="mt-10"
       >
         <h2 id="t-ml" className="text-2xl font-extrabold">
-          Non ricordi la password?
+          Sei un volontario e non ricordi la password?
         </h2>
-        <p>Ti mandiamo per email un link per entrare, senza password.</p>
+        <p>
+          Solo per i volontari: ti mandiamo per email un link per entrare, senza
+          password. Il personale deve usare la password.
+        </p>
         <Field
           label="Email"
           type="email"

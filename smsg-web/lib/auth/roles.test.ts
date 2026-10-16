@@ -28,6 +28,10 @@ describe("canAccess", () => {
     expect(canAccess("super_admin", "/gestione/utenti-e-ruoli")).toBe(true);
     expect(canAccess("staff", "/gestione/nuova")).toBe(false);
   });
+  it("lets any role open its own account pages", () => {
+    expect(canAccess("volontario", "/gestione/account/password")).toBe(true);
+    expect(canAccess(null, "/gestione/account/password")).toBe(false);
+  });
   it("does not match lookalike prefixes", () => {
     expect(canAccess(null, "/gestionefoo")).toBe(true);
   });
@@ -40,5 +44,16 @@ describe("safeNext", () => {
     expect(safeNext("https://evil.com")).toBe("/gestione");
     expect(safeNext("/\\evil.com")).toBe("/gestione");
     expect(safeNext(null)).toBe("/gestione");
+    for (const bad of [
+      "/%09/evil.com",
+      "/\t/evil.com",
+      "/%5cevil.com",
+      "/%2f/evil.com",
+      "%2f%2fevil.com",
+      "/%0d%0a/evil.com",
+      "/ /evil.com",
+      "/%E0%A4%A",
+    ])
+      expect(safeNext(bad)).toBe("/gestione");
   });
 });

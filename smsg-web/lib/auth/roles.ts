@@ -43,12 +43,29 @@ export function canAccess(role: AppRole | null, pathname: string): boolean {
     return true;
   if (role === null) return false;
   const slug = pathname.split("/")[2];
-  if (!slug) return true; // dashboard: any role
+  if (!slug || slug === "account") return true; // dashboard and own account: any role
   const section = SECTIONS.find((s) => s.slug === slug);
   // Unknown sections: super_admin only, so new pages are closed by default.
   return hasRole(role, section?.min ?? "super_admin");
 }
 
 /** Open-redirect guard for `next` params. */
-export const safeNext = (next: string | null | undefined) =>
-  next && /^\/(?![/\\])/.test(next) ? next : "/gestione";
+export function safeNext(next: string | null | undefined): string {
+  const bad = /[\\\s\u0000-\u001f\u007f]/; // backslash, whitespace, control chars
+  try {
+    // Check the decoded form too: `/%09/evil.com` becomes `//evil.com` in browsers.
+    if (!next || bad.test(next) || bad.test(decodeURIComponent(next)))
+      return "/gestione";
+    const dec = decodeURIComponent(next);
+    const u = new URL(next, "http://x.invalid");
+    if (
+      u.origin !== "http://x.invalid" ||
+      !next.startsWith("/") ||
+      dec.startsWith("//")
+    )
+      return "/gestione";
+    return next;
+  } catch {
+    return "/gestione";
+  }
+}

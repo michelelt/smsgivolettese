@@ -7,6 +7,7 @@ import type { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { setPasswordSchema } from "@/lib/auth/schemas";
+import { roleFromClaims } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/client";
 
 export function SetPasswordForm() {
@@ -18,13 +19,21 @@ export function SetPasswordForm() {
 
   const onSubmit = form.handleSubmit(async (v) => {
     setErr(undefined);
-    const { error } = await createClient().auth.updateUser({
+    const supabase = createClient();
+    const { error } = await supabase.auth.updateUser({
       password: v.password,
     });
     if (error)
       return setErr(
         "Non è stato possibile salvare la password. Riprova o richiedi un nuovo link.",
       );
+    // Staff/super_admin cannot refresh a link-born session: send them to sign in with the password.
+    const { data } = await supabase.auth.getClaims();
+    if (roleFromClaims(data?.claims) !== "volontario") {
+      await supabase.auth.signOut();
+      window.location.assign("/accedi?impostata=1");
+      return;
+    }
     // Full reload so the server sees the new cookies.
     // eslint-disable-next-line @next/next/no-location-assign-relative-destination
     window.location.assign("/gestione");
@@ -44,7 +53,7 @@ export function SetPasswordForm() {
         label="Nuova password"
         type="password"
         autoComplete="new-password"
-        hint="Almeno 10 caratteri."
+        hint="Almeno 12 caratteri."
         error={errors.password?.message}
         {...form.register("password")}
       />

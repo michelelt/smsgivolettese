@@ -33,7 +33,7 @@ export const Field = forwardRef<HTMLInputElement, Props>(function Field(
         className="mt-1 min-h-12 w-full rounded-xl border-2 border-ink bg-white px-3 text-lg"
       />
       {error && (
-        <p id={`${id}-e`} role="alert" className="mt-1 font-bold text-bordeaux">
+        <p id={`${id}-e`} className="mt-1 font-bold text-bordeaux">
           Attenzione: {error}
         </p>
       )}

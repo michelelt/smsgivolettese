@@ -25,20 +25,25 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
   const q = query.safeParse(Object.fromEntries(searchParams));
   const supabase = await createClient();
-  let ok = false;
+  let error: { message: string; status?: number } | null | undefined;
   if (q.success) {
     if (q.data.code) {
-      ok = !(await supabase.auth.exchangeCodeForSession(q.data.code)).error;
+      ({ error } = await supabase.auth.exchangeCodeForSession(q.data.code));
     } else if (q.data.token_hash && q.data.type) {
-      ok = !(
-        await supabase.auth.verifyOtp({
-          type: q.data.type as EmailOtpType,
-          token_hash: q.data.token_hash,
-        })
-      ).error;
-    }
+      ({ error } = await supabase.auth.verifyOtp({
+        type: q.data.type as EmailOtpType,
+        token_hash: q.data.token_hash,
+      }));
+    } else error = { message: "missing params" };
+  } else error = { message: "invalid params" };
+  if (error) {
+    // The Access Token Hook rejects staff/super_admin sessions from links.
+    // GoTrue answers 403 for it; other failures are plain invalid/expired links.
+    const staff = error.status === 403;
+    return NextResponse.redirect(
+      `${origin}/accedi?errore=${staff ? "personale" : "link"}`,
+    );
   }
-  if (!ok) return NextResponse.redirect(`${origin}/accedi?errore=link`);
   // Invites and recovery must pick a password first.
   const needsPassword =
     q.data?.type === "invite" || q.data?.type === "recovery";
