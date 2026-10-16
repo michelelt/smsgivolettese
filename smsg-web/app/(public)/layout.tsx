@@ -2,8 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { MainNav } from "@/components/public/main-nav";
 import { TextSize } from "@/components/public/text-size";
-import { Icon } from "@/components/ui/icon";
-import { getSiteSettings, telHref } from "@/lib/public/server";
+import { httpsOnly } from "@/lib/public/https-url";
+import { getSiteSettings } from "@/lib/public/server";
+
+const GROUPS = [
+  ["associazioni", "Associazioni del territorio"],
+  ["mutuo_soccorso", "Società di mutuo soccorso"],
+  ["utili", "Link utili"],
+] as const;
 
 export default async function PublicLayout({
   children,
@@ -39,18 +45,6 @@ export default async function PublicLayout({
             </Link>
             <TextSize />
           </div>
-          {site.phone && (
-            <a
-              href={telHref(site.phone)}
-              className="flex min-h-14 items-center justify-center gap-3 rounded-xl bg-bordeaux px-4 text-xl font-extrabold text-white"
-            >
-              <Icon name="phone" />
-              <span>
-                Ci telefoni:{" "}
-                <span className="whitespace-nowrap">{site.phone}</span>
-              </span>
-            </a>
-          )}
           <MainNav />
         </div>
       </header>
@@ -62,14 +56,58 @@ export default async function PublicLayout({
         {children}
       </main>
       <footer className="mt-8 border-t-4 border-blu bg-white">
-        <div className="mx-auto flex max-w-5xl flex-wrap justify-between gap-3 p-4">
-          <p>
-            © Società di Mutuo Soccorso Givolettese
-            {site.address && <> · {site.address}</>}
-          </p>
-          <Link href="/privacy" className="font-bold text-blu underline">
-            Informativa sulla privacy
-          </Link>
+        <div className="mx-auto max-w-5xl space-y-6 p-4">
+          {GROUPS.some(([g]) =>
+            httpsOnly(site.footerLinks).some((l) => l.group === g),
+          ) && (
+            <div className="grid gap-6 sm:grid-cols-3">
+              {GROUPS.map(([g, title]) => {
+                const links = httpsOnly(site.footerLinks).filter(
+                  (l) => l.group === g,
+                );
+                return (
+                  links.length > 0 && (
+                    <nav key={g} aria-label={title}>
+                      <h2 className="text-xl font-extrabold text-bordeaux">
+                        {title}
+                      </h2>
+                      <ul className="mt-2 space-y-1">
+                        {links.map((l, i) => (
+                          <li key={`${i}-${l.url}`}>
+                            <a
+                              href={l.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex min-h-11 items-center font-bold text-blu underline"
+                            >
+                              {l.label}
+                              <span className="sr-only">
+                                {" "}
+                                (si apre in una nuova scheda)
+                              </span>
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </nav>
+                  )
+                );
+              })}
+            </div>
+          )}
+          <div className="flex flex-wrap justify-between gap-3">
+            <p>
+              © Società di Mutuo Soccorso Givolettese
+              {site.address && <> · {site.address}</>}
+              {site.vatNumber && <> · P. IVA {site.vatNumber}</>}
+            </p>
+            <Link
+              href="/privacy"
+              className="inline-flex min-h-11 items-center font-bold text-blu underline"
+            >
+              Informativa sulla privacy
+            </Link>
+          </div>
         </div>
       </footer>
     </>

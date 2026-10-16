@@ -31,6 +31,8 @@ export function SetPasswordForm() {
     const { data } = await supabase.auth.getClaims();
     if (!keepsSessionAfterPassword(roleFromClaims(data?.claims))) {
       await supabase.auth.signOut();
+      // Full reload so the server sees the cleared cookies.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
       window.location.assign("/accedi?impostata=1");
       return;
     }

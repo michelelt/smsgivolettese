@@ -6,10 +6,10 @@ import { Icon } from "@/components/ui/icon";
 
 const ITEMS = [
   { href: "/", label: "Home", icon: "home" },
-  { href: "/servizi", label: "Servizi", icon: "heart" },
-  { href: "/prenota", label: "Prenota", icon: "cal" },
   { href: "/chi-siamo", label: "Chi siamo", icon: "hands" },
-  { href: "/contatti", label: "Contatti", icon: "pin" },
+  { href: "/servizi", label: "Servizi", icon: "heart" },
+  { href: "/convenzioni", label: "Convenzioni", icon: "check" },
+  { href: "/dove-siamo", label: "Dove siamo", icon: "pin" },
   { href: "/accedi", label: "Area riservata", icon: "lock" },
 ] as const;
 

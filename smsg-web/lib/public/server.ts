@@ -7,13 +7,12 @@ const cache = (tag: string) => ({ next: { tags: [tag], revalidate: 3600 } });
 
 const building = () => process.env.NEXT_PHASE === "phase-production-build";
 const EMPTY_SETTINGS = {
-  phone: null,
-  email: null,
   address: null,
-  openingHours: null,
   slogan: null,
   homeIntro: null,
-  membershipInfo: null,
+  vatNumber: null,
+  conventions: [],
+  footerLinks: [],
 };
 
 // Throw at runtime so ISR keeps serving the last good page instead of caching a broken one;
@@ -50,5 +49,3 @@ export const getSiteSettings = () =>
       (await client.GET("/public/site-settings", cache("site-settings"))).data,
     EMPTY_SETTINGS,
   );
-
-export const telHref = (phone: string) => `tel:${phone.replace(/[^\d+]/g, "")}`;

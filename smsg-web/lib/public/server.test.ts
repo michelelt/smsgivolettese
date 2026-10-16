@@ -14,7 +14,7 @@ describe("public loaders when the API is down", () => {
     fetchMock.mockRejectedValue(new TypeError("fetch failed"));
     const { getServices, getSiteSettings } = await import("./server");
     expect(await getServices()).toEqual([]);
-    expect((await getSiteSettings()).phone).toBeNull();
+    expect((await getSiteSettings()).slogan).toBeNull();
     fetchMock.mockResolvedValue(new Response("{}", { status: 500 }));
     expect(await getServices()).toEqual([]);
   });

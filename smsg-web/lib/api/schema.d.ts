@@ -116,11 +116,7 @@ export interface paths {
                                 id: string;
                                 name: string;
                                 description: string | null;
-                                memberPriceCents: number;
-                                nonMemberPriceCents: number;
                                 scheduleNote: string | null;
-                                bookable: boolean;
-                                requiresTransport: boolean;
                             }[];
                         };
                     };
@@ -158,13 +154,23 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            phone: string | null;
-                            email: string | null;
                             address: string | null;
-                            openingHours: string | null;
                             slogan: string | null;
                             homeIntro: string | null;
-                            membershipInfo: string | null;
+                            vatNumber: string | null;
+                            conventions: {
+                                title: string;
+                                description: string;
+                                /** Format: uri */
+                                url?: string;
+                            }[];
+                            footerLinks: {
+                                /** @enum {string} */
+                                group: "associazioni" | "mutuo_soccorso" | "utili";
+                                label: string;
+                                /** Format: uri */
+                                url: string;
+                            }[];
                         };
                     };
                 };
@@ -172,82 +178,6 @@ export interface paths {
         };
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/public/bookings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        /** Format: uuid */
-                        serviceId: string;
-                        /** Format: date */
-                        day: string;
-                        /** @enum {string} */
-                        slot: "mattina" | "pomeriggio";
-                        firstName: string;
-                        lastName: string;
-                        phone: string;
-                        declaredMember: boolean;
-                        notes?: string;
-                        turnstileToken: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description Prenotazione creata */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** Format: uuid */
-                            id: string;
-                        };
-                    };
-                };
-                /** @description VALIDATION_ERROR o TURNSTILE_FAILED */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description INVALID_DAY o SERVICE_NOT_BOOKABLE */
-                422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description RATE_LIMITED */
-                429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
         delete?: never;
         options?: never;
         head?: never;

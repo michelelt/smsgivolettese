@@ -4,9 +4,9 @@ import { parseEnv } from "@/lib/env";
 const PAGES = [
   "",
   "/servizi",
-  "/prenota",
   "/chi-siamo",
-  "/contatti",
+  "/convenzioni",
+  "/dove-siamo",
   "/privacy",
 ];
 

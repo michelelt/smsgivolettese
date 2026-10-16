@@ -1,7 +1,4 @@
 import type { Metadata } from "next";
-import { ButtonLink } from "@/components/ui/button";
-import { Icon } from "@/components/ui/icon";
-import { getSiteSettings } from "@/lib/public/server";
 
 export const revalidate = 3600;
 export const metadata: Metadata = {
@@ -26,8 +23,7 @@ const VALUES = [
   ],
 ];
 
-export default async function ChiSiamo() {
-  const site = await getSiteSettings();
+export default function ChiSiamo() {
   return (
     <div className="space-y-8">
       <div className="max-w-prose space-y-4">
@@ -40,9 +36,9 @@ export default async function ChiSiamo() {
           quota, si sostengono a vicenda nei momenti di bisogno.
         </p>
         <p>
-          Oggi questo aiuto prende la forma di servizi sanitari a prezzi
-          agevolati, accompagnamenti, attività culturali e ricreative, e di un
-          luogo dove ritrovarsi.
+          Oggi questo aiuto prende la forma di servizi sanitari per i soci,
+          accompagnamenti, attività culturali e ricreative, e di un luogo dove
+          ritrovarsi.
         </p>
       </div>
       <div className="grid gap-4 sm:grid-cols-3">
@@ -56,17 +52,6 @@ export default async function ChiSiamo() {
           </section>
         ))}
       </div>
-      <section className="space-y-3 rounded-2xl border-2 border-blu p-5">
-        <h2 className="text-3xl font-extrabold text-blu">Diventare socio</h2>
-        <p className="whitespace-pre-line">
-          {site.membershipInfo ??
-            "Passi in sede durante gli orari di apertura con un documento d'identità e il codice fiscale."}
-        </p>
-        <ButtonLink href="/contatti">
-          <Icon name="pin" />
-          Dove siamo e orari
-        </ButtonLink>
-      </section>
     </div>
   );
 }

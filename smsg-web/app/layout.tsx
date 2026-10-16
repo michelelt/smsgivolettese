@@ -5,7 +5,7 @@ import "./globals.css";
 
 const title = "SMS Givolettese";
 const description =
-  "Società di Mutuo Soccorso Givolettese: visite, prelievi, accompagnamenti e momenti insieme per i soci e le loro famiglie.";
+  "Società di Mutuo Soccorso Givolettese: mutualità, solidarietà e vita associativa a Givoletto.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(parseEnv(process.env).SITE_URL),
@@ -34,7 +34,11 @@ export default function RootLayout({
   return (
     <html lang="it" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: TEXT_SIZE_SCRIPT }} />
+        {/* Raw script: next/script beforeInteractive runs only after JS chunks load, too late for ADR-037 (before paint). */}
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: TEXT_SIZE_SCRIPT }}
+        />
       </head>
       <body>{children}</body>
     </html>
