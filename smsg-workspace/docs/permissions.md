@@ -85,7 +85,7 @@ API queries run as `authenticated`/`anon` with the caller's JWT claims (ADR-002)
 | `posts` | S published | S published | S/I/U/D | |
 | `post_proposals` | – (I via function) | – | S/U | D |
 | `media` | S `bucket='media'` | S `bucket='media'` | S/I/D | |
-| `site_settings` | S | S | S/U | |
+| `site_settings` | S | S | S/U (incl. `pages`, ADR-061; no new permission) | |
 | `org_settings` | – | – | – | S/U |
 | `audit_log` | – | – | – | S |
 | `rate_limit_hits` | – | – | – | (service only) |

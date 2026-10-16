@@ -90,7 +90,7 @@ All routes require a session; permission key → minimum role in `permissions.ts
 | `POST /invoices/:id/void` `{ reason 1..300 }` | `invoices.void` | `void_invoice` |
 | `GET /invoices/export.csv?year` | `invoices.export` | ADR-050 |
 | `GET /services` · `POST /services` · `PATCH /services/:id` | `services.read` / `services.write` | all services with `priceCents` (single price, ADR-060); writes revalidate `services`; no DELETE |
-| `PUT /site-settings` | `site_settings.write` | ADR-051; read via `GET /public/site-settings` |
+| `PUT /site-settings` | `site_settings.write` | ADR-051; body includes required `pages` (ADR-061, major bump); read via `GET /public/site-settings` (adds `pages`) |
 | `GET /org-info` | `org_info.read` | `staff_org_info()` |
 New error codes: `TAX_CODE_INVALID` 422, `SERVICE_INACTIVE` 422, `BOOKING_INVALID_TRANSITION`, `MEMBER_INVALID_TRANSITION`, `INVOICE_NOT_PAYABLE`, `MEMBER_TAX_CODE_EXISTS`, `FEE_ALREADY_PAID`, `CARD_NUMBER_IMMUTABLE` 409; `MEMBER_NOT_FOUND` 404, `VOID_REASON_REQUIRED` 400 (existing raises, now mapped); `MEMBER_NOT_ACTIVE` 422 (ADR-060). Removed with ADR-060: `CLIENT_ALREADY_LINKED`, `CLIENT_NOT_FOUND`.
 
@@ -108,7 +108,8 @@ Web serves images with `next/image` (`remotePatterns` = Supabase Storage host). 
 - Rule: ship API changes backward-compatible (add, then remove after web is deployed); then deploy order between repos does not matter.
 
 ## ISR revalidation
-- Public pages are Server Components fetching `${API_URL}` with `next: { tags: [...] }` and `revalidate: 3600` fallback. Tags: `posts`, `post:<slug>`, `services`, `site-settings`.
+- Public pages are Server Components fetching `${API_URL}` with `next: { tags: [...] }` and `revalidate: 3600` fallback. Tags: `posts`, `post:<slug>`, `services`, `site-settings`. All six showcase pages read site settings (page texts, ADR-061), so `site-settings` revalidates them all; `/servizi` also uses `services`. No per-page tags.
+- Staff edit public pages in place at `/gestione/sito?pagina=…` ("Modifica il sito", ADR-061): the real public page components in edit mode, one global save. Public layout shows "Modifica questa pagina" only client-side to staff (cookie presence → lazy Supabase client → `app_role` claim); public HTML stays static.
 - After publish/update/unpublish/delete of posts, writes to services or site_settings, the API service calls `POST ${WEB_URL}/hooks/revalidate` with header `x-revalidate-secret: ${REVALIDATE_SECRET}` and body `{ tags: string[] }` (2 s timeout, failure logged, never fails the write). The route handler checks the secret (constant-time) and calls `revalidateTag(tag)` (use the Next 16 signature with immediate expiry).
 - Not under `/api/*`: that prefix is rewritten to the API.
 
