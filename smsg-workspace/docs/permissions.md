@@ -29,7 +29,6 @@ export const can = (role: AppRole | null, action: Action) => rank(role) >= rank(
 | `transports.read_own` (minimal view), `transports.respond_own`, `transports.complete_own` | – | own | own | own | volontario |
 | `volunteers.read_own` | – | own | own | own | volontario |
 | `bookings.read`, `bookings.write`, `bookings.change_status` | – | – | ✔ | ✔ | staff |
-| `clients.read`, `clients.write` | – | – | ✔ | ✔ | staff |
 | `members.read`, `members.write`, `members.end`, `members.export`, `membership_fees.write` | – | – | ✔ | ✔ | staff |
 | `invoices.read`, `invoices.issue`, `invoices.mark_paid`, `invoices.void`, `invoices.export` | – | – | ✔ | ✔ | staff |
 | `services.read` (all, with prices), `services.write`, `site_settings.write` | – | – | ✔ | ✔ | staff |
@@ -55,7 +54,7 @@ Notes: `org_settings` is read by `issue_invoice`/receipts internally (definer), 
 | Route under `/gestione` | Min role |
 |---|---|
 | `/` (dashboard by role; volunteer = "I miei impegni"), `/disponibilita` (own grid; staff see all) | volontario |
-| `prenotazioni`, `utenti`, `soci`, `fatture`, `bacheca`, `servizi`, `sito` (Info del sito), `turni`, `trasporti`, `volontari`, `mezzi` (ADR-059) | staff |
+| `prenotazioni`, `soci` (also history of bookings/transports/invoices; `utenti` "Assistiti" removed, ADR-060), `fatture`, `bacheca`, `servizi`, `sito` (Info del sito), `turni`, `trasporti`, `volontari`, `mezzi` (ADR-059) | staff |
 | `impostazioni`, `utenti-e-ruoli`, `registro-attivita` | super_admin |
 Navigation hides what the role cannot do; the API is the enforcement point.
 
@@ -76,7 +75,6 @@ API queries run as `authenticated`/`anon` with the caller's JWT claims (ADR-002)
 | `volunteer_commitments` | – | – | S | (writes by triggers only) |
 | `transports` | – | – (use view) | S/I/U (no D; cancel = `annullato`) | |
 | `volunteer_transports_v` (view) | – | S (filtered in view) | – | |
-| `clients` | – | – | S/I/U | |
 | `services` | S `active`, columns without prices only (column grant, ADR-044) | S `active` | S/I/U/D | |
 | `bookings` | – | – | S/I/U (no D; cancel = status; only write path, ADR-043) | |
 | `members` | – | – | S/U (I via `register_member`) | |
@@ -99,7 +97,7 @@ Volunteer writes outside availability go through `security definer` functions th
 - `update_my_profile(phone)`.
 
 ## Volunteer data minimisation
-A volunteer sees for an assigned transport **only**: client first/last name and phone, from/to address, date, departure/appointment/return times, wheelchair, companion, status, vehicle plate/model, and their own km/driver notes. Never: `tax_code`, `address` of the client record, `reason`, staff `notes`, invoices, bookings, other clients.
+A volunteer sees for an assigned transport **only**: the member's first/last name and phone, from/to address, date, departure/appointment/return times, wheelchair, companion, status, vehicle plate/model, and their own km/driver notes. Never: card number, `tax_code`, birth data, email, `address` of the member record, `reason`, staff `notes`, fees, invoices, bookings, other members.
 Enforced twice: the view `volunteer_transports_v` (owned by `postgres`, `security_barrier`, filter `driver_volunteer_id = auth.uid()`, `grant select to authenticated`, no base-table policy for volunteers) and the API response schema `MyTransport` (Zod, strict). Shifts carry no personal data and use plain RLS.
 
 ## Invites and user lifecycle
@@ -114,7 +112,7 @@ Enforced twice: the view `volunteer_transports_v` (owned by `postgres`, `securit
 - **Staff lost password**: the super admin resets it from the Supabase dashboard (owner decision, ADR-034). There is no API endpoint for it: no endpoint, role or script may call `auth.admin.updateUserById` with `password` or otherwise set another user's password.
 
 ## GDPR (super_admin)
-- `GET /gdpr/export?subject=client|member|user&id=…` → JSON with every row referencing the person (client + bookings + transports + invoices; member + fees; profile + volunteer + availability + assignments). Writes an audit row.
-- `POST /gdpr/anonymize` → definer functions `app.anonymize_client|member|user(id)`: names → `Anonimo`, phone/tax code/address/email/birth data → null, `anonymized_at = now()`; keeps ids, card numbers, amounts and statuses; redacts `before/after` of that person's rows in `audit_log` (`redacted = true`). For users also bans the auth user and replaces its email with `deleted+<id>@invalid.local`.
+- `GET /gdpr/export?subject=member|user&id=…` → JSON with every row referencing the person (member + fees + bookings + transports + invoices; profile + volunteer + availability + assignments). Writes an audit row. No `client` subject (ADR-060).
+- `POST /gdpr/anonymize` → definer functions `app.anonymize_member|user(id)`: names → `Anonimo`, phone/tax code/address/email/birth data → null, `anonymized_at = now()`; keeps ids, card numbers, amounts and statuses; redacts `before/after` of that person's rows in `audit_log` (`redacted = true`). For users also bans the auth user and replaces its email with `deleted+<id>@invalid.local`.
 - **Invoices are not anonymised** (fiscal retention, 10 years — GDPR art. 17(3)(b)); the response lists retained invoices. Open question for the association's privacy officer.
 - No health data: only the service type; `transports.reason` and notes carry a UI warning.
