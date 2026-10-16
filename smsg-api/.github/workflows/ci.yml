@@ -1,4 +1,5 @@
 name: ci
+permissions: { contents: read }
 on:
   pull_request:
   push:
@@ -22,7 +23,7 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           if git show origin/main:openapi.json > /tmp/base.json 2>/dev/null; then
-            docker run --rm -v /tmp:/t -v "$PWD":/w tufin/oasdiff breaking /t/base.json /w/openapi.json --fail-on ERR
+            docker run --rm -v /tmp:/t -v "$PWD":/w tufin/oasdiff:v1.33.0 breaking /t/base.json /w/openapi.json --fail-on ERR
           else
             echo "No openapi.json on main, skipping"
           fi

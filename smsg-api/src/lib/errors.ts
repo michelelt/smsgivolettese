@@ -42,6 +42,13 @@ export class RateLimited extends DomainError {
   }
 }
 
+const PG_RAISE_CODES = new Set([
+  'DRIVER_NOT_ELIGIBLE',
+  'LAST_SUPER_ADMIN',
+  'BOOKINGS_NOT_INVOICEABLE',
+  'INVOICE_IMMUTABLE',
+]); // extend with new RAISE codes as modules add them
+
 /** Placeholder: maps Postgres errors per architecture.md §Errors. Messages refined with each module. */
 export function fromPostgres(err: { code?: string; constraint_name?: string; message?: string }) {
   switch (err.code) {
@@ -52,7 +59,10 @@ export function fromPostgres(err: { code?: string; constraint_name?: string; mes
       return new Conflict('Valore già esistente', 'DUPLICATE');
     case 'P0001':
       // RAISE EXCEPTION message is the stable code (DRIVER_NOT_ELIGIBLE, LAST_SUPER_ADMIN, ...)
-      return new Conflict('Operazione non consentita', err.message ?? 'CONFLICT');
+      return new Conflict(
+        'Operazione non consentita',
+        PG_RAISE_CODES.has(err.message ?? '') ? err.message! : 'CONFLICT',
+      );
     case '42501':
       return new Forbidden();
     default:

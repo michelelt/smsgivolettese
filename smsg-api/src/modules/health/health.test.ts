@@ -17,4 +17,12 @@ describe('health', () => {
     });
     expect(res.headers.get('x-request-id')).toBeTruthy();
   });
+
+  it('replaces a malformed x-request-id and sets security headers', async () => {
+    const res = await app.request('/health', {
+      headers: { 'x-request-id': 'bad id\u0021<script>' },
+    });
+    expect(res.headers.get('x-request-id')).toMatch(/^[0-9a-f-]{36}$/);
+    expect(res.headers.get('x-content-type-options')).toBe('nosniff');
+  });
 });

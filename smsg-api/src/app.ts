@@ -1,12 +1,16 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
+import { secureHeaders } from 'hono/secure-headers';
 import { DomainError } from './lib/errors.js';
 import { log } from './lib/logger.js';
 import { healthRoutes } from './modules/health/health.routes.js';
 
 export const app = new OpenAPIHono();
 
+app.use(secureHeaders());
+
 app.use(async (c, next) => {
-  const requestId = c.req.header('x-request-id') ?? crypto.randomUUID();
+  const incoming = c.req.header('x-request-id');
+  const requestId = incoming && /^[\w-]{1,64}$/.test(incoming) ? incoming : crypto.randomUUID();
   c.set('requestId' as never, requestId as never);
   const start = Date.now();
   await next();
