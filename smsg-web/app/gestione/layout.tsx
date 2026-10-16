@@ -1,9 +1,43 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { hasRole, SECTIONS } from "@/lib/auth/roles";
 import { Providers } from "./providers";
-import { NavLink } from "./nav-link";
+import { GestioneNav, type NavGroup } from "./staff-nav";
 import { getSessionRole } from "@/lib/supabase/server";
+
+type Item = NavGroup["items"][number];
+/** Order of groups and of the links inside them, with the one-line help shown in the menus. */
+const MENU: Record<string, Record<string, Pick<Item, "icon" | "desc">>> = {
+  Attività: {
+    prenotazioni: { icon: "cal", desc: "Richieste e appuntamenti" },
+    turni: { icon: "clock", desc: "Turni della settimana" },
+    trasporti: { icon: "car", desc: "Viaggi e accompagnamenti" },
+    disponibilita: { icon: "hands", desc: "Chi può aiutare e quando" },
+  },
+  Persone: {
+    utenti: { icon: "user", desc: "Anagrafica delle persone assistite" },
+    soci: { icon: "heart", desc: "Iscrizioni e quote" },
+    volontari: { icon: "hands", desc: "Elenco dei volontari" },
+  },
+  Amministrazione: {
+    fatture: { icon: "doc", desc: "Fatture e pagamenti" },
+    servizi: { icon: "tag", desc: "Elenco servizi e tariffe" },
+    mezzi: { icon: "car", desc: "Veicoli dell’associazione" },
+  },
+  Sito: {
+    bacheca: { icon: "news", desc: "Avvisi per i soci" },
+    sito: { icon: "globe", desc: "Contatti e orari" },
+  },
+  "Super admin": {
+    impostazioni: { icon: "gear", desc: "Configurazione generale" },
+    "utenti-e-ruoli": { icon: "shield", desc: "Account e permessi" },
+    "registro-attivita": { icon: "list", desc: "Chi ha fatto cosa" },
+  },
+};
+const ROLE_LABEL = {
+  volontario: "Volontario",
+  staff: "Staff",
+  super_admin: "Super admin",
+} as const;
 
 export default async function GestioneLayout({
   children,
@@ -12,46 +46,30 @@ export default async function GestioneLayout({
 }) {
   const { role } = await getSessionRole();
   if (!role) redirect("/accedi?next=/gestione"); // defence in depth behind proxy.ts
-  const items = SECTIONS.filter((s) => hasRole(role, s.min));
+  const groups: NavGroup[] = Object.entries(MENU)
+    .map(([name, slugs]) => ({
+      name,
+      items: Object.entries(slugs).flatMap(([slug, m]) => {
+        const s = SECTIONS.find((x) => x.slug === slug);
+        if (!s || s.group !== name || !hasRole(role, s.min)) return [];
+        const label =
+          slug === "disponibilita" ? "Disponibilità volontari" : s.label;
+        return [{ href: `/gestione/${slug}`, label, ...m }];
+      }),
+    }))
+    .filter((g) => g.items.length > 0);
   return (
-    <div className="mx-auto max-w-5xl p-6">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <Link
-          href="/gestione"
-          className="text-2xl font-extrabold text-bordeaux"
-        >
-          SMS Givolettese — Gestione
-        </Link>
-        <form action="/auth/esci" method="post">
-          <button className="min-h-12 rounded-xl border-2 border-blu px-5 text-lg font-bold text-blu">
-            Esci
-          </button>
-        </form>
-      </header>
-      <nav aria-label="Sezioni di gestione" className="mt-4">
-        <ul className="flex flex-wrap gap-3">
-          {role === "volontario" && (
-            <li>
-              <NavLink href="/gestione">I miei impegni</NavLink>
-            </li>
-          )}
-          {items.map((s) => (
-            <li key={s.slug}>
-              <NavLink href={`/gestione/${s.slug}`}>
-                {s.slug === "disponibilita" && role !== "volontario"
-                  ? "Disponibilità volontari"
-                  : s.label}
-              </NavLink>
-            </li>
-          ))}
-          <li>
-            <NavLink href="/gestione/account/password">Cambia password</NavLink>
-          </li>
-        </ul>
-      </nav>
-      <main className="mt-6">
-        <Providers>{children}</Providers>
-      </main>
-    </div>
+    <>
+      <GestioneNav
+        groups={groups}
+        roleLabel={ROLE_LABEL[role]}
+        volunteer={role === "volontario"}
+      />
+      <div className="mx-auto max-w-[1800px] px-4 md:px-6 lg:px-8 py-6">
+        <main>
+          <Providers>{children}</Providers>
+        </main>
+      </div>
+    </>
   );
 }

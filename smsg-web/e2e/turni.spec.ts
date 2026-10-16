@@ -105,6 +105,38 @@ test("axe (staff): phase 5 pages", async ({ page }) => {
   }
 });
 
+test("turni never scrolls horizontally", async ({ page }) => {
+  await login(page, env("E2E_STAFF_EMAIL"));
+  for (const width of [320, 390, 768, 1024, 1280, 1440, 1536, 1920, 2560]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/gestione/turni");
+    await expect(page.getByText("Caricamento…")).toHaveCount(0);
+    const w = await page.evaluate(() => [
+      document.documentElement.scrollWidth,
+      innerWidth,
+    ]);
+    expect.soft(w[0], `width ${width}`).toBeLessThanOrEqual(w[1]);
+    for (const fs of [19, 25]) {
+      await page.evaluate(
+        (f) => (document.documentElement.style.fontSize = f + "px"),
+        fs,
+      );
+      const out = await page.evaluate(() =>
+        [...document.querySelectorAll("ol > li li button, ol > li li li")]
+          .filter((e) => {
+            const card = e
+              .parentElement!.closest("li")!
+              .getBoundingClientRect();
+            const r = e.getBoundingClientRect();
+            return r.right > card.right + 0.5 || r.left < card.left - 0.5;
+          })
+          .map((e) => e.textContent),
+      );
+      expect(out, `card overflow ${width}/${fs}`).toEqual([]);
+    }
+  }
+});
+
 test("staff registers a transport and opens its page", async ({ page }) => {
   await login(page, env("E2E_STAFF_EMAIL"));
   await page.goto("/gestione/trasporti/nuovo");

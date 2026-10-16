@@ -19,22 +19,57 @@ export const roleFromClaims = (claims: unknown): AppRole | null => {
 
 /** Section under /gestione -> label and minimum role (mirrors docs/permissions.md). */
 export const SECTIONS = [
-  { slug: "disponibilita", label: "Le mie disponibilità", min: "volontario" },
-  { slug: "prenotazioni", label: "Prenotazioni", min: "staff" },
-  { slug: "utenti", label: "Utenti", min: "staff" },
-  { slug: "soci", label: "Soci", min: "staff" },
-  { slug: "fatture", label: "Fatture", min: "staff" },
-  { slug: "bacheca", label: "Bacheca", min: "staff" },
-  { slug: "servizi", label: "Servizi", min: "staff" },
-  { slug: "sito", label: "Info del sito", min: "staff" },
-  { slug: "turni", label: "Turni", min: "staff" },
-  { slug: "trasporti", label: "Trasporti", min: "staff" },
-  { slug: "mezzi", label: "Mezzi", min: "staff" },
-  { slug: "volontari", label: "Volontari", min: "staff" },
-  { slug: "impostazioni", label: "Impostazioni", min: "super_admin" },
-  { slug: "utenti-e-ruoli", label: "Utenti e ruoli", min: "super_admin" },
-  { slug: "registro-attivita", label: "Registro attività", min: "super_admin" },
-] as const satisfies readonly { slug: string; label: string; min: AppRole }[];
+  {
+    slug: "disponibilita",
+    label: "Le mie disponibilità",
+    min: "volontario",
+    group: "Attività",
+  },
+  {
+    slug: "prenotazioni",
+    label: "Prenotazioni",
+    min: "staff",
+    group: "Attività",
+  },
+  { slug: "utenti", label: "Assistiti", min: "staff", group: "Persone" },
+  { slug: "soci", label: "Soci", min: "staff", group: "Persone" },
+  { slug: "fatture", label: "Fatture", min: "staff", group: "Amministrazione" },
+  { slug: "bacheca", label: "Bacheca", min: "staff", group: "Sito" },
+  {
+    slug: "servizi",
+    label: "Servizi e prezzi",
+    min: "staff",
+    group: "Amministrazione",
+  },
+  { slug: "sito", label: "Info del sito", min: "staff", group: "Sito" },
+  { slug: "turni", label: "Turni", min: "staff", group: "Attività" },
+  { slug: "trasporti", label: "Trasporti", min: "staff", group: "Attività" },
+  { slug: "mezzi", label: "Mezzi", min: "staff", group: "Amministrazione" },
+  { slug: "volontari", label: "Volontari", min: "staff", group: "Persone" },
+  {
+    slug: "impostazioni",
+    label: "Impostazioni",
+    min: "super_admin",
+    group: "Super admin",
+  },
+  {
+    slug: "utenti-e-ruoli",
+    label: "Utenti e ruoli",
+    min: "super_admin",
+    group: "Super admin",
+  },
+  {
+    slug: "registro-attivita",
+    label: "Registro attività",
+    min: "super_admin",
+    group: "Super admin",
+  },
+] as const satisfies readonly {
+  slug: string;
+  label: string;
+  min: AppRole;
+  group: string;
+}[];
 
 export const hasRole = (role: AppRole | null, min: AppRole) =>
   role !== null && RANK[role] >= RANK[min];

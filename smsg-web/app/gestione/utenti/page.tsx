@@ -27,7 +27,7 @@ export default function Utenti() {
   });
   return (
     <>
-      <h1 className="text-4xl font-extrabold text-bordeaux">Utenti</h1>
+      <h1 className="text-4xl font-extrabold text-bordeaux">Assistiti</h1>
       <div className="mt-4">
         <Button auto onClick={() => setAdding(true)}>
           Nuovo utente

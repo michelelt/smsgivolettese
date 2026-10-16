@@ -3,6 +3,32 @@
 import { useEffect, useId, useRef } from "react";
 import { Button } from "./button";
 
+const outside = (e: React.MouseEvent<HTMLDialogElement>) => {
+  const r = e.currentTarget.getBoundingClientRect();
+  return (
+    e.clientX < r.left ||
+    e.clientX > r.right ||
+    e.clientY < r.top ||
+    e.clientY > r.bottom
+  );
+};
+
+/** Props for a native <dialog> that closes on a click on the backdrop. */
+export function backdropClose() {
+  let downOutside = false;
+  return {
+    // Both press and release must be outside, so a text selection dragged out of a field never closes it.
+    onMouseDown: (e: React.MouseEvent<HTMLDialogElement>) => {
+      downOutside = e.target === e.currentTarget && outside(e);
+    },
+    onClick: (e: React.MouseEvent<HTMLDialogElement>) => {
+      if (downOutside && e.target === e.currentTarget && outside(e))
+        e.currentTarget.close();
+      downOutside = false;
+    },
+  };
+}
+
 /** Native <dialog>: focus trap, Esc and inert background come from the browser. */
 export function Dialog({
   open,
@@ -28,6 +54,7 @@ export function Dialog({
       ref={ref}
       aria-labelledby={id}
       onClose={onClose}
+      {...backdropClose()}
       className="m-auto max-h-[92vh] w-[calc(100%-2rem)] max-w-xl rounded-2xl border-2 border-ink bg-paper p-6 text-ink backdrop:bg-black/60"
     >
       {open && (
