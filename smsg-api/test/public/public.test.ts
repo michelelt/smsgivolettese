@@ -43,6 +43,8 @@ describe('GET /public/*', () => {
   });
   it('fails closed with 500 on a non-https footer url in DB', async () => {
     const old = (await sql`select footer_links from site_settings`)[0]!.footer_links;
+    // the DB check now blocks this state; drop it to simulate legacy data
+    await sql`alter table site_settings drop constraint site_settings_links_valid`;
     await sql`update site_settings set footer_links = ${sql.json([{ group: 'utili', label: 'x', url: 'http://evil.example' }])}`;
     try {
       const r = await app.request('/public/site-settings');
@@ -50,6 +52,7 @@ describe('GET /public/*', () => {
       expect(await r.text()).not.toContain('evil.example');
     } finally {
       await sql`update site_settings set footer_links = ${sql.json(old)}`;
+      await sql`alter table site_settings add constraint site_settings_links_valid check (app.site_links_valid(conventions, footer_links))`;
     }
   });
   it('POST /public/bookings no longer exists', async () => {

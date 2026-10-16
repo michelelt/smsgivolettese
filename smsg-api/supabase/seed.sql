@@ -53,7 +53,7 @@ insert into public.shift_assignments (shift_id, volunteer_id, status)
 select id, 'a0000000-0000-4000-8000-000000000003', 'proposto' from public.shifts;
 insert into public.posts (slug, title, category, content, excerpt, status, published_at) values
   ('festa-di-esempio', 'Festa di esempio', 'evento', '[]', 'Evento fittizio per il sito.', 'pubblicata', now());
-update public.site_settings set slogan = 'Sito di esempio', vat_number = '00000000000 (esempio)',
+update public.site_settings set slogan = 'Sito di esempio', vat_number = '00000000000',
   conventions = '[{"title":"Farmacia di esempio","description":"Sconto per i soci (esempio)","url":"https://example.test/farmacia"},{"title":"Ottica di esempio","description":"Convenzione fittizia"}]',
   footer_links = '[{"group":"associazioni","label":"Pro Loco (esempio)","url":"https://example.test/proloco"},
     {"group":"associazioni","label":"Croce Esempio","url":"https://example.test/croce"},
@@ -61,3 +61,10 @@ update public.site_settings set slogan = 'Sito di esempio', vat_number = '000000
     {"group":"mutuo_soccorso","label":"Società di mutuo soccorso vicina (esempio)","url":"https://example.test/sms"},
     {"group":"utili","label":"Comune di esempio","url":"https://example.test/comune"},
     {"group":"utili","label":"ASL di esempio","url":"https://example.test/asl"}]';
+
+insert into public.bookings (client_id, service_id, day, slot, declared_member, price_applied_cents, origin, status, executed_at)
+select c.id, s.id, current_date + d.off, 'mattina', false, s.non_member_price_cents, 'telefono', d.st::public.booking_status,
+  case when d.st = 'eseguita' then now() end
+from public.clients c, public.services s,
+  (values (1, 'attesa'), (-7, 'eseguita'), (-3, 'eseguita')) d (off, st)
+where c.last_name = 'Rossi (esempio)' and s.name = 'Prelievi (esempio)';

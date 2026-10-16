@@ -1,5 +1,6 @@
 {
   "regions": ["fra1"],
   "git": { "deploymentEnabled": { "main": false } },
+  "functions": { "api/index.ts": { "includeFiles": "assets/fonts/**" } },
   "rewrites": [{ "source": "/(.*)", "destination": "/api" }]
 }

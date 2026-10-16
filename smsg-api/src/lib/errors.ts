@@ -36,6 +36,11 @@ export class Conflict extends DomainError {
     super(409, code, message, details);
   }
 }
+export class Unprocessable extends DomainError {
+  constructor(message: string, code: string, details?: unknown) {
+    super(422, code, message, details);
+  }
+}
 export class RateLimited extends DomainError {
   constructor(message = 'Troppe richieste, riprova più tardi') {
     super(429, 'RATE_LIMITED', message);
@@ -47,6 +52,16 @@ export class TurnstileFailed extends DomainError {
     super(400, 'TURNSTILE_FAILED', message);
   }
 }
+
+// Unique constraint name -> [code, Italian message].
+const PG_UNIQUE: Record<string, [string, string]> = {
+  members_tax_code_key: ['MEMBER_TAX_CODE_EXISTS', 'Esiste già un socio con questo codice fiscale'],
+  membership_fees_member_id_year_key: [
+    'FEE_ALREADY_PAID',
+    "La quota di quell'anno è già registrata",
+  ],
+  clients_member_id_key: ['CLIENT_ALREADY_LINKED', 'Il socio è già collegato a un altro cliente'],
+};
 
 // Stable RAISE EXCEPTION message codes from the DB -> [HTTP status, Italian message].
 const PG_RAISE: Record<string, [ErrorStatus, string]> = {
@@ -62,6 +77,9 @@ const PG_RAISE: Record<string, [ErrorStatus, string]> = {
   ASSIGNMENT_NOT_FOUND: [404, 'Assegnazione non trovata'],
   TRANSPORT_NOT_FOUND: [404, 'Trasporto non trovato'],
   TRANSPORT_NOT_COMPLETABLE: [409, 'Il trasporto non può essere completato'],
+  CLIENT_NOT_FOUND: [404, 'Cliente non trovato'],
+  VOID_REASON_REQUIRED: [400, "Indica il motivo dell'annullamento"],
+  CARD_NUMBER_IMMUTABLE: [409, 'Il numero di tessera non è modificabile'],
 };
 
 /** Maps Postgres errors per architecture.md §Errors. */
@@ -69,9 +87,13 @@ export function fromPostgres(err: { code?: string; constraint_name?: string; mes
   switch (err.code) {
     case '23P01':
       return new Conflict('Impegno sovrapposto', 'COMMITMENT_OVERLAP');
-    case '23505':
-      // TODO: map by constraint name (e.g. members_tax_code_key -> MEMBER_TAX_CODE_EXISTS)
-      return new Conflict('Valore già esistente', 'DUPLICATE');
+    case '23505': {
+      const u = PG_UNIQUE[err.constraint_name ?? ''];
+      return u ? new Conflict(u[1], u[0]) : new Conflict('Valore già esistente', 'DUPLICATE');
+    }
+    case '23514':
+    case '23503':
+      return new ValidationError('Dati non validi');
     case 'P0001': {
       // RAISE EXCEPTION message is the stable code
       const known = PG_RAISE[err.message ?? ''];

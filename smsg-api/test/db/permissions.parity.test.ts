@@ -1,6 +1,7 @@
-import { describe, expect, it } from 'vitest';
+import { afterAll, describe, expect, it } from 'vitest';
 import { PERMISSIONS, type Action } from '../../src/auth/permissions';
 import { specs } from './rls.matrix';
+import { ID, ROLES, actAs, fixtures, rank, rolledBack, sql } from './helpers';
 
 type Op = 'S' | 'I' | 'U' | 'D';
 // Permissions backed directly by a table policy. Each must equal the minimum role of every listed
@@ -79,6 +80,8 @@ const BACKING: Partial<Record<Action, [string, Op][]>> = {
   'audit.read': [['audit_log', 'S']],
 };
 
+afterAll(() => sql.end());
+
 describe('permissions.ts mirrors the RLS matrix', () => {
   for (const [action, backing] of Object.entries(BACKING) as [Action, [string, Op][]][]) {
     for (const [table, op] of backing) {
@@ -88,5 +91,24 @@ describe('permissions.ts mirrors the RLS matrix', () => {
         expect(PERMISSIONS[action]).toBe(min);
       });
     }
+  }
+});
+
+// users.read is ownership-scoped in the matrix (volunteers see their own row), so check other users' rows here.
+describe('users.read mirrors RLS on profiles and user_roles', () => {
+  for (const role of ROLES.filter((r) => r !== 'anon')) {
+    it(`${role} ${rank(role) >= rank(PERMISSIONS['users.read']) ? 'sees' : 'does not see'} other users`, async () => {
+      await rolledBack(async (tx) => {
+        await fixtures(tx);
+        await actAs(tx, role);
+        const visible = rank(role) >= rank(PERMISSIONS['users.read']) ? 1 : 0;
+        expect(await tx.unsafe(`select 1 from profiles where id = '${ID.vol2}'`)).toHaveLength(
+          visible,
+        );
+        expect(
+          await tx.unsafe(`select 1 from user_roles where user_id = '${ID.vol2}'`),
+        ).toHaveLength(visible);
+      });
+    });
   }
 });
