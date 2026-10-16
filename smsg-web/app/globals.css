@@ -11,6 +11,12 @@
 html {
   font-size: 19px;
 }
+html[data-text-size="l"] {
+  font-size: 22px;
+}
+html[data-text-size="xl"] {
+  font-size: 25px;
+}
 body {
   background: var(--color-paper);
   color: var(--color-ink);

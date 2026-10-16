@@ -88,6 +88,172 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/public/services": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Servizi attivi */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: {
+                                /** Format: uuid */
+                                id: string;
+                                name: string;
+                                description: string | null;
+                                memberPriceCents: number;
+                                nonMemberPriceCents: number;
+                                scheduleNote: string | null;
+                                bookable: boolean;
+                                requiresTransport: boolean;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/site-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Impostazioni del sito */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            phone: string | null;
+                            email: string | null;
+                            address: string | null;
+                            openingHours: string | null;
+                            slogan: string | null;
+                            homeIntro: string | null;
+                            membershipInfo: string | null;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/bookings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** Format: uuid */
+                        serviceId: string;
+                        /** Format: date */
+                        day: string;
+                        /** @enum {string} */
+                        slot: "mattina" | "pomeriggio";
+                        firstName: string;
+                        lastName: string;
+                        phone: string;
+                        declaredMember: boolean;
+                        notes?: string;
+                        turnstileToken: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Prenotazione creata */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** Format: uuid */
+                            id: string;
+                        };
+                    };
+                };
+                /** @description VALIDATION_ERROR o TURNSTILE_FAILED */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description INVALID_DAY o SERVICE_NOT_BOOKABLE */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description RATE_LIMITED */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
