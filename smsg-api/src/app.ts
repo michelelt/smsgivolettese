@@ -1,7 +1,9 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { secureHeaders } from 'hono/secure-headers';
-import { DomainError } from './lib/errors.js';
+import { authenticate } from './auth/middleware.js';
+import { DomainError, fromPostgres } from './lib/errors.js';
 import { log } from './lib/logger.js';
+import { meRoutes } from './modules/me/me.routes.js';
 import { healthRoutes } from './modules/health/health.routes.js';
 
 export const app = new OpenAPIHono();
@@ -24,7 +26,16 @@ app.use(async (c, next) => {
   });
 });
 
+app.use(authenticate);
+
 app.route('/', healthRoutes);
+app.route('/', meRoutes);
+
+app.openAPIRegistry.registerComponent('securitySchemes', 'bearerAuth', {
+  type: 'http',
+  scheme: 'bearer',
+  bearerFormat: 'JWT',
+});
 
 app.doc('/openapi.json', {
   openapi: '3.1.0',
@@ -41,6 +52,8 @@ app.onError((err, c) => {
   if (err instanceof DomainError) {
     return c.json(body(err.code, err.message, err.details), err.status);
   }
+  const pg = fromPostgres(err as { code?: string; message?: string });
+  if (pg) return c.json(body(pg.code, pg.message), pg.status);
   log('error', 'unhandled', { name: err.name }); // message may contain PII, not logged
   return c.json(body('INTERNAL_ERROR', 'Errore interno del server'), 500);
 });

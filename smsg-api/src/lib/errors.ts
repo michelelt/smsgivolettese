@@ -42,14 +42,25 @@ export class RateLimited extends DomainError {
   }
 }
 
-const PG_RAISE_CODES = new Set([
-  'DRIVER_NOT_ELIGIBLE',
-  'LAST_SUPER_ADMIN',
-  'BOOKINGS_NOT_INVOICEABLE',
-  'INVOICE_IMMUTABLE',
-]); // extend with new RAISE codes as modules add them
+// Stable RAISE EXCEPTION message codes from the DB -> [HTTP status, Italian message].
+const PG_RAISE: Record<string, [ErrorStatus, string]> = {
+  DRIVER_NOT_ELIGIBLE: [409, 'Il volontario non è idoneo alla guida (patente o autorizzazione)'],
+  VEHICLE_NOT_SUITABLE: [409, 'Il mezzo non è adatto al trasporto richiesto'],
+  DRIVER_HAS_FUTURE_TRANSPORTS: [409, 'Il volontario ha trasporti futuri assegnati'],
+  LAST_SUPER_ADMIN: [409, 'Deve restare almeno un super amministratore attivo'],
+  BOOKINGS_NOT_INVOICEABLE: [409, 'Alcune prenotazioni non sono fatturabili'],
+  INVOICE_NOT_VOIDABLE: [409, 'La fattura non può essere annullata'],
+  INVOICE_IMMUTABLE: [409, 'La fattura emessa non è modificabile'],
+  COUNTER_BELOW_MAX: [409, 'Il contatore non può essere inferiore al numero più alto già emesso'],
+  INVALID_DAY: [422, 'Giorno non valido'],
+  SERVICE_NOT_BOOKABLE: [422, 'Il servizio non è prenotabile'],
+  INVALID_INPUT: [400, 'Dati non validi'],
+  ASSIGNMENT_NOT_FOUND: [404, 'Assegnazione non trovata'],
+  TRANSPORT_NOT_FOUND: [404, 'Trasporto non trovato'],
+  TRANSPORT_NOT_COMPLETABLE: [409, 'Il trasporto non può essere completato'],
+};
 
-/** Placeholder: maps Postgres errors per architecture.md §Errors. Messages refined with each module. */
+/** Maps Postgres errors per architecture.md §Errors. */
 export function fromPostgres(err: { code?: string; constraint_name?: string; message?: string }) {
   switch (err.code) {
     case '23P01':
@@ -57,12 +68,12 @@ export function fromPostgres(err: { code?: string; constraint_name?: string; mes
     case '23505':
       // TODO: map by constraint name (e.g. members_tax_code_key -> MEMBER_TAX_CODE_EXISTS)
       return new Conflict('Valore già esistente', 'DUPLICATE');
-    case 'P0001':
-      // RAISE EXCEPTION message is the stable code (DRIVER_NOT_ELIGIBLE, LAST_SUPER_ADMIN, ...)
-      return new Conflict(
-        'Operazione non consentita',
-        PG_RAISE_CODES.has(err.message ?? '') ? err.message! : 'CONFLICT',
-      );
+    case 'P0001': {
+      // RAISE EXCEPTION message is the stable code
+      const known = PG_RAISE[err.message ?? ''];
+      if (!known) return new Conflict('Operazione non consentita');
+      return new DomainError(known[0], err.message!, known[1]);
+    }
     case '42501':
       return new Forbidden();
     default:
