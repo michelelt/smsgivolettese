@@ -5,6 +5,13 @@ import type { MyShift, MyTransport } from './me.schemas.js';
 
 const R = 'Europe/Rome';
 
+export const name = async (tx: Tx, uid: string) =>
+  (
+    await tx<{ firstName: string; lastName: string }[]>`
+      select first_name as "firstName", last_name as "lastName"
+      from public.profiles where id = ${uid}`
+  )[0];
+
 export const rules = (tx: Tx, uid: string) => tx<AvailabilityRule[]>`
   select weekday::int as weekday, to_char(start_time, 'HH24:MI') as "startTime",
          to_char(end_time, 'HH24:MI') as "endTime"

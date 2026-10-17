@@ -80,7 +80,7 @@ describe('JWT verification and requirePermission', () => {
   ])('%s -> 200 with role %s from app_role claim', async (name, role) => {
     const res = await me((await login(name)).token);
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ id: users[name]!.id, role });
+    expect(await res.json()).toEqual({ id: users[name]!.id, role, firstName: 'T', lastName: name });
   });
   it('valid user without a role -> 403', async () => {
     const res = await me((await login('norole')).token);

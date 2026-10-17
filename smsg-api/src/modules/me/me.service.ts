@@ -11,6 +11,11 @@ import * as repo from './me.repo.js';
 
 const uid = (ctx: Ctx) => ctx.user.id;
 
+export const profile = async (ctx: Ctx) => {
+  const n = await asUser(ctx, (tx) => repo.name(tx, uid(ctx)));
+  return { firstName: n?.firstName ?? null, lastName: n?.lastName ?? null };
+};
+
 export const availability = async (ctx: Ctx) => ({
   rules: await asUser(ctx, (tx) => repo.rules(tx, uid(ctx))),
 });

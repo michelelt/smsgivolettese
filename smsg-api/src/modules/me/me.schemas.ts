@@ -2,7 +2,12 @@ import { z } from '@hono/zod-openapi';
 import { Absence, AvailabilityRule } from '../volunteers/volunteers.schemas.js';
 
 export const Me = z
-  .object({ id: z.uuid(), role: z.enum(['volontario', 'staff', 'super_admin']) })
+  .object({
+    id: z.uuid(),
+    role: z.enum(['volontario', 'staff', 'super_admin']),
+    firstName: z.string().nullable(),
+    lastName: z.string().nullable(),
+  })
   .openapi('Me');
 
 export const MyAvailability = z

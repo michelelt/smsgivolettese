@@ -102,9 +102,9 @@ const completeTransport = createRoute({
 });
 
 export const meRoutes = new OpenAPIHono<AuthEnv>({ defaultHook })
-  .openapi(me, (c) => {
+  .openapi(me, async (c) => {
     const u = c.get('user')!; // requirePermission guarantees an authenticated role
-    return c.json({ id: u.id, role: u.role! }, 200);
+    return c.json({ id: u.id, role: u.role!, ...(await service.profile(ctxOf(c))) }, 200);
   })
   .openapi(getAvail, async (c) => c.json(await service.availability(ctxOf(c)), 200))
   .openapi(putAvail, async (c) =>
