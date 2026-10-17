@@ -7,6 +7,7 @@ import { CATEGORY } from "@/components/posts/post-card";
 import { Loading, Pill } from "@/components/ui/bits";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/dialog";
+import { ActionBar, PageHeader } from "@/components/ui/actions";
 import { FormError } from "@/components/ui/bits";
 import { useToast } from "@/components/ui/toast";
 import { api, call } from "@/lib/api/call";
@@ -60,7 +61,7 @@ export default function Proposta() {
   const busy = open.isPending || publish.isPending || rej.isPending;
   return (
     <>
-      <h1 className="text-4xl font-extrabold text-bordeaux">Proposta</h1>
+      <PageHeader title="Proposta" />
       <Loading query={q} />
       {p && (
         <div className="mt-4 max-w-3xl space-y-3">
@@ -110,27 +111,29 @@ export default function Proposta() {
           )}
           <FormError message={open.error?.message ?? publish.error?.message} />
           {p.status === "attesa" && (
-            <div className="flex flex-wrap gap-3">
-              <Button auto disabled={busy} onClick={() => publish.mutate()}>
+            <ActionBar
+              label="Azioni sulla proposta"
+              danger={
+                <Button
+                  variant="danger"
+                  disabled={busy}
+                  onClick={() => setReject(true)}
+                >
+                  Scarta
+                </Button>
+              }
+            >
+              <Button disabled={busy} onClick={() => publish.mutate()}>
                 Pubblica così
               </Button>
               <Button
-                auto
                 variant="secondary"
                 disabled={busy}
                 onClick={() => open.mutate()}
               >
                 Apri nell&apos;editor
               </Button>
-              <Button
-                auto
-                variant="danger"
-                disabled={busy}
-                onClick={() => setReject(true)}
-              >
-                Scarta
-              </Button>
-            </div>
+            </ActionBar>
           )}
           {p.postId && (
             <ButtonLink

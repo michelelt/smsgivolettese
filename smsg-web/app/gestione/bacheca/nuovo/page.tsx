@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { FormError } from "@/components/ui/bits";
-import { Button } from "@/components/ui/button";
+import { ActionBar, PageHeader } from "@/components/ui/actions";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Select } from "@/components/ui/select";
 import { api, call } from "@/lib/api/call";
@@ -58,7 +59,7 @@ export default function NuovoArticolo() {
   });
   return (
     <>
-      <h1 className="text-4xl font-extrabold text-bordeaux">Nuovo articolo</h1>
+      <PageHeader title="Nuovo articolo" />
       <form
         onSubmit={f.handleSubmit((v) => m.mutate(v))}
         noValidate
@@ -91,11 +92,14 @@ export default function NuovoArticolo() {
           error={e.location?.message}
         />
         <FormError message={m.error?.message} />
-        <div className="mt-6">
-          <Button auto type="submit" disabled={m.isPending}>
+        <ActionBar label="Azioni">
+          <Button type="submit" disabled={m.isPending}>
             Crea e scrivi
           </Button>
-        </div>
+          <ButtonLink variant="secondary" href="/gestione/bacheca">
+            Annulla
+          </ButtonLink>
+        </ActionBar>
       </form>
     </>
   );

@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
+import { PageHeader } from "@/components/ui/actions";
 import { Filters, Loading, Pager, Pill } from "@/components/ui/bits";
 import { ButtonLink } from "@/components/ui/button";
 import { api, call } from "@/lib/api/call";
@@ -38,9 +39,6 @@ function Articoli() {
   });
   return (
     <>
-      <div className="mt-4">
-        <ButtonLink href="/gestione/bacheca/nuovo">Nuovo articolo</ButtonLink>
-      </div>
       <Filters
         label="Mostra"
         value={status}
@@ -54,16 +52,21 @@ function Articoli() {
       {q.data?.items.length === 0 && <p className="mt-4">Nessun articolo.</p>}
       <ul className="mt-4 space-y-3">
         {q.data?.items.map((p) => (
-          <li key={p.id} className="rounded-xl border-2 border-ink p-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-xl font-extrabold">{p.title}</p>
-              <Pill>{p.status === "bozza" ? "Bozza" : "Pubblicato"}</Pill>
+          <li
+            key={p.id}
+            className="flex flex-col gap-3 rounded-xl border-2 border-ink p-4 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-xl font-extrabold">{p.title}</p>
+                <Pill>{p.status === "bozza" ? "Bozza" : "Pubblicato"}</Pill>
+              </div>
+              <p>
+                {CATEGORY[p.category]}
+                {p.eventDate && ` · ${fmtDate(p.eventDate)}`}
+              </p>
             </div>
-            <p>
-              {CATEGORY[p.category]}
-              {p.eventDate && ` · ${fmtDate(p.eventDate)}`}
-            </p>
-            <div className="mt-3">
+            <div>
               <ButtonLink
                 variant="secondary"
                 href={`/gestione/bacheca/${p.id}`}
@@ -105,22 +108,27 @@ function Proposte() {
       {q.data?.items.length === 0 && <p className="mt-4">Nessuna proposta.</p>}
       <ul className="mt-4 space-y-3">
         {q.data?.items.map((p) => (
-          <li key={p.id} className="rounded-xl border-2 border-ink p-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-xl font-extrabold">{p.title}</p>
-              <Pill>
-                {p.status === "attesa"
-                  ? "Da guardare"
-                  : p.status === "pubblicata"
-                    ? "Pubblicata"
-                    : "Scartata"}
-              </Pill>
+          <li
+            key={p.id}
+            className="flex flex-col gap-3 rounded-xl border-2 border-ink p-4 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-xl font-extrabold">{p.title}</p>
+                <Pill>
+                  {p.status === "attesa"
+                    ? "Da guardare"
+                    : p.status === "pubblicata"
+                      ? "Pubblicata"
+                      : "Scartata"}
+                </Pill>
+              </div>
+              <p>
+                Da {p.submitterName} · {CATEGORY[p.category]}
+                {p.hasPhoto && " · con foto"}
+              </p>
             </div>
-            <p>
-              Da {p.submitterName} · {CATEGORY[p.category]}
-              {p.hasPhoto && " · con foto"}
-            </p>
-            <div className="mt-3">
+            <div>
               <ButtonLink
                 variant="secondary"
                 href={`/gestione/bacheca/proposte/${p.id}`}
@@ -151,7 +159,16 @@ export default function Bacheca() {
   });
   return (
     <>
-      <h1 className="text-4xl font-extrabold text-bordeaux">Bacheca</h1>
+      <PageHeader
+        title="Bacheca"
+        actions={
+          tab === "articoli" && (
+            <ButtonLink href="/gestione/bacheca/nuovo">
+              Nuovo articolo
+            </ButtonLink>
+          )
+        }
+      />
       <div
         role="group"
         aria-label="Sezione"

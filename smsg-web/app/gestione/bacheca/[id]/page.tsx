@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { BlockEditor } from "@/components/gestione/block-editor";
 import type { ApiBlock } from "@/components/posts/block-types";
+import { ActionBar, PageHeader } from "@/components/ui/actions";
 import { FormError, Loading, Pill } from "@/components/ui/bits";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/dialog";
@@ -130,12 +131,11 @@ function Editor({ post }: { post: Post }) {
 
   return (
     <>
-      <h1 className="text-4xl font-extrabold text-bordeaux">
-        {published ? "Modifica articolo" : "Scrivi articolo"}
-      </h1>
-      <p className="mt-2">
-        <Pill>{published ? "Pubblicato" : "Bozza"}</Pill>
-      </p>
+      <PageHeader title={published ? "Modifica articolo" : "Scrivi articolo"}>
+        <p className="mt-2">
+          <Pill>{published ? "Pubblicato" : "Bozza"}</Pill>
+        </p>
+      </PageHeader>
       <form
         onSubmit={(ev) => {
           ev.preventDefault();
@@ -171,8 +171,13 @@ function Editor({ post }: { post: Post }) {
           error={e.location?.message}
         />
 
-        <div className="mt-4">
-          <p className="font-bold">Foto in evidenza</p>
+        <section
+          aria-labelledby="cover-title"
+          className="mt-6 rounded-xl border-2 border-ink p-4"
+        >
+          <h2 id="cover-title" className="text-xl font-extrabold">
+            Foto in evidenza
+          </h2>
           {cover && (
             <Image
               src={mediaUrl(cover.path)}
@@ -232,16 +237,15 @@ function Editor({ post }: { post: Post }) {
           <FormError message={coverErr} />
           {cover && (
             <Button
-              auto
               variant="danger"
               type="button"
-              className="mt-2"
+              className="mt-3"
               onClick={() => setCover(null)}
             >
               Togli la foto in evidenza
             </Button>
           )}
-        </div>
+        </section>
 
         <div className="mt-6">
           <p id="body-label" className="font-bold">
@@ -269,30 +273,40 @@ function Editor({ post }: { post: Post }) {
         </div>
 
         <FormError message={m.error?.message} />
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Button auto type="submit" disabled={m.isPending}>
-            {published ? "Salva le modifiche" : "Salva la bozza"}
-          </Button>
-          {!published && (
+        <ActionBar
+          label="Azioni sull'articolo"
+          sticky
+          danger={
+            <Button type="button" variant="danger" onClick={() => setDel(true)}>
+              Elimina
+            </Button>
+          }
+        >
+          {published ? (
+            <Button type="submit" disabled={m.isPending}>
+              Salva le modifiche
+            </Button>
+          ) : (
             <Button
-              auto
               type="button"
-              variant="secondary"
               disabled={m.isPending}
               onClick={() => go("publish")}
             >
               Pubblica
             </Button>
           )}
-          {published && (
+          {published ? (
             <Button
-              auto
               type="button"
               variant="secondary"
               disabled={m.isPending}
               onClick={() => go("unpublish")}
             >
               Ritira (torna bozza)
+            </Button>
+          ) : (
+            <Button type="submit" variant="secondary" disabled={m.isPending}>
+              Salva la bozza
             </Button>
           )}
           <ButtonLink
@@ -301,15 +315,7 @@ function Editor({ post }: { post: Post }) {
           >
             Anteprima
           </ButtonLink>
-          <Button
-            auto
-            type="button"
-            variant="danger"
-            onClick={() => setDel(true)}
-          >
-            Elimina
-          </Button>
-        </div>
+        </ActionBar>
       </form>
       <ConfirmDialog
         open={del}
