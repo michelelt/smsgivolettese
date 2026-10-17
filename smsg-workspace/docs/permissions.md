@@ -43,7 +43,7 @@ export const can = (role: AppRole | null, action: Action) => rank(role) >= rank(
 | `users.read` (all `profiles`: name, email, phone, active; all `user_roles`) | – | own | ✔ | ✔ | staff |
 | `users.invite_volunteer` | – | – | ✔ | ✔ | staff |
 | `availability.write_all` | – | – | – | ✔ | super_admin |
-| `users.invite_staff`, `users.change_role`, `users.deactivate` | – | – | – | ✔ | super_admin |
+| `users.invite_staff`, `users.change_role`, `users.deactivate`, `users.reset_mfa` | – | – | – | ✔ | super_admin |
 | `org_settings.write`, `counters.write` | – | – | – | ✔ | super_admin |
 | `audit.read` | – | – | – | ✔ | super_admin |
 | `gdpr.export`, `gdpr.anonymize` | – | – | – | ✔ | super_admin |
@@ -112,6 +112,7 @@ Enforced twice: the view `volunteer_transports_v` (owned by `postgres`, `securit
 - **Staff lost password**: the super admin resets it from the Supabase dashboard (owner decision, ADR-034). There is no API endpoint for it: no endpoint, role or script may call `auth.admin.updateUserById` with `password` or otherwise set another user's password.
 
 ## GDPR (super_admin)
+- Details and exact rules: ADR-067. Super admin MFA (`SUPERADMIN_MFA`, aal1 super admin acts as staff): ADR-063.
 - `GET /gdpr/export?subject=member|user&id=…` → JSON with every row referencing the person (member + fees + bookings + transports + invoices; profile + volunteer + availability + assignments). Writes an audit row. No `client` subject (ADR-060).
 - `POST /gdpr/anonymize` → definer functions `app.anonymize_member|user(id)`: names → `Anonimo`, phone/tax code/address/email/birth data → null, `anonymized_at = now()`; keeps ids, card numbers, amounts and statuses; redacts `before/after` of that person's rows in `audit_log` (`redacted = true`). For users also bans the auth user and replaces its email with `deleted+<id>@invalid.local`.
 - **Invoices are not anonymised** (fiscal retention, 10 years — GDPR art. 17(3)(b)); the response lists retained invoices. Open question for the association's privacy officer.

@@ -6,7 +6,7 @@ SHELL := /usr/bin/env bash
 LOAD_SECRETS := if [ -f secrets.env ]; then set -a; . ./secrets.env; set +a; fi
 CONCURRENTLY := pnpm dlx concurrently@9.2.5
 
-.PHONY: help setup dev test db-reset gen-api superadmin deploy-check
+.PHONY: help setup dev test e2e db-reset gen-api superadmin deploy-check
 
 help: ## Show available targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-13s %s\n", $$1, $$2}'
@@ -44,8 +44,13 @@ test: ## Run lint, typecheck and tests of both repos
 	pnpm -C web typecheck
 	pnpm -C web test
 
+e2e: ## Run the Playwright suite against the running `make dev` stack (slow, not part of `make test`)
+	@curl -sf -o /dev/null http://localhost:3000 || { echo "Web not reachable on :3000: start 'make dev' first"; exit 1; }
+	pnpm -C web e2e
+
 db-reset: ## Reset the local database (migrations + seed)
-	cd api && supabase db reset --local
+	@# shortcut: the CLI sometimes fails at "Initialising schema" (container exit 1, cause unknown); one retry, investigate if it fails twice
+	cd api && (supabase db reset --local || (echo 'db reset failed, retrying once...' && supabase db reset --local))
 	@# new seed ids: drop the web's cached public data if the dev server is running (secret read from web/.env.local, never printed)
 	@secret=$$(grep -m1 '^REVALIDATE_SECRET=' web/.env.local | cut -d= -f2-); \
 	  curl -sf -o /dev/null -X POST http://localhost:3000/hooks/revalidate -H "x-revalidate-secret: $$secret" \
