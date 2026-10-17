@@ -7514,6 +7514,8 @@ export interface components {
             id: string;
             /** @enum {string} */
             role: "volontario" | "staff" | "super_admin";
+            firstName: string | null;
+            lastName: string | null;
         };
         MyAvailability: {
             rules: components["schemas"]["AvailabilityRule"][];

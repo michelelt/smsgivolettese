@@ -69,7 +69,7 @@ test("volunteer is blocked from staff pages", async ({ page }) => {
 
 test("super admin sees super-admin-only sections", async ({ page }) => {
   await login(page, env("E2E_ADMIN_EMAIL"), PASSWORD);
-  await page.getByRole("button", { name: "Super admin" }).click();
+  await page.getByRole("button", { name: "Super admin", exact: true }).click();
   await page.getByRole("link", { name: "Impostazioni" }).click();
   await expect(page).toHaveURL(/\/gestione\/impostazioni/);
 });

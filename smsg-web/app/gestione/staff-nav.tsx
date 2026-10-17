@@ -20,12 +20,14 @@ const pill =
 /** Disclosure: plain button + panel; Esc and outside click close it and give focus back. */
 function Disclosure({
   label,
+  ariaLabel,
   icon,
   active,
   align = "left",
   children,
 }: {
-  label: string;
+  label: React.ReactNode;
+  ariaLabel?: string;
   icon?: IconName;
   active?: boolean;
   align?: "left" | "right";
@@ -64,13 +66,14 @@ function Disclosure({
         type="button"
         aria-expanded={open}
         aria-controls={id}
+        aria-label={ariaLabel}
         onClick={() => setOpen(!open)}
         className={`${pill} ${focus} ${active ? "bg-bordeaux/10 text-bordeaux underline decoration-2 underline-offset-4" : "text-ink hover:bg-black/5"}`}
       >
         {icon && <Icon name={icon} />}
         {label}
         <span
-          className={`inline-flex transition-transform motion-reduce:transition-none ${open ? "rotate-180" : ""}`}
+          className={`inline-flex shrink-0 transition-transform motion-reduce:transition-none ${open ? "rotate-180" : ""}`}
         >
           <Icon name="down" />
         </span>
@@ -179,20 +182,44 @@ function Item({
   );
 }
 
+/** Current user's full name from GET /me; null while loading or on error (callers fall back to "Account"). */
+function useFullName() {
+  const [name, setName] = useState<string | null>(null);
+  useEffect(() => {
+    void call(api.GET("/me"))
+      .then((m) =>
+        setName([m.firstName, m.lastName].filter(Boolean).join(" ") || null),
+      )
+      .catch(() => {});
+  }, []);
+  return name;
+}
+
 function Account({
   roleLabel,
   superAdmin,
+  name,
 }: {
   roleLabel: string;
   superAdmin: boolean;
+  name: string | null;
 }) {
   return (
-    <Disclosure label="Account" icon="user" align="right">
+    <Disclosure
+      label={
+        <span className="flex min-w-0 flex-col text-left leading-tight">
+          <span className="max-w-40 truncate whitespace-nowrap">
+            {name ?? "Account"}
+          </span>
+          <span className="text-sm font-semibold">{roleLabel}</span>
+        </span>
+      }
+      ariaLabel={`Account${name ? ` di ${name}` : ""}, ${roleLabel}`}
+      icon="user"
+      align="right"
+    >
       {() => (
         <>
-          <p className="px-3 py-2 text-base">
-            Ruolo: <strong>{roleLabel}</strong>
-          </p>
           <Item
             item={{
               href: "/gestione/account/password",
@@ -235,6 +262,7 @@ export function GestioneNav({
   volunteer: boolean;
 }) {
   const path = usePathname();
+  const name = useFullName();
   const [mobileAt, setMobileAt] = useState<string | null>(null);
   const mobile = mobileAt === path;
   const setMobile = (v: boolean) => setMobileAt(v ? path : null);
@@ -275,7 +303,11 @@ export function GestioneNav({
                 </li>
               ))}
               <li>
-                <Account roleLabel={roleLabel} superAdmin={superAdmin} />
+                <Account
+                  roleLabel={roleLabel}
+                  superAdmin={superAdmin}
+                  name={name}
+                />
               </li>
             </ul>
           </nav>
@@ -318,7 +350,11 @@ export function GestioneNav({
             Menu
           </button>
           <div className="hidden xl:block">
-            <Account roleLabel={roleLabel} superAdmin={superAdmin} />
+            <Account
+              roleLabel={roleLabel}
+              superAdmin={superAdmin}
+              name={name}
+            />
           </div>
         </div>
       </div>
@@ -336,7 +372,7 @@ export function GestioneNav({
           ))}
           <section aria-label="Account">
             <h3 className="px-3 text-base font-extrabold uppercase tracking-wide text-blu">
-              Account · {roleLabel}
+              {name ?? "Account"} · {roleLabel}
             </h3>
             <Item
               item={{
