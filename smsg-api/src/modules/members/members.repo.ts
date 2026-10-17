@@ -34,7 +34,7 @@ const select = (tx: Tx) => tx`
     m.tax_code as "taxCode", m.birth_date::text as "birthDate", m.birth_place as "birthPlace", m.address,
     m.postal_code as "postalCode", m.city, m.phone, m.email, m.member_type as "memberType",
     m.joined_on::text as "joinedOn", m.status, m.ended_on::text as "endedOn", m.end_reason as "endReason",
-    m.privacy_signed_on::text as "privacySignedOn", m.notes,
+    m.privacy_signed_on::text as "privacySignedOn", m.notes, m.anonymized_at::text as "anonymizedAt",
     exists (select 1 from public.membership_fees f
             where f.member_id = m.id and f.year = ${year(tx)}) as "feePaidCurrentYear"
   from public.members m`;

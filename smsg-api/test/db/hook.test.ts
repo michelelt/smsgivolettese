@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- untyped JSON from Auth/SQL */
+import { createHmac } from 'node:crypto';
 import { afterAll, describe, expect, it } from 'vitest';
 import { ID, fixtures, rolledBack, sql } from './helpers';
 
@@ -6,7 +8,7 @@ afterAll(() => sql.end());
 const claimsFor = async (tx: Parameters<Parameters<typeof rolledBack>[0]>[0], id: string) => {
   const event = { user_id: id, claims: { sub: id, role: 'authenticated' } };
   const [r] = await tx`select app.custom_access_token_hook(${tx.json(event)}) as e`;
-  return r!.e.claims as Record<string, unknown>;
+  return r!.e.claims as Record<string, any>;
 };
 
 describe('custom access token hook (function)', () => {
@@ -175,6 +177,82 @@ describe('custom access token hook: no link sessions for staff/super_admin', () 
         method: 'DELETE',
         headers: { apikey: secret, authorization: `Bearer ${secret}` },
       });
+    }
+  });
+});
+
+const b32 = (s: string) => {
+  const A = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  let bits = '';
+  for (const c of s.replace(/=+$/, '')) bits += A.indexOf(c).toString(2).padStart(5, '0');
+  return Buffer.from(bits.match(/.{8}/g)!.map((b) => parseInt(b, 2)));
+};
+const totp = (secret: string) => {
+  const ctr = Buffer.alloc(8);
+  ctr.writeBigUInt64BE(BigInt(Math.floor(Date.now() / 30000)));
+  const h = createHmac('sha1', b32(secret)).update(ctr).digest();
+  const o = h[19]! & 15;
+  return String((h.readUInt32BE(o) & 0x7fffffff) % 1_000_000).padStart(6, '0');
+};
+
+describe('TOTP login through real Auth (ADR-063)', () => {
+  const url = process.env.SUPABASE_URL ?? 'http://127.0.0.1:54321';
+  const key =
+    process.env.SUPABASE_PUBLISHABLE_KEY ?? 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH';
+  const call = async (path: string, token: string | null, method: string, body?: unknown) => {
+    const res = await fetch(`${url}/auth/v1/${path}`, {
+      method,
+      headers: {
+        apikey: key,
+        'content-type': 'application/json',
+        ...(token ? { authorization: `Bearer ${token}` } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    return {
+      status: res.status,
+      json: (await res.json().catch(() => ({}))) as Record<string, any>,
+    };
+  };
+  const claims = (jwt: string) =>
+    JSON.parse(Buffer.from(jwt.split('.')[1]!, 'base64url').toString());
+  it('password + TOTP gives an aal2 token that still carries app_role (needs make db-reset seed)', async () => {
+    const login = await call('token?grant_type=password', null, 'POST', {
+      email: 'admin.esempio@example.test',
+      password: 'Esempio-Locale-123!',
+    });
+    const t1 = login.json.access_token as string;
+    const enrol = await call('factors', t1, 'POST', {
+      factor_type: 'totp',
+      friendly_name: `t-${Date.now()}`,
+    });
+    expect(enrol.status).toBe(200);
+    const fid = enrol.json.id as string;
+    try {
+      const ch = await call(`factors/${fid}/challenge`, t1, 'POST');
+      const ver = await call(`factors/${fid}/verify`, t1, 'POST', {
+        challenge_id: ch.json.id,
+        code: totp(enrol.json.totp.secret),
+      });
+      expect(ver.status).toBe(200);
+      const c = claims(ver.json.access_token);
+      expect(c.aal).toBe('aal2');
+      expect(c.app_role).toBe('super_admin');
+      expect(c.amr.map((a: { method: string }) => a.method)).toContain('totp');
+      // sign-in afterwards (password) still works and reports aal1 until the code is given
+      const again = await call('token?grant_type=password', null, 'POST', {
+        email: 'admin.esempio@example.test',
+        password: 'Esempio-Locale-123!',
+      });
+      expect(claims(again.json.access_token)).toMatchObject({
+        aal: 'aal1',
+        app_role: 'super_admin',
+      });
+      const del = await call(`factors/${fid}`, ver.json.access_token, 'DELETE');
+      expect(del.status).toBe(200);
+    } catch (e) {
+      await sql`delete from auth.mfa_factors where id = ${fid}`;
+      throw e;
     }
   });
 });

@@ -10,6 +10,7 @@ const good = {
   RESEND_API_KEY: 're_123',
   EMAIL_FROM: 'SMS <noreply@example.org>',
   CRON_SECRET: 'prod-cron-secret-0123',
+  SUPERADMIN_MFA: 'required',
 };
 
 describe('env in production', () => {
@@ -19,6 +20,8 @@ describe('env in production', () => {
   it('rejects missing, dev- and Cloudflare test secrets', () => {
     expect(schema.safeParse({ ...good, API_PROXY_SECRET: undefined }).success).toBe(false);
     expect(schema.safeParse({ ...good, WEB_URL: undefined }).success).toBe(false);
+    expect(schema.safeParse({ ...good, SUPERADMIN_MFA: undefined }).success).toBe(false);
+    expect(schema.safeParse({ ...good, SUPERADMIN_MFA: 'maybe' }).success).toBe(false);
     for (const k of ['RESEND_API_KEY', 'EMAIL_FROM', 'CRON_SECRET'])
       expect(schema.safeParse({ ...good, [k]: undefined }).success).toBe(false);
     expect(schema.safeParse({ ...good, REVALIDATE_SECRET: 'dev-x' }).success).toBe(false);

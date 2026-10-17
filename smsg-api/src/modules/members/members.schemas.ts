@@ -34,6 +34,7 @@ export const Member = z
     endReason: endReason.nullable(),
     privacySignedOn: z.string().nullable(),
     notes: z.string().nullable(),
+    anonymizedAt: z.string().nullable(),
     feePaidCurrentYear: z.boolean(),
   })
   .openapi('Member');

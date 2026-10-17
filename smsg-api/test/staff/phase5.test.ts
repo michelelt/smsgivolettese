@@ -71,7 +71,7 @@ async function cleanup() {
     await t`delete from shifts where shift_type_id in (select id from shift_types where name like 'ZZP%')`;
     await t`delete from shift_types where name like 'ZZP%'`;
     await t`delete from vehicles where plate like 'ZZP%'`;
-    await t`delete from audit_log where actor_id in (${zu}) or request_id like 'zzp%'`;
+    // audit_log is append-only (ADR-066): test rows are left behind, queries filter by request_id/actor
     await t`delete from volunteers where id in (${zu})`;
     await t`delete from user_roles where user_id in (${zu})`;
     await t`delete from profiles where id in (${zu})`;
@@ -682,6 +682,9 @@ describe('users invite', () => {
     expect(dup.data.error.code).toBe('USER_EXISTS');
     expect(
       (await staff('POST', '/users/invite', { ...body, email: mail('x2'), role: 'staff' })).status,
+    ).toBe(403); // staff may not invite staff/super_admin (users.invite_staff, ADR-064)
+    expect(
+      (await staff('POST', '/users/invite', { ...body, email: 'not-an-email', role: 'x' })).status,
     ).toBe(400);
   });
 });

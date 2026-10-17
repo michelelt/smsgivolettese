@@ -35,6 +35,7 @@ const DESC = {
   409: 'Conflitto con lo stato attuale',
   422: 'Richiede conferma o non elaborabile',
   429: 'Troppe richieste',
+  502: 'Servizio di autenticazione non raggiungibile',
 } as const;
 type ErrStatus = keyof typeof DESC;
 /** Standard error responses (400/401/403 always) plus the given extra statuses. */

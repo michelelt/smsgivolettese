@@ -1,10 +1,10 @@
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 import { createMiddleware } from 'hono/factory';
 import { env } from '../config/env.js';
-import { Forbidden, Unauthorized } from '../lib/errors.js';
-import { can, isAppRole, type Action, type AppRole } from './permissions.js';
+import { Forbidden, mfaRequired, Unauthorized } from '../lib/errors.js';
+import { can, isAppRole, PERMISSIONS, type Action, type AppRole } from './permissions.js';
 
-export type AuthUser = { id: string; role: AppRole | null };
+export type AuthUser = { id: string; role: AppRole | null; mfaPending?: true };
 export type AuthEnv = { Variables: { user: AuthUser | null } };
 
 // Cached across requests (jose refetches only on unknown kid, with a cooldown).
@@ -29,7 +29,12 @@ export const authenticate = createMiddleware<AuthEnv>(async (c, next) => {
         audience: 'authenticated',
       });
       if (typeof p.sub !== 'string') throw new Error('no sub');
-      user = { id: p.sub, role: isAppRole(p.app_role) ? p.app_role : null };
+      const role = isAppRole(p.app_role) ? p.app_role : null;
+      user = { id: p.sub, role };
+      // ADR-063: aal1 super admin acts as staff everywhere (ctx.ts derives DB claims from user.role)
+      if (env.SUPERADMIN_MFA === 'required' && role === 'super_admin' && p.aal !== 'aal2') {
+        user = { id: p.sub, role: 'staff', mfaPending: true };
+      }
     } catch {
       throw new Unauthorized('Sessione non valida o scaduta');
     }
@@ -45,6 +50,7 @@ export const requirePermission = (action: Action) =>
     const role = user?.role ?? null;
     if (!can(role, action)) {
       if (!user) throw new Unauthorized();
+      if (user.mfaPending && PERMISSIONS[action] === 'super_admin') throw mfaRequired();
       throw new Forbidden();
     }
     await next();

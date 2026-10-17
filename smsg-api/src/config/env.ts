@@ -18,12 +18,16 @@ export const schema = z
     REVALIDATE_SECRET: opt(z.string().min(16)),
     WEB_URL: opt(z.url()),
     API_PROXY_SECRET: opt(z.string().min(16)),
+    // ADR-063: super admin TOTP; no default in production
+    SUPERADMIN_MFA: opt(z.enum(['off', 'required'])),
   })
   .superRefine((e, ctx) => {
     if (e.NODE_ENV !== 'production') return;
     // Turnstile hostname check and revalidation need it; without it every booking fails closed
     if (!e.WEB_URL)
       ctx.addIssue({ code: 'custom', path: ['WEB_URL'], message: 'required in production' });
+    if (!e.SUPERADMIN_MFA)
+      ctx.addIssue({ code: 'custom', path: ['SUPERADMIN_MFA'], message: 'required in production' });
     for (const k of ['RESEND_API_KEY', 'EMAIL_FROM', 'CRON_SECRET'] as const)
       if (!e[k]) ctx.addIssue({ code: 'custom', path: [k], message: 'required in production' });
     for (const k of ['API_PROXY_SECRET', 'REVALIDATE_SECRET', 'TURNSTILE_SECRET_KEY'] as const) {

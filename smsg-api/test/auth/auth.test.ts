@@ -168,7 +168,10 @@ describe('super admin password', () => {
     walk('scripts');
     for (const f of files) {
       const code = readFileSync(f, 'utf8');
-      expect(code, f).not.toMatch(/updateUserById|resetPasswordForEmail|generateLink/);
+      expect(code, f).not.toMatch(/resetPasswordForEmail|generateLink/);
+      // updateUserById is allowed (ban, email replace) but never with a password
+      for (const m of code.matchAll(/updateUserById\([^;]*;/g))
+        expect(m[0], f).not.toMatch(/password/i);
     }
     const spec = readFileSync('openapi.json', 'utf8');
     expect(spec.toLowerCase()).not.toContain('password');

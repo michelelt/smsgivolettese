@@ -28,6 +28,7 @@ export async function rolledBack<T>(fn: (tx: Tx) => Promise<T>): Promise<T> {
   let out: T | undefined;
   try {
     await sql.begin(async (tx) => {
+      await tx.unsafe("set local timezone = 'Europe/Rome'"); // current_date in fixtures/tests = the Rome date the DB functions use
       out = await fn(tx);
       throw ROLLBACK;
     });

@@ -162,7 +162,7 @@ export const specs: Record<string, Spec> = {
     ],
     U: [
       'staff',
-      `update invoices set status = 'pagata', payment_method = 'pos', paid_on = current_date returning 1`,
+      `update invoices set status = 'pagata', payment_method = 'pos', paid_on = current_date where id = 'fd000000-0000-4000-8000-000000000001' returning 1`,
     ],
     D: [null, `delete from invoices returning 1`],
   },

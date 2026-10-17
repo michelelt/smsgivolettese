@@ -74,7 +74,7 @@ async function cleanup(restore: boolean) {
     await t`delete from membership_fees where member_id in (select id from members where first_name = 'ZZT')`;
     await t`delete from members where first_name = 'ZZT'`;
     await t`delete from services where name like 'ZZT%'`;
-    await t`delete from audit_log where actor_id in (${zu})`;
+    // audit_log is append-only (ADR-066): test rows are left behind, queries filter by request_id/actor
     if (restore) {
       await t`delete from invoice_counters`;
       for (const c of counters0)

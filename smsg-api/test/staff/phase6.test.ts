@@ -56,7 +56,7 @@ async function cleanup() {
     await t`delete from post_proposals where title like 'ZZB%'`;
     await t`delete from media where uploaded_by in (${zu})`;
     await t`delete from rate_limit_hits where key like 'proposal%:zzb-%'`;
-    await t`delete from audit_log where actor_id in (${zu})`;
+    // audit_log is append-only (ADR-066): test rows are left behind, queries filter by request_id/actor
     await t`delete from user_roles where user_id in (${zu})`;
     await t`delete from profiles where id in (${zu})`;
     await t`delete from auth.users where email like 'zzb-%@t.test'`;

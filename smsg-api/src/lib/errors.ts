@@ -1,4 +1,4 @@
-export type ErrorStatus = 400 | 401 | 403 | 404 | 409 | 422 | 429 | 500;
+export type ErrorStatus = 400 | 401 | 403 | 404 | 409 | 422 | 429 | 500 | 502;
 
 export class DomainError extends Error {
   constructor(
@@ -21,6 +21,12 @@ export class Unauthorized extends DomainError {
     super(401, 'UNAUTHORIZED', message);
   }
 }
+export const mfaRequired = () =>
+  new DomainError(
+    403,
+    'MFA_REQUIRED',
+    "Per questa sezione serve il codice dell'app di autenticazione",
+  );
 export class Forbidden extends DomainError {
   constructor(message = 'Operazione non consentita') {
     super(403, 'FORBIDDEN', message);
@@ -39,6 +45,11 @@ export class Conflict extends DomainError {
 export class Unprocessable extends DomainError {
   constructor(message: string, code: string, details?: unknown) {
     super(422, code, message, details);
+  }
+}
+export class BadGateway extends DomainError {
+  constructor(message: string, code = 'BAD_GATEWAY') {
+    super(502, code, message);
   }
 }
 export class RateLimited extends DomainError {
@@ -79,6 +90,9 @@ const PG_RAISE: Record<string, [ErrorStatus, string]> = {
   BOOKINGS_NOT_INVOICEABLE: [409, 'Alcune prenotazioni non sono fatturabili'],
   INVOICE_NOT_VOIDABLE: [409, 'La fattura non può essere annullata'],
   INVOICE_IMMUTABLE: [409, 'La fattura emessa non è modificabile'],
+  AUDIT_IMMUTABLE: [409, 'Il registro attività non è modificabile'],
+  MEMBER_ACTIVE: [409, 'Il socio è ancora attivo: registra prima la cessazione'],
+  SELF_FORBIDDEN: [409, 'Non puoi eseguire questa operazione su te stesso'],
   COUNTER_BELOW_MAX: [409, 'Il contatore non può essere inferiore al numero più alto già emesso'],
   INVALID_INPUT: [400, 'Dati non validi'],
   ASSIGNMENT_NOT_FOUND: [404, 'Assegnazione non trovata'],
@@ -89,6 +103,7 @@ const PG_RAISE: Record<string, [ErrorStatus, string]> = {
     'Operazione non consentita nello stato attuale del trasporto',
   ],
   TRANSPORT_NOT_COMPLETABLE: [409, 'Il trasporto non può essere completato'],
+  USER_NOT_FOUND: [404, 'Utente non trovato'],
   MEMBER_NOT_FOUND: [404, 'Socio non trovato'],
   MEMBER_NOT_ACTIVE: [422, 'Il socio non è attivo: riattivalo prima di prenotare'],
   VOID_REASON_REQUIRED: [400, "Indica il motivo dell'annullamento"],

@@ -67,6 +67,7 @@ export const PERMISSIONS = {
   'users.invite_staff': SA,
   'users.change_role': SA,
   'users.deactivate': SA,
+  'users.reset_mfa': SA,
   'org_settings.write': SA,
   'counters.write': SA,
   'audit.read': SA,

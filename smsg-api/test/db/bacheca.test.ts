@@ -86,7 +86,7 @@ describe('proposal <-> post links', () => {
 });
 
 describe('audit and storage', () => {
-  it('audits post writes by staff but not post_proposals', async () => {
+  it('audits post writes and proposal reviews by staff, proposals without personal data', async () => {
     await rolledBack(async (tx) => {
       await fixtures(tx);
       await actAs(tx, 'staff');
@@ -94,9 +94,14 @@ describe('audit and storage', () => {
       await tx.unsafe(`update post_proposals set status = 'rifiutata' where id = '${PROP}'`);
       await tx.unsafe('reset role');
       const rows = await tx.unsafe(
-        `select table_name, actor_id from audit_log where table_name in ('posts','post_proposals') and action = 'update'`,
+        `select table_name, actor_id, after ? 'submitter_name' as has_name, after ->> 'status' as status from audit_log
+          where action = 'update' and ((table_name = 'posts' and row_id = '${DRAFT}') or (table_name = 'post_proposals' and row_id = '${PROP}'))
+          order by table_name`,
       );
-      expect(rows).toEqual([{ table_name: 'posts', actor_id: ID.staff }]);
+      expect(rows).toEqual([
+        { table_name: 'post_proposals', actor_id: ID.staff, has_name: false, status: 'rifiutata' },
+        { table_name: 'posts', actor_id: ID.staff, has_name: false, status: 'bozza' },
+      ]);
     });
   });
   it('proposals bucket is capped at 5 MB, media at 50 MB', async () => {
