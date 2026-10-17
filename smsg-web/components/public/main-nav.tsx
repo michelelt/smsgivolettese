@@ -8,6 +8,8 @@ const ITEMS = [
   { href: "/", label: "Home", icon: "home" },
   { href: "/chi-siamo", label: "Chi siamo", icon: "hands" },
   { href: "/servizi", label: "Servizi", icon: "heart" },
+  { href: "/notizie", label: "Eventi e novità", icon: "news" },
+  { href: "/galleria", label: "Galleria", icon: "doc" },
   { href: "/convenzioni", label: "Convenzioni", icon: "check" },
   { href: "/dove-siamo", label: "Dove siamo", icon: "pin" },
   { href: "/accedi", label: "Area riservata", icon: "lock" },
@@ -17,9 +19,11 @@ export function MainNav() {
   const path = usePathname();
   return (
     <nav aria-label="Menu principale">
-      <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+      <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
         {ITEMS.map((i) => {
-          const active = path === i.href;
+          const active =
+            path === i.href ||
+            (i.href !== "/" && path.startsWith(`${i.href}/`));
           return (
             <li key={i.href}>
               <Link

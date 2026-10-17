@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { backdropClose } from "@/components/ui/dialog";
 import { Icon } from "@/components/ui/icon";
+import { api, call } from "@/lib/api/call";
 
 type IconName = React.ComponentProps<typeof Icon>["name"];
 export type NavGroup = {
@@ -41,11 +42,11 @@ function Disclosure({
   useEffect(() => {
     if (!open) return;
     const down = (e: MouseEvent) => {
-      if (!root.current?.contains(e.target as Node)) setOpen(false);
+      if (!root.current?.contains(e.target as Node)) setOpenAt(null);
     };
     const key = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setOpen(false);
+        setOpenAt(null);
         btn.current?.focus();
       }
     };
@@ -126,6 +127,25 @@ function MobilePanel({
   );
 }
 
+/** Proposals waiting for review, as text next to "Bacheca" (fetched when the menu opens, not cached). */
+function Waiting() {
+  const [total, setTotal] = useState(0);
+  useEffect(() => {
+    void call(
+      api.GET("/proposals", {
+        params: { query: { status: "attesa", pageSize: 1 } },
+      }),
+    )
+      .then((r) => setTotal(r.total))
+      .catch(() => {});
+  }, []);
+  return total ? (
+    <span className="ml-2 rounded-full border-2 border-current px-2 text-base font-bold">
+      {total} da guardare
+    </span>
+  ) : null;
+}
+
 function Item({
   item,
   onClick,
@@ -143,7 +163,10 @@ function Item({
     >
       <Icon name={item.icon} />
       <span className="flex flex-col leading-tight">
-        <span className="font-bold">{item.label}</span>
+        <span className="font-bold">
+          {item.label}
+          {item.href === "/gestione/bacheca" && <Waiting />}
+        </span>
         {item.desc && (
           <span
             className={`text-base ${active ? "text-white" : "text-ink/75"}`}

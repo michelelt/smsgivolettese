@@ -9,6 +9,9 @@ const PAGES = [
   "/convenzioni",
   "/dove-siamo",
   "/privacy",
+  "/notizie",
+  "/galleria",
+  "/proponi",
 ];
 
 test("edit link is hidden for anonymous visitors", async ({ page }) => {
@@ -97,4 +100,18 @@ test("text-size script is a real inline script in head, applied before hydration
   await page.route("**/_next/static/**/*.js", (r) => r.abort());
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute("data-text-size", "xl");
+});
+
+test("axe: seeded post page and unknown slug 404", async ({
+  page,
+  request,
+}) => {
+  await page.goto("/notizie/festa-di-esempio");
+  await page.locator("h1").waitFor();
+  const r = await new AxeBuilder({ page })
+    .exclude("iframe") // third-party embed internals
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+    .analyze();
+  expect(r.violations).toEqual([]);
+  expect((await request.get("/notizie/non-esiste")).status()).toBe(404);
 });

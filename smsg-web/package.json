@@ -16,7 +16,12 @@
     "gen:api": "node scripts/gen-api.mjs"
   },
   "dependencies": {
+    "@blocknote/core": "0.56.0",
+    "@blocknote/mantine": "0.56.0",
+    "@blocknote/react": "0.56.0",
     "@hookform/resolvers": "^5.9.1",
+    "@mantine/core": "^9.7.2",
+    "@mantine/hooks": "^9.7.2",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.117.3",
     "@tanstack/react-query": "^5.104.3",

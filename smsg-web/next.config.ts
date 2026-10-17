@@ -18,7 +18,26 @@ const securityHeaders = [
   },
 ];
 
+const dev = process.env.NODE_ENV !== "production";
+const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL)
+  : undefined;
+
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: supabase
+      ? [
+          {
+            protocol: supabase.protocol.replace(":", "") as "http" | "https",
+            hostname: supabase.hostname,
+            port: supabase.port,
+            pathname: "/storage/v1/object/public/media/**",
+          },
+        ]
+      : [],
+    // Local Supabase resolves to a loopback address, blocked by default.
+    ...(dev ? { dangerouslyAllowLocalIP: true } : {}),
+  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },

@@ -63,3 +63,44 @@ export const getSiteSettings = () =>
       (await client.GET("/public/site-settings", cache("site-settings"))).data,
     EMPTY_SETTINGS,
   );
+
+type PostQuery = NonNullable<
+  paths["/public/posts"]["get"]["parameters"]["query"]
+>;
+
+export const getPosts = (q: PostQuery) =>
+  load(
+    "/public/posts",
+    async () =>
+      (
+        await client.GET("/public/posts", {
+          params: { query: q },
+          ...cache("posts"),
+        })
+      ).data,
+    { items: [], total: 0 },
+  );
+
+export const getGallery = (page: number, pageSize: number) =>
+  load(
+    "/public/gallery",
+    async () =>
+      (
+        await client.GET("/public/gallery", {
+          params: { query: { page, pageSize } },
+          ...cache("posts"),
+        })
+      ).data,
+    { items: [], total: 0 },
+  );
+
+/** null = 404. Other failures throw, so ISR keeps the last good page. */
+export async function getPost(slug: string) {
+  const r = await client.GET("/public/posts/{slug}", {
+    params: { path: { slug } },
+    next: { tags: ["posts", `post:${slug}`], revalidate: 3600 },
+  });
+  if (r.response.status === 404) return null;
+  if (!r.data) throw new Error(`GET /public/posts/${slug} failed`);
+  return r.data;
+}

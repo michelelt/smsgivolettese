@@ -12,6 +12,7 @@ function build(scriptSrc: string, frames: string) {
     `script-src ${scriptSrc}${dev ? " 'unsafe-eval'" : ""}`,
     "style-src 'self' 'unsafe-inline'",
     `img-src 'self' data: blob:${supabase ? ` ${supabase}` : ""}`,
+    `media-src 'self'${supabase ? ` ${supabase}` : ""}`,
     "font-src 'self'",
     `connect-src 'self'${supabase ? ` ${supabase}` : ""}`,
     `frame-src ${frames}`,
@@ -23,12 +24,15 @@ function build(scriptSrc: string, frames: string) {
   ].join("; ");
 }
 
+// ADR-062: privacy-enhanced YouTube and Vimeo (dnt) players only.
+const EMBEDS = "https://www.youtube-nocookie.com https://player.vimeo.com";
+
 // ADR-036: no hash or nonce here, it would disable 'unsafe-inline' and break Next's inline scripts.
 export const publicCsp = () =>
   build(
     "'self' 'unsafe-inline' https://challenges.cloudflare.com",
-    "https://challenges.cloudflare.com",
+    `https://challenges.cloudflare.com ${EMBEDS}`,
   );
 
 export const privateCsp = (nonce: string) =>
-  build(`'self' 'nonce-${nonce}' ${textSizeHash}`, "'none'");
+  build(`'self' 'nonce-${nonce}' ${textSizeHash}`, EMBEDS);

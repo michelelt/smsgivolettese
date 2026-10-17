@@ -38,3 +38,18 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* BlockNote sizes text in px: follow the A/A+/A++ choice and keep 44px+ targets in the editor UI. */
+.bn-container .bn-editor,
+.bn-container .bn-block-content {
+  font-size: 1rem;
+}
+.bn-container .bn-toolbar button,
+.bn-container .bn-suggestion-menu-item,
+.bn-container .bn-menu-item {
+  min-height: 44px;
+  min-width: 44px;
+}
+.bn-container .bn-editor {
+  min-height: 12rem;
+}

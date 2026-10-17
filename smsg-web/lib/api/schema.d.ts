@@ -794,6 +794,280 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/public/posts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    category?: components["schemas"]["PostCategory"];
+                    upcoming?: "true" | "false";
+                    page?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Articoli pubblicati */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PublicPostList"];
+                    };
+                };
+                /** @description Dati non validi */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/posts/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    slug: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Articolo */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PublicPost"];
+                    };
+                };
+                /** @description Non trovato */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/gallery": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Copertine degli articoli */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GalleryList"];
+                    };
+                };
+                /** @description Dati non validi */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/proposals/upload-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ProposalUploadUrlBody"];
+                };
+            };
+            responses: {
+                /** @description URL di caricamento firmato */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UploadTarget"];
+                    };
+                };
+                /** @description Dati non validi */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Richiede conferma o non elaborabile */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Troppe richieste */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/proposals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ProposalSubmit"];
+                };
+            };
+            responses: {
+                /** @description Proposta ricevuta */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProposalCreated"];
+                    };
+                };
+                /** @description Dati non validi */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Richiede conferma o non elaborabile */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Troppe richieste */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/bookings": {
         parameters: {
             query?: never;
@@ -5253,6 +5527,1084 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/posts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    status?: "bozza" | "pubblicata" | "tutte";
+                    category?: components["schemas"]["PostCategory"];
+                    q?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Articoli */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["StaffPostList"];
+                    };
+                };
+                /** @description Dati non validi */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non autenticato */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Permesso negato */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PostCreate"];
+                };
+            };
+            responses: {
+                /** @description Bozza creata */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["StaffPost"];
+                    };
+                };
+                /** @description Dati non validi */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non autenticato */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Permesso negato */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Conflitto con lo stato attuale */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Richiede conferma o non elaborabile */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/posts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Articolo */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["StaffPost"];
+                    };
+                };
+                /** @description Dati non validi */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non autenticato */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Permesso negato */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non trovato */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Eliminato */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Dati non validi */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non autenticato */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Permesso negato */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non trovato */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PostPatch"];
+                };
+            };
+            responses: {
+                /** @description Articolo aggiornato */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["StaffPost"];
+                    };
+                };
+                /** @description Dati non validi */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non autenticato */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Permesso negato */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non trovato */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Conflitto con lo stato attuale */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Richiede conferma o non elaborabile */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/posts/{id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Articolo pubblicato */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["StaffPost"];
+                    };
+                };
+                /** @description Dati non validi */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non autenticato */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Permesso negato */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non trovato */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Conflitto con lo stato attuale */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Richiede conferma o non elaborabile */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/posts/{id}/unpublish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Articolo riportato in bozza */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["StaffPost"];
+                    };
+                };
+                /** @description Dati non validi */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non autenticato */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Permesso negato */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non trovato */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Conflitto con lo stato attuale */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media/upload-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["MediaUploadUrlBody"];
+                };
+            };
+            responses: {
+                /** @description URL di caricamento firmato */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UploadTarget"];
+                    };
+                };
+                /** @description Dati non validi */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non autenticato */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Permesso negato */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Richiede conferma o non elaborabile */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["MediaCompleteBody"];
+                };
+            };
+            responses: {
+                /** @description Media registrato */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Media"];
+                    };
+                };
+                /** @description Dati non validi */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non autenticato */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Permesso negato */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Conflitto con lo stato attuale */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Richiede conferma o non elaborabile */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/proposals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    status?: "attesa" | "pubblicata" | "rifiutata" | "tutte";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Proposte */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProposalList"];
+                    };
+                };
+                /** @description Dati non validi */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non autenticato */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Permesso negato */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/proposals/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Proposta */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Proposal"];
+                    };
+                };
+                /** @description Dati non validi */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non autenticato */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Permesso negato */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non trovato */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/proposals/{id}/draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bozza già esistente */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["StaffPost"];
+                    };
+                };
+                /** @description Bozza creata */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["StaffPost"];
+                    };
+                };
+                /** @description Dati non validi */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non autenticato */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Permesso negato */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non trovato */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Conflitto con lo stato attuale */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/proposals/{id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Articolo pubblicato */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["StaffPost"];
+                    };
+                };
+                /** @description Dati non validi */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non autenticato */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Permesso negato */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non trovato */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Conflitto con lo stato attuale */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Richiede conferma o non elaborabile */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/proposals/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Proposta rifiutata */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Proposal"];
+                    };
+                };
+                /** @description Dati non validi */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non autenticato */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Permesso negato */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non trovato */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Conflitto con lo stato attuale */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/cron/daily": {
         parameters: {
             query?: never;
@@ -5429,6 +6781,738 @@ export interface components {
                 title: string;
                 intro: string;
             };
+        };
+        PublicPostList: {
+            items: components["schemas"]["PublicPostItem"][];
+            total: number;
+        };
+        PublicPostItem: {
+            slug: string;
+            title: string;
+            category: components["schemas"]["PostCategory"];
+            eventDate: string | null;
+            location: string | null;
+            excerpt: string | null;
+            publishedAt: string | null;
+            cover: components["schemas"]["Media"];
+        };
+        /** @enum {string} */
+        PostCategory: "evento" | "avviso" | "notizia";
+        Media: {
+            /** Format: uuid */
+            id: string;
+            path: string;
+            mime: string;
+            width: number | null;
+            height: number | null;
+            alt: string | null;
+        } | null;
+        PublicPost: {
+            slug: string;
+            title: string;
+            category: components["schemas"]["PostCategory"];
+            eventDate: string | null;
+            location: string | null;
+            excerpt: string | null;
+            publishedAt: string | null;
+            cover: components["schemas"]["Media"];
+            content: components["schemas"]["Block"][];
+            media: components["schemas"]["Media"][];
+        };
+        Block: {
+            id: string;
+            /** @enum {string} */
+            type: "paragraph";
+            /** @default {} */
+            props: Record<string, never>;
+            /** @default [] */
+            content: ({
+                /** @enum {string} */
+                type: "text";
+                text: string;
+                /** @default {} */
+                styles: {
+                    bold?: boolean;
+                    italic?: boolean;
+                    underline?: boolean;
+                };
+            } | {
+                /** @enum {string} */
+                type: "link";
+                href: string;
+                content: {
+                    /** @enum {string} */
+                    type: "text";
+                    text: string;
+                    /** @default {} */
+                    styles: {
+                        bold?: boolean;
+                        italic?: boolean;
+                        underline?: boolean;
+                    };
+                }[];
+            })[];
+            /** @default [] */
+            children: unknown[];
+        } | {
+            id: string;
+            /** @enum {string} */
+            type: "heading";
+            /**
+             * @default {
+             *       "level": 1
+             *     }
+             */
+            props: {
+                /** @default 1 */
+                level: 1 | 2 | 3;
+            };
+            /** @default [] */
+            content: ({
+                /** @enum {string} */
+                type: "text";
+                text: string;
+                /** @default {} */
+                styles: {
+                    bold?: boolean;
+                    italic?: boolean;
+                    underline?: boolean;
+                };
+            } | {
+                /** @enum {string} */
+                type: "link";
+                href: string;
+                content: {
+                    /** @enum {string} */
+                    type: "text";
+                    text: string;
+                    /** @default {} */
+                    styles: {
+                        bold?: boolean;
+                        italic?: boolean;
+                        underline?: boolean;
+                    };
+                }[];
+            })[];
+            /** @default [] */
+            children: unknown[];
+        } | {
+            id: string;
+            /** @enum {string} */
+            type: "quote";
+            /** @default {} */
+            props: Record<string, never>;
+            /** @default [] */
+            content: ({
+                /** @enum {string} */
+                type: "text";
+                text: string;
+                /** @default {} */
+                styles: {
+                    bold?: boolean;
+                    italic?: boolean;
+                    underline?: boolean;
+                };
+            } | {
+                /** @enum {string} */
+                type: "link";
+                href: string;
+                content: {
+                    /** @enum {string} */
+                    type: "text";
+                    text: string;
+                    /** @default {} */
+                    styles: {
+                        bold?: boolean;
+                        italic?: boolean;
+                        underline?: boolean;
+                    };
+                }[];
+            })[];
+            /** @default [] */
+            children: unknown[];
+        } | {
+            id: string;
+            /** @enum {string} */
+            type: "bulletListItem";
+            /** @default {} */
+            props: Record<string, never>;
+            /** @default [] */
+            content: ({
+                /** @enum {string} */
+                type: "text";
+                text: string;
+                /** @default {} */
+                styles: {
+                    bold?: boolean;
+                    italic?: boolean;
+                    underline?: boolean;
+                };
+            } | {
+                /** @enum {string} */
+                type: "link";
+                href: string;
+                content: {
+                    /** @enum {string} */
+                    type: "text";
+                    text: string;
+                    /** @default {} */
+                    styles: {
+                        bold?: boolean;
+                        italic?: boolean;
+                        underline?: boolean;
+                    };
+                }[];
+            })[];
+            /** @default [] */
+            children: ({
+                id: string;
+                /** @enum {string} */
+                type: "bulletListItem";
+                /** @default {} */
+                props: Record<string, never>;
+                /** @default [] */
+                content: ({
+                    /** @enum {string} */
+                    type: "text";
+                    text: string;
+                    /** @default {} */
+                    styles: {
+                        bold?: boolean;
+                        italic?: boolean;
+                        underline?: boolean;
+                    };
+                } | {
+                    /** @enum {string} */
+                    type: "link";
+                    href: string;
+                    content: {
+                        /** @enum {string} */
+                        type: "text";
+                        text: string;
+                        /** @default {} */
+                        styles: {
+                            bold?: boolean;
+                            italic?: boolean;
+                            underline?: boolean;
+                        };
+                    }[];
+                })[];
+                /** @default [] */
+                children: ({
+                    id: string;
+                    /** @enum {string} */
+                    type: "bulletListItem";
+                    /** @default {} */
+                    props: Record<string, never>;
+                    /** @default [] */
+                    content: ({
+                        /** @enum {string} */
+                        type: "text";
+                        text: string;
+                        /** @default {} */
+                        styles: {
+                            bold?: boolean;
+                            italic?: boolean;
+                            underline?: boolean;
+                        };
+                    } | {
+                        /** @enum {string} */
+                        type: "link";
+                        href: string;
+                        content: {
+                            /** @enum {string} */
+                            type: "text";
+                            text: string;
+                            /** @default {} */
+                            styles: {
+                                bold?: boolean;
+                                italic?: boolean;
+                                underline?: boolean;
+                            };
+                        }[];
+                    })[];
+                    /** @default [] */
+                    children: unknown[];
+                } | {
+                    id: string;
+                    /** @enum {string} */
+                    type: "numberedListItem";
+                    /** @default {} */
+                    props: Record<string, never>;
+                    /** @default [] */
+                    content: ({
+                        /** @enum {string} */
+                        type: "text";
+                        text: string;
+                        /** @default {} */
+                        styles: {
+                            bold?: boolean;
+                            italic?: boolean;
+                            underline?: boolean;
+                        };
+                    } | {
+                        /** @enum {string} */
+                        type: "link";
+                        href: string;
+                        content: {
+                            /** @enum {string} */
+                            type: "text";
+                            text: string;
+                            /** @default {} */
+                            styles: {
+                                bold?: boolean;
+                                italic?: boolean;
+                                underline?: boolean;
+                            };
+                        }[];
+                    })[];
+                    /** @default [] */
+                    children: unknown[];
+                })[];
+            } | {
+                id: string;
+                /** @enum {string} */
+                type: "numberedListItem";
+                /** @default {} */
+                props: Record<string, never>;
+                /** @default [] */
+                content: ({
+                    /** @enum {string} */
+                    type: "text";
+                    text: string;
+                    /** @default {} */
+                    styles: {
+                        bold?: boolean;
+                        italic?: boolean;
+                        underline?: boolean;
+                    };
+                } | {
+                    /** @enum {string} */
+                    type: "link";
+                    href: string;
+                    content: {
+                        /** @enum {string} */
+                        type: "text";
+                        text: string;
+                        /** @default {} */
+                        styles: {
+                            bold?: boolean;
+                            italic?: boolean;
+                            underline?: boolean;
+                        };
+                    }[];
+                })[];
+                /** @default [] */
+                children: ({
+                    id: string;
+                    /** @enum {string} */
+                    type: "bulletListItem";
+                    /** @default {} */
+                    props: Record<string, never>;
+                    /** @default [] */
+                    content: ({
+                        /** @enum {string} */
+                        type: "text";
+                        text: string;
+                        /** @default {} */
+                        styles: {
+                            bold?: boolean;
+                            italic?: boolean;
+                            underline?: boolean;
+                        };
+                    } | {
+                        /** @enum {string} */
+                        type: "link";
+                        href: string;
+                        content: {
+                            /** @enum {string} */
+                            type: "text";
+                            text: string;
+                            /** @default {} */
+                            styles: {
+                                bold?: boolean;
+                                italic?: boolean;
+                                underline?: boolean;
+                            };
+                        }[];
+                    })[];
+                    /** @default [] */
+                    children: unknown[];
+                } | {
+                    id: string;
+                    /** @enum {string} */
+                    type: "numberedListItem";
+                    /** @default {} */
+                    props: Record<string, never>;
+                    /** @default [] */
+                    content: ({
+                        /** @enum {string} */
+                        type: "text";
+                        text: string;
+                        /** @default {} */
+                        styles: {
+                            bold?: boolean;
+                            italic?: boolean;
+                            underline?: boolean;
+                        };
+                    } | {
+                        /** @enum {string} */
+                        type: "link";
+                        href: string;
+                        content: {
+                            /** @enum {string} */
+                            type: "text";
+                            text: string;
+                            /** @default {} */
+                            styles: {
+                                bold?: boolean;
+                                italic?: boolean;
+                                underline?: boolean;
+                            };
+                        }[];
+                    })[];
+                    /** @default [] */
+                    children: unknown[];
+                })[];
+            })[];
+        } | {
+            id: string;
+            /** @enum {string} */
+            type: "numberedListItem";
+            /** @default {} */
+            props: Record<string, never>;
+            /** @default [] */
+            content: ({
+                /** @enum {string} */
+                type: "text";
+                text: string;
+                /** @default {} */
+                styles: {
+                    bold?: boolean;
+                    italic?: boolean;
+                    underline?: boolean;
+                };
+            } | {
+                /** @enum {string} */
+                type: "link";
+                href: string;
+                content: {
+                    /** @enum {string} */
+                    type: "text";
+                    text: string;
+                    /** @default {} */
+                    styles: {
+                        bold?: boolean;
+                        italic?: boolean;
+                        underline?: boolean;
+                    };
+                }[];
+            })[];
+            /** @default [] */
+            children: ({
+                id: string;
+                /** @enum {string} */
+                type: "bulletListItem";
+                /** @default {} */
+                props: Record<string, never>;
+                /** @default [] */
+                content: ({
+                    /** @enum {string} */
+                    type: "text";
+                    text: string;
+                    /** @default {} */
+                    styles: {
+                        bold?: boolean;
+                        italic?: boolean;
+                        underline?: boolean;
+                    };
+                } | {
+                    /** @enum {string} */
+                    type: "link";
+                    href: string;
+                    content: {
+                        /** @enum {string} */
+                        type: "text";
+                        text: string;
+                        /** @default {} */
+                        styles: {
+                            bold?: boolean;
+                            italic?: boolean;
+                            underline?: boolean;
+                        };
+                    }[];
+                })[];
+                /** @default [] */
+                children: ({
+                    id: string;
+                    /** @enum {string} */
+                    type: "bulletListItem";
+                    /** @default {} */
+                    props: Record<string, never>;
+                    /** @default [] */
+                    content: ({
+                        /** @enum {string} */
+                        type: "text";
+                        text: string;
+                        /** @default {} */
+                        styles: {
+                            bold?: boolean;
+                            italic?: boolean;
+                            underline?: boolean;
+                        };
+                    } | {
+                        /** @enum {string} */
+                        type: "link";
+                        href: string;
+                        content: {
+                            /** @enum {string} */
+                            type: "text";
+                            text: string;
+                            /** @default {} */
+                            styles: {
+                                bold?: boolean;
+                                italic?: boolean;
+                                underline?: boolean;
+                            };
+                        }[];
+                    })[];
+                    /** @default [] */
+                    children: unknown[];
+                } | {
+                    id: string;
+                    /** @enum {string} */
+                    type: "numberedListItem";
+                    /** @default {} */
+                    props: Record<string, never>;
+                    /** @default [] */
+                    content: ({
+                        /** @enum {string} */
+                        type: "text";
+                        text: string;
+                        /** @default {} */
+                        styles: {
+                            bold?: boolean;
+                            italic?: boolean;
+                            underline?: boolean;
+                        };
+                    } | {
+                        /** @enum {string} */
+                        type: "link";
+                        href: string;
+                        content: {
+                            /** @enum {string} */
+                            type: "text";
+                            text: string;
+                            /** @default {} */
+                            styles: {
+                                bold?: boolean;
+                                italic?: boolean;
+                                underline?: boolean;
+                            };
+                        }[];
+                    })[];
+                    /** @default [] */
+                    children: unknown[];
+                })[];
+            } | {
+                id: string;
+                /** @enum {string} */
+                type: "numberedListItem";
+                /** @default {} */
+                props: Record<string, never>;
+                /** @default [] */
+                content: ({
+                    /** @enum {string} */
+                    type: "text";
+                    text: string;
+                    /** @default {} */
+                    styles: {
+                        bold?: boolean;
+                        italic?: boolean;
+                        underline?: boolean;
+                    };
+                } | {
+                    /** @enum {string} */
+                    type: "link";
+                    href: string;
+                    content: {
+                        /** @enum {string} */
+                        type: "text";
+                        text: string;
+                        /** @default {} */
+                        styles: {
+                            bold?: boolean;
+                            italic?: boolean;
+                            underline?: boolean;
+                        };
+                    }[];
+                })[];
+                /** @default [] */
+                children: ({
+                    id: string;
+                    /** @enum {string} */
+                    type: "bulletListItem";
+                    /** @default {} */
+                    props: Record<string, never>;
+                    /** @default [] */
+                    content: ({
+                        /** @enum {string} */
+                        type: "text";
+                        text: string;
+                        /** @default {} */
+                        styles: {
+                            bold?: boolean;
+                            italic?: boolean;
+                            underline?: boolean;
+                        };
+                    } | {
+                        /** @enum {string} */
+                        type: "link";
+                        href: string;
+                        content: {
+                            /** @enum {string} */
+                            type: "text";
+                            text: string;
+                            /** @default {} */
+                            styles: {
+                                bold?: boolean;
+                                italic?: boolean;
+                                underline?: boolean;
+                            };
+                        }[];
+                    })[];
+                    /** @default [] */
+                    children: unknown[];
+                } | {
+                    id: string;
+                    /** @enum {string} */
+                    type: "numberedListItem";
+                    /** @default {} */
+                    props: Record<string, never>;
+                    /** @default [] */
+                    content: ({
+                        /** @enum {string} */
+                        type: "text";
+                        text: string;
+                        /** @default {} */
+                        styles: {
+                            bold?: boolean;
+                            italic?: boolean;
+                            underline?: boolean;
+                        };
+                    } | {
+                        /** @enum {string} */
+                        type: "link";
+                        href: string;
+                        content: {
+                            /** @enum {string} */
+                            type: "text";
+                            text: string;
+                            /** @default {} */
+                            styles: {
+                                bold?: boolean;
+                                italic?: boolean;
+                                underline?: boolean;
+                            };
+                        }[];
+                    })[];
+                    /** @default [] */
+                    children: unknown[];
+                })[];
+            })[];
+        } | {
+            id: string;
+            /** @enum {string} */
+            type: "image";
+            props: {
+                url: string;
+                /** @default  */
+                caption: string;
+                previewWidth?: number;
+            };
+            /** @default [] */
+            children: unknown[];
+        } | {
+            id: string;
+            /** @enum {string} */
+            type: "gallery";
+            props: {
+                paths: string;
+                /** @default  */
+                caption: string;
+            };
+            /** @default [] */
+            children: unknown[];
+        } | {
+            id: string;
+            /** @enum {string} */
+            type: "video";
+            props: {
+                /** @enum {string} */
+                source: "file" | "youtube" | "vimeo";
+                src: string;
+                /** @default  */
+                caption: string;
+            };
+            /** @default [] */
+            children: unknown[];
+        } | {
+            id: string;
+            /** @enum {string} */
+            type: "buttonLink";
+            props: {
+                label: string;
+                href: string;
+            };
+            /** @default [] */
+            children: unknown[];
+        } | {
+            id: string;
+            /** @enum {string} */
+            type: "divider";
+            /** @default {} */
+            props: Record<string, never>;
+            /** @default [] */
+            children: unknown[];
+        };
+        GalleryList: {
+            items: components["schemas"]["GalleryItem"][];
+            total: number;
+        };
+        GalleryItem: {
+            slug: string;
+            title: string;
+            publishedAt: string | null;
+            cover: components["schemas"]["Media"];
+        };
+        UploadTarget: {
+            bucket: string;
+            path: string;
+            token: string;
+            signedUrl: string;
+        };
+        ProposalUploadUrlBody: {
+            /** @enum {string} */
+            mime: "image/webp" | "image/jpeg" | "image/png";
+            size: number;
+        };
+        ProposalCreated: {
+            /** Format: uuid */
+            id: string;
+        };
+        ProposalSubmit: {
+            title: string;
+            category: components["schemas"]["PostCategory"];
+            /** Format: date */
+            eventDate?: string;
+            location?: string;
+            body: string;
+            photoPath?: string;
+            videoUrl?: string;
+            submitterName: string;
+            submitterContact?: string;
+            turnstileToken: string;
         };
         BookingPage: {
             items: components["schemas"]["Booking"][];
@@ -5973,9 +8057,123 @@ export interface components {
             /** @enum {string} */
             role: "volontario";
         };
+        StaffPostList: {
+            items: components["schemas"]["StaffPostItem"][];
+            total: number;
+        };
+        StaffPostItem: {
+            slug: string;
+            title: string;
+            category: components["schemas"]["PostCategory"];
+            eventDate: string | null;
+            location: string | null;
+            excerpt: string | null;
+            publishedAt: string | null;
+            cover: components["schemas"]["Media"];
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            status: "bozza" | "pubblicata";
+            updatedAt: string;
+            /** Format: uuid */
+            fromProposalId: string | null;
+        };
+        StaffPost: {
+            slug: string;
+            title: string;
+            category: components["schemas"]["PostCategory"];
+            eventDate: string | null;
+            location: string | null;
+            excerpt: string | null;
+            publishedAt: string | null;
+            cover: components["schemas"]["Media"];
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            status: "bozza" | "pubblicata";
+            updatedAt: string;
+            /** Format: uuid */
+            fromProposalId: string | null;
+            content: components["schemas"]["Block"][];
+            media: components["schemas"]["Media"][];
+        };
+        PostCreate: {
+            title: string;
+            category: components["schemas"]["PostCategory"];
+            /** Format: date */
+            eventDate?: string;
+            location?: string;
+            /** Format: uuid */
+            coverMediaId?: string;
+            content?: components["schemas"]["Block"][];
+        };
+        PostPatch: {
+            title?: string;
+            category?: components["schemas"]["PostCategory"];
+            /** Format: date */
+            eventDate?: string | null;
+            location?: string | null;
+            /** Format: uuid */
+            coverMediaId?: string | null;
+            content?: components["schemas"]["Block"][];
+        };
+        MediaUploadUrlBody: {
+            /** @enum {string} */
+            kind: "image" | "video";
+            /** @enum {string} */
+            mime: "image/webp" | "image/jpeg" | "image/png" | "video/mp4" | "video/webm";
+            size: number;
+        };
+        MediaCompleteBody: {
+            path: string;
+            width?: number;
+            height?: number;
+            alt?: string;
+        };
+        ProposalList: {
+            items: components["schemas"]["ProposalItem"][];
+            total: number;
+        };
+        ProposalItem: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            category: components["schemas"]["PostCategory"];
+            eventDate: string | null;
+            status: components["schemas"]["ProposalStatus"];
+            submitterName: string;
+            createdAt: string;
+            hasPhoto: boolean;
+            /** Format: uuid */
+            postId: string | null;
+        };
+        /** @enum {string} */
+        ProposalStatus: "attesa" | "pubblicata" | "rifiutata";
+        Proposal: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            category: components["schemas"]["PostCategory"];
+            eventDate: string | null;
+            status: components["schemas"]["ProposalStatus"];
+            submitterName: string;
+            createdAt: string;
+            hasPhoto: boolean;
+            /** Format: uuid */
+            postId: string | null;
+            location: string | null;
+            body: string;
+            videoUrl: string | null;
+            submitterContact: string | null;
+            reviewedAt: string | null;
+            /** @description URL firmato di lettura, valido 600 secondi */
+            photoUrl: string | null;
+        };
         CronResult: {
             sent: number;
             failed: number;
+            orphansRemoved: number;
+            proposalsAnonymised: number;
         };
     };
     responses: never;
