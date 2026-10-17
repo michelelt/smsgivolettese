@@ -1,6 +1,7 @@
 import { hasRole } from "@/lib/auth/roles";
 import { MyCommitments } from "@/components/gestione/my-commitments";
-import { StaffHome } from "./staff-home";
+import { PageHeader } from "@/components/ui/actions";
+import { StaffHome, StaffNewActions } from "./staff-home";
 import { getSessionRole } from "@/lib/supabase/server";
 
 export default async function Dashboard({
@@ -10,6 +11,7 @@ export default async function Dashboard({
 }) {
   const { role } = await getSessionRole();
   const { negato } = await searchParams;
+  const staff = hasRole(role, "staff");
   return (
     <>
       {negato && (
@@ -20,10 +22,13 @@ export default async function Dashboard({
           Attenzione: non hai il permesso di aprire quella pagina.
         </p>
       )}
-      <h1 className="text-4xl font-extrabold text-bordeaux">
-        {role === "volontario" ? "I miei impegni" : "Pannello di gestione"}
-      </h1>
-      {hasRole(role, "staff") ? <StaffHome /> : <MyCommitments />}
+      <PageHeader
+        title={
+          role === "volontario" ? "I miei impegni" : "Pannello di gestione"
+        }
+        actions={staff ? <StaffNewActions /> : undefined}
+      />
+      {staff ? <StaffHome /> : <MyCommitments />}
     </>
   );
 }

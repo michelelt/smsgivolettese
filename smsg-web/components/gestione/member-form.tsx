@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { ActionBar } from "@/components/ui/actions";
 import { SaveErrors } from "@/components/ui/bits";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
@@ -222,19 +223,14 @@ export function MemberForm({ member }: { member?: Member }) {
         </Select>
       )}
       <SaveErrors g={g} />
-      <div className="mt-6 flex flex-wrap gap-3">
-        <Button auto type="submit" disabled={g.pending}>
+      <ActionBar label="Azioni sulla scheda del socio" sticky>
+        <Button type="submit" disabled={g.pending}>
           {member ? "Salva le modifiche" : "Registra socio"}
         </Button>
-        <Button
-          auto
-          type="button"
-          variant="secondary"
-          onClick={() => router.back()}
-        >
+        <Button type="button" variant="secondary" onClick={() => router.back()}>
           Indietro
         </Button>
-      </div>
+      </ActionBar>
     </form>
   );
 }

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Loading } from "@/components/ui/bits";
+import { PageHeader } from "@/components/ui/actions";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { ConfirmDialog } from "@/components/ui/dialog";
@@ -142,28 +143,22 @@ export default function Turni() {
     "inline-flex size-12 items-center justify-center rounded-xl border-2 border-blu bg-white text-blu shadow-sm";
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-4xl font-extrabold text-bordeaux">Turni</h1>
-        <div className="flex flex-wrap gap-3">
-          <Button auto onClick={() => setDlg({ k: "new", day: sel })}>
-            Nuovo turno
-          </Button>
-          <Button
-            auto
-            variant="secondary"
-            onClick={() => setDlg({ k: "copy" })}
-          >
-            Copia la settimana
-          </Button>
-          <Button
-            auto
-            variant="secondary"
-            onClick={() => setDlg({ k: "types" })}
-          >
-            Tipi di turno
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Turni"
+        actions={
+          <>
+            <Button onClick={() => setDlg({ k: "new", day: sel })}>
+              Nuovo turno
+            </Button>
+            <Button variant="secondary" onClick={() => setDlg({ k: "copy" })}>
+              Copia la settimana
+            </Button>
+            <Button variant="secondary" onClick={() => setDlg({ k: "types" })}>
+              Tipi di turno
+            </Button>
+          </>
+        }
+      />
       <nav
         aria-label="Settimana"
         className="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-ink/15 bg-white p-3 shadow-sm"
@@ -369,7 +364,7 @@ export default function Turni() {
                             </p>
                           )}
                           <Button
-                            className="mt-2 min-w-0 !px-1 lg:!min-h-10 lg:!text-sm 2xl:!text-base"
+                            className="mt-2 min-h-11 min-w-0 !px-1 lg:!text-sm 2xl:!text-base"
                             onClick={() => setDlg({ k: "assign", id: s.id })}
                             aria-label={`Assegna volontari: ${label}`}
                           >

@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormError, Loading } from "@/components/ui/bits";
+import { ActionBar } from "@/components/ui/actions";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Select } from "@/components/ui/select";
@@ -100,13 +101,12 @@ function Weekly() {
         {custom.map((r) => (
           <li
             key={`${r.weekday}${r.startTime}${r.endTime}`}
-            className="flex flex-wrap items-center gap-3"
+            className="flex flex-wrap items-center justify-between gap-3 rounded-xl border-2 border-ink/20 p-2"
           >
             <span className="font-bold">
               {WEEKDAYS[r.weekday - 1]} dalle {r.startTime} alle {r.endTime}
             </span>
             <Button
-              auto
               variant="danger"
               aria-label={`Togli ${WEEKDAYS[r.weekday - 1]} dalle ${r.startTime} alle ${r.endTime}`}
               onClick={() => change((l) => l.filter((x) => x !== r))}
@@ -154,22 +154,23 @@ function Weekly() {
           })}
           error={f.formState.errors.endTime?.message}
         />
-        <Button auto variant="secondary" type="submit" className="mt-4">
-          Aggiungi orario
-        </Button>
+        <ActionBar label="Aggiungi orario">
+          <Button variant="secondary" type="submit">
+            Aggiungi orario
+          </Button>
+        </ActionBar>
       </form>
 
       <FormError message={save.error?.message} />
-      <div className="mt-6">
+      <ActionBar label="Azioni sulle disponibilità" sticky>
         <Button
-          auto
           disabled={save.isPending || !dirty}
           onClick={() => save.mutate()}
         >
           Salva le disponibilità
         </Button>
-        {dirty && <p className="mt-2 font-bold">Hai modifiche non salvate.</p>}
-      </div>
+        {dirty && <p className="font-bold">Hai modifiche non salvate.</p>}
+      </ActionBar>
     </>
   );
 }
@@ -213,13 +214,15 @@ function Absences() {
       <Loading query={q} />
       <ul className="mt-2 space-y-2">
         {q.data?.items.map((a) => (
-          <li key={a.id} className="flex flex-wrap items-center gap-3">
+          <li
+            key={a.id}
+            className="flex flex-wrap items-center justify-between gap-3 rounded-xl border-2 border-ink/20 p-2"
+          >
             <span className="font-bold">
               Dal {fmtDate(a.startsOn)} al {fmtDate(a.endsOn)}
               {a.note && ` · ${a.note}`}
             </span>
             <Button
-              auto
               variant="danger"
               aria-label={`Togli assenza dal ${fmtDate(a.startsOn)} al ${fmtDate(a.endsOn)}`}
               disabled={del.isPending}
@@ -261,9 +264,11 @@ function Absences() {
           {...f.register("note")}
         />
         <FormError message={add.error?.message} />
-        <Button auto type="submit" className="mt-4" disabled={add.isPending}>
-          Segna assenza
-        </Button>
+        <ActionBar label="Segna assenza">
+          <Button type="submit" disabled={add.isPending}>
+            Segna assenza
+          </Button>
+        </ActionBar>
       </form>
     </>
   );

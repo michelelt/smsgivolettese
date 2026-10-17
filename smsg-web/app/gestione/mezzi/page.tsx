@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { ActionBar, PageHeader } from "@/components/ui/actions";
 import { FormError, Loading, Pill } from "@/components/ui/bits";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -123,12 +124,10 @@ export default function Mezzi() {
   });
   return (
     <>
-      <h1 className="text-4xl font-extrabold text-bordeaux">Mezzi</h1>
-      <div className="mt-4">
-        <Button auto onClick={() => setDlg({})}>
-          Aggiungi un mezzo
-        </Button>
-      </div>
+      <PageHeader
+        title="Mezzi"
+        actions={<Button onClick={() => setDlg({})}>Aggiungi un mezzo</Button>}
+      />
       <Loading query={q} />
       {q.data?.items.length === 0 && <p className="mt-4">Nessun mezzo.</p>}
       <ul className="mt-4 space-y-3">
@@ -144,25 +143,40 @@ export default function Mezzi() {
               {v.seats} posti
               {v.wheelchairAccessible && " · adatto alla carrozzina"}
             </p>
-            <div className="mt-2 flex flex-wrap gap-2">
+            <ActionBar
+              label={`Azioni su ${v.model} ${v.plate}`}
+              compact
+              danger={
+                v.active && (
+                  <Button
+                    variant="danger"
+                    disabled={toggle.isPending}
+                    aria-label={`Disattiva ${v.model} ${v.plate}`}
+                    onClick={() => toggle.mutate(v)}
+                  >
+                    Disattiva
+                  </Button>
+                )
+              }
+            >
               <Button
-                auto
                 variant="secondary"
                 aria-label={`Modifica ${v.model} ${v.plate}`}
                 onClick={() => setDlg({ v })}
               >
                 Modifica
               </Button>
-              <Button
-                auto
-                variant={v.active ? "danger" : "secondary"}
-                disabled={toggle.isPending}
-                aria-label={`${v.active ? "Disattiva" : "Riattiva"} ${v.model} ${v.plate}`}
-                onClick={() => toggle.mutate(v)}
-              >
-                {v.active ? "Disattiva" : "Riattiva"}
-              </Button>
-            </div>
+              {!v.active && (
+                <Button
+                  variant="secondary"
+                  disabled={toggle.isPending}
+                  aria-label={`Riattiva ${v.model} ${v.plate}`}
+                  onClick={() => toggle.mutate(v)}
+                >
+                  Riattiva
+                </Button>
+              )}
+            </ActionBar>
           </li>
         ))}
       </ul>

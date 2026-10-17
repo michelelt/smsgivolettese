@@ -3,6 +3,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { ActionBar } from "@/components/ui/actions";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/bits";
 import { Dialog, DialogActions } from "@/components/ui/dialog";
@@ -118,25 +119,29 @@ export function InvoiceActions({ invoice: i }: { invoice: Invoice }) {
     onSuccess: () => toast("Fattura scaricata"),
   });
   return (
-    <div className="mt-3 flex flex-wrap gap-2">
-      {i.status === "emessa" && (
-        <Button auto onClick={() => setDlg("pay")}>
-          Segna pagata
-        </Button>
-      )}
-      <Button
-        auto
-        variant="secondary"
-        disabled={pdf.isPending}
-        onClick={() => pdf.mutate()}
+    <>
+      <ActionBar
+        label={`Azioni sulla fattura n. ${i.number}/${i.year}`}
+        compact
+        danger={
+          i.status !== "annullata" && (
+            <Button variant="danger" onClick={() => setDlg("void")}>
+              Annulla
+            </Button>
+          )
+        }
       >
-        Scarica PDF
-      </Button>
-      {i.status !== "annullata" && (
-        <Button auto variant="danger" onClick={() => setDlg("void")}>
-          Annulla
+        {i.status === "emessa" && (
+          <Button onClick={() => setDlg("pay")}>Segna pagata</Button>
+        )}
+        <Button
+          variant="secondary"
+          disabled={pdf.isPending}
+          onClick={() => pdf.mutate()}
+        >
+          Scarica PDF
         </Button>
-      )}
+      </ActionBar>
       <Dialog
         open={dlg === "pay"}
         onClose={close}
@@ -151,6 +156,6 @@ export function InvoiceActions({ invoice: i }: { invoice: Invoice }) {
       >
         <VoidBody i={i} onClose={close} />
       </Dialog>
-    </div>
+    </>
   );
 }

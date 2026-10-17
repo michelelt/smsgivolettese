@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { ActionBar, PageHeader } from "@/components/ui/actions";
 import { FormError, Loading, Pill } from "@/components/ui/bits";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -140,12 +141,10 @@ export default function Servizi() {
   const close = () => setEdit(null);
   return (
     <>
-      <h1 className="text-4xl font-extrabold text-bordeaux">Servizi</h1>
-      <div className="mt-4">
-        <Button auto onClick={() => setEdit("new")}>
-          Nuovo servizio
-        </Button>
-      </div>
+      <PageHeader
+        title="Servizi"
+        actions={<Button onClick={() => setEdit("new")}>Nuovo servizio</Button>}
+      />
       <Loading query={q} />
       <ul className="mt-4 space-y-3">
         {q.data?.items.map((s) => (
@@ -159,11 +158,15 @@ export default function Servizi() {
               {s.requiresTransport && " · Richiede trasporto"}
               {s.scheduleNote && ` · ${s.scheduleNote}`}
             </p>
-            <div className="mt-3">
-              <Button auto variant="secondary" onClick={() => setEdit(s)}>
+            <ActionBar label={`Azioni su ${s.name}`} compact>
+              <Button
+                variant="secondary"
+                aria-label={`Modifica ${s.name}`}
+                onClick={() => setEdit(s)}
+              >
                 Modifica
               </Button>
-            </div>
+            </ActionBar>
           </li>
         ))}
       </ul>

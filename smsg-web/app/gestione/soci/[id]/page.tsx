@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { ActionBar } from "@/components/ui/actions";
 import { FormError, Loading, Pill } from "@/components/ui/bits";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Dialog, DialogActions } from "@/components/ui/dialog";
@@ -191,19 +192,31 @@ export default function Socio() {
                 ` · ${REASONS.find((r) => r[0] === m.endReason)?.[1]}`}
             </p>
           )}
-          <div className="mt-4 flex flex-wrap gap-3">
+          <ActionBar
+            label="Azioni sul socio"
+            danger={
+              m.status === "attivo" ? (
+                <Button variant="danger" onClick={() => setDlg("end")}>
+                  Cessa iscrizione
+                </Button>
+              ) : undefined
+            }
+          >
             {m.status === "attivo" && !paid && (
-              <Button auto onClick={() => setDlg("fee")}>
+              <Button onClick={() => setDlg("fee")}>
                 Registra quota {year}
               </Button>
             )}
             {m.status === "attivo" && (
-              <Button auto onClick={() => setDlg("book")}>
+              <Button
+                variant={paid ? "primary" : "secondary"}
+                onClick={() => setDlg("book")}
+              >
                 Nuova prenotazione
               </Button>
             )}
             {invoiceable(m).length > 0 && (
-              <Button auto onClick={() => setDlg("invoice")}>
+              <Button variant="secondary" onClick={() => setDlg("invoice")}>
                 Fattura {invoiceable(m).length} prestazioni eseguite
               </Button>
             )}
@@ -213,13 +226,8 @@ export default function Socio() {
             >
               Modifica dati
             </ButtonLink>
-            {m.status === "attivo" ? (
-              <Button auto variant="danger" onClick={() => setDlg("end")}>
-                Cessa iscrizione
-              </Button>
-            ) : (
+            {m.status !== "attivo" && (
               <Button
-                auto
                 variant="secondary"
                 disabled={reactivate.isPending}
                 onClick={() => reactivate.mutate()}
@@ -227,7 +235,7 @@ export default function Socio() {
                 Riattiva
               </Button>
             )}
-          </div>
+          </ActionBar>
           <dl className="mt-6 grid gap-x-6 gap-y-1 sm:grid-cols-[max-content_1fr]">
             {(
               [
@@ -274,8 +282,8 @@ export default function Socio() {
                   {METHODS.find((x) => x[0] === f.method)?.[1]}
                 </span>
                 <Button
-                  auto
                   variant="secondary"
+                  className="w-full! sm:w-auto!"
                   disabled={receipt.isPending}
                   onClick={() => receipt.mutate(f.id)}
                 >

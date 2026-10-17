@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
+import { ActionBar } from "@/components/ui/actions";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { changePasswordSchema } from "@/lib/auth/schemas";
@@ -67,14 +68,11 @@ export function ChangePasswordForm() {
           <p>
             Per sicurezza ti mandiamo per email un codice da scrivere qui sotto.
           </p>
-          <Button
-            type="button"
-            className="mt-6"
-            onClick={sendCode}
-            disabled={sending}
-          >
-            Inviami il codice per email
-          </Button>
+          <ActionBar label="Azioni">
+            <Button type="button" onClick={sendCode} disabled={sending}>
+              Inviami il codice per email
+            </Button>
+          </ActionBar>
         </>
       ) : (
         <form onSubmit={onSubmit} noValidate aria-label="Cambia password">
@@ -100,9 +98,11 @@ export function ChangePasswordForm() {
             error={errors.confirm?.message}
             {...form.register("confirm")}
           />
-          <Button type="submit" className="mt-6" disabled={isSubmitting}>
-            Salva la password
-          </Button>
+          <ActionBar label="Azioni">
+            <Button type="submit" disabled={isSubmitting}>
+              Salva la password
+            </Button>
+          </ActionBar>
         </form>
       )}
     </div>

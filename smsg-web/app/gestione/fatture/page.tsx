@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { PageHeader } from "@/components/ui/actions";
 import { Filters, Kpis, Loading, Pager, Pill } from "@/components/ui/bits";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
@@ -59,7 +60,18 @@ export default function Fatture() {
   const k = kpis.data;
   return (
     <>
-      <h1 className="text-4xl font-extrabold text-bordeaux">Fatture</h1>
+      <PageHeader
+        title="Fatture"
+        actions={
+          <Button
+            variant="secondary"
+            disabled={csv.isPending}
+            onClick={() => csv.mutate()}
+          >
+            Esporta CSV per il commercialista
+          </Button>
+        }
+      />
       <Select
         label="Anno"
         value={year}
@@ -85,16 +97,6 @@ export default function Fatture() {
           ]}
         />
       )}
-      <div className="mt-4">
-        <Button
-          auto
-          variant="secondary"
-          disabled={csv.isPending}
-          onClick={() => csv.mutate()}
-        >
-          Esporta CSV per il commercialista
-        </Button>
-      </div>
       <Filters
         label="Filtro fatture"
         value={status}

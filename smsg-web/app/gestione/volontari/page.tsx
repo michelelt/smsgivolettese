@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Filters, FormError, Loading, Pager, Pill } from "@/components/ui/bits";
+import { PageHeader } from "@/components/ui/actions";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogActions } from "@/components/ui/dialog";
@@ -177,12 +178,12 @@ export default function Volontari() {
   const close = () => setDlg(null);
   return (
     <>
-      <h1 className="text-4xl font-extrabold text-bordeaux">Volontari</h1>
-      <div className="mt-4">
-        <Button auto onClick={() => setDlg("invite")}>
-          Invita un volontario
-        </Button>
-      </div>
+      <PageHeader
+        title="Volontari"
+        actions={
+          <Button onClick={() => setDlg("invite")}>Invita un volontario</Button>
+        }
+      />
       <Filters
         label="Stato dei volontari"
         value={active}
@@ -226,10 +227,10 @@ export default function Volontari() {
                 ? `Può guidare · patente ${v.licenseNumber ?? "—"} fino al ${fmtDate(v.licenseExpiresOn)}`
                 : "Non guida"}
             </p>
-            <div className="mt-2">
+            <div className="mt-3 flex justify-end">
               <Button
-                auto
                 variant="secondary"
+                className="w-full! sm:w-auto!"
                 aria-label={`Modifica ${v.firstName} ${v.lastName}`}
                 onClick={() => setDlg({ edit: v })}
               >

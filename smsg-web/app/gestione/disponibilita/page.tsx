@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/actions";
 import { MyAvailability } from "@/components/gestione/my-availability";
 import { StaffAvailability } from "@/components/gestione/staff-availability";
 import { hasRole } from "@/lib/auth/roles";
@@ -8,9 +9,9 @@ export default async function Disponibilita() {
   const staff = hasRole(role, "staff");
   return (
     <>
-      <h1 className="text-4xl font-extrabold text-bordeaux">
-        {staff ? "Disponibilità dei volontari" : "Le mie disponibilità"}
-      </h1>
+      <PageHeader
+        title={staff ? "Disponibilità dei volontari" : "Le mie disponibilità"}
+      />
       {staff ? <StaffAvailability /> : <MyAvailability />}
     </>
   );

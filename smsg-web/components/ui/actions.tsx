@@ -49,12 +49,15 @@ export function PageHeader({
 export function ActionBar({
   label,
   sticky = false,
+  compact = false,
   danger,
   children,
 }: {
   /** Accessible name of the group. */
   label: string;
   sticky?: boolean;
+  /** For actions inside list cards: no top border, small top margin. */
+  compact?: boolean;
   danger?: ReactNode;
   children: ReactNode;
 }) {
@@ -62,7 +65,7 @@ export function ActionBar({
     <div
       role="group"
       aria-label={label}
-      className={`mt-6 flex flex-col gap-3 border-t-2 border-ink bg-paper py-3 sm:flex-row sm:flex-wrap sm:items-center ${fit} ${sticky ? "sm:sticky sm:bottom-0 sm:z-10" : ""}`}
+      className={`flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center ${fit} ${compact ? "mt-3" : "mt-6 border-t-2 border-ink bg-paper py-3"} ${sticky ? "sm:sticky sm:bottom-0 sm:z-10" : ""}`}
     >
       {children}
       {danger && (

@@ -25,7 +25,8 @@ import {
   SiteFooter,
   type FooterGroup,
 } from "@/components/public/site-parts";
-import { Button } from "@/components/ui/button";
+import { ActionBar } from "@/components/ui/actions";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { Dialog, DialogActions } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
@@ -506,9 +507,9 @@ export function SiteEditor({
 
   return (
     <>
-      <div className="sticky top-0 z-20 -mx-4 mb-6 border-b-2 border-blu bg-white px-4 py-3 md:-mx-6 md:px-6 lg:-mx-8 lg:px-8">
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="mr-auto text-2xl font-extrabold text-bordeaux">
+      <div className="-mx-4 mb-6 border-b-2 border-blu bg-white px-4 py-3 sm:sticky sm:top-0 sm:z-20 md:-mx-6 md:px-6 lg:-mx-8 lg:px-8">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-2xl font-extrabold text-bordeaux">
             Modifica il sito
           </h1>
           <p
@@ -517,11 +518,12 @@ export function SiteEditor({
           >
             {n ? `Modifiche non salvate (${n})` : "Nessuna modifica"}
           </p>
-          <Button auto onClick={save} disabled={n === 0 || m.isPending}>
+        </div>
+        <ActionBar label="Salvataggio del sito" compact>
+          <Button onClick={save} disabled={n === 0 || m.isPending}>
             {m.isPending ? "Salvo…" : "Salva e pubblica"}
           </Button>
           <Button
-            auto
             variant="secondary"
             disabled={n === 0 || m.isPending}
             onClick={() => {
@@ -531,17 +533,17 @@ export function SiteEditor({
           >
             Annulla modifiche
           </Button>
-          <a
+          <ButtonLink
+            variant="secondary"
             href="/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex min-h-12 items-center font-bold text-blu underline"
           >
             Vedi il sito
             <span className="sr-only"> (si apre in una nuova scheda)</span>
-          </a>
-        </div>
-        <nav aria-label="Pagine del sito" className="mt-2">
+          </ButtonLink>
+        </ActionBar>
+        <nav aria-label="Pagine del sito" className="mt-3">
           <ul className="flex flex-wrap gap-2">
             {TABS.map(([slug, label]) => (
               <li key={slug}>

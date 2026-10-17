@@ -3,6 +3,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
+import { PageHeader } from "@/components/ui/actions";
 import { Filters, Kpis, Loading, Pager, Pill } from "@/components/ui/bits";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
@@ -47,7 +48,21 @@ export default function Soci() {
   const k = kpis.data;
   return (
     <>
-      <h1 className="text-4xl font-extrabold text-bordeaux">Soci</h1>
+      <PageHeader
+        title="Soci"
+        actions={
+          <>
+            <ButtonLink href="/gestione/soci/nuovo">Nuovo socio</ButtonLink>
+            <Button
+              variant="secondary"
+              disabled={csv.isPending}
+              onClick={() => csv.mutate()}
+            >
+              Esporta CSV
+            </Button>
+          </>
+        }
+      />
       <Loading query={kpis} />
       {k && (
         <Kpis
@@ -59,17 +74,6 @@ export default function Soci() {
           ]}
         />
       )}
-      <div className="mt-4 flex flex-wrap gap-3">
-        <ButtonLink href="/gestione/soci/nuovo">Nuovo socio</ButtonLink>
-        <Button
-          auto
-          variant="secondary"
-          disabled={csv.isPending}
-          onClick={() => csv.mutate()}
-        >
-          Esporta CSV
-        </Button>
-      </div>
       <Filters
         label="Filtro soci"
         value={filter}

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { PageHeader } from "@/components/ui/actions";
 import { SECTIONS } from "@/lib/auth/roles";
 
 export default async function Sezione({
@@ -11,7 +12,7 @@ export default async function Sezione({
   if (!s) notFound();
   return (
     <>
-      <h1 className="text-4xl font-extrabold text-bordeaux">{s.label}</h1>
+      <PageHeader title={s.label} />
       <p className="mt-4">Questa pagina è in costruzione.</p>
     </>
   );
