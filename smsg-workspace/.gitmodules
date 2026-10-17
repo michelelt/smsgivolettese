@@ -1,6 +1,0 @@
-[submodule "api"]
-	path = api
-	url = ../smsg-api
-[submodule "web"]
-	path = web
-	url = ../smsg-web
