@@ -34,6 +34,7 @@ const DESC = {
   404: 'Non trovato',
   409: 'Conflitto con lo stato attuale',
   422: 'Richiede conferma o non elaborabile',
+  429: 'Troppe richieste',
 } as const;
 type ErrStatus = keyof typeof DESC;
 /** Standard error responses (400/401/403 always) plus the given extra statuses. */

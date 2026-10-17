@@ -656,7 +656,7 @@ describe('cron', () => {
 
     const mid = sent.length;
     const r2 = await run(`Bearer ${secret}`);
-    expect(await r2.json()).toEqual({ sent: 0, failed: 0 });
+    expect(await r2.json()).toMatchObject({ sent: 0, failed: 0 });
     expect(sent).toHaveLength(mid);
   });
 });

@@ -5,6 +5,9 @@ import { authenticate } from './auth/middleware.js';
 import { DomainError, fromPostgres } from './lib/errors.js';
 import { log } from './lib/logger.js';
 import { meRoutes } from './modules/me/me.routes.js';
+import { mediaRoutes } from './modules/media/media.routes.js';
+import { postsRoutes } from './modules/posts/posts.routes.js';
+import { proposalsRoutes } from './modules/proposals/proposals.routes.js';
 import { publicRoutes } from './modules/public/public.routes.js';
 import { bookingsRoutes } from './modules/bookings/bookings.routes.js';
 import { invoicesRoutes } from './modules/invoices/invoices.routes.js';
@@ -61,6 +64,9 @@ app.route('/', vehiclesRoutes);
 app.route('/', shiftsRoutes);
 app.route('/', transportsRoutes);
 app.route('/', usersRoutes);
+app.route('/', postsRoutes);
+app.route('/', mediaRoutes);
+app.route('/', proposalsRoutes);
 app.route('/', cronRoutes);
 
 app.openAPIRegistry.registerComponent('securitySchemes', 'bearerAuth', {
@@ -71,7 +77,7 @@ app.openAPIRegistry.registerComponent('securitySchemes', 'bearerAuth', {
 
 app.doc('/openapi.json', {
   openapi: '3.1.0',
-  info: { title: 'SMS Givolettese API', version: '3.0.0' },
+  info: { title: 'SMS Givolettese API', version: '3.1.0' },
 });
 
 const body = (code: string, message: string, details?: unknown) => ({

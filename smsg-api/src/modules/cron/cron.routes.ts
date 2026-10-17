@@ -11,7 +11,14 @@ const daily = createRoute({
   path: '/cron/daily',
   responses: {
     200: ok(
-      z.strictObject({ sent: z.number().int(), failed: z.number().int() }).openapi('CronResult'),
+      z
+        .strictObject({
+          sent: z.number().int(),
+          failed: z.number().int(),
+          orphansRemoved: z.number().int(),
+          proposalsAnonymised: z.number().int(),
+        })
+        .openapi('CronResult'),
       'Promemoria inviati',
     ),
     401: {

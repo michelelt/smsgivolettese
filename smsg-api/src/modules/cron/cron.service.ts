@@ -2,6 +2,8 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import { env } from '../../config/env.js';
 import { db } from '../../lib/db.js';
 import { sendEmail } from '../../lib/email.js';
+import { log } from '../../lib/logger.js';
+import { removeObjects } from '../../lib/storage.js';
 import { reminder } from '../notifications/templates.js';
 import type { Item } from '../notifications/templates.js';
 
@@ -75,5 +77,70 @@ export async function daily(requestId?: string) {
                  where id in ${tx(ids('transport'))} and reminder_sent_at is null`;
     }, requestId);
   }
-  return { sent, failed };
+  const proposalsAnonymised = await cleanProposals(requestId);
+  return { sent, failed, orphansRemoved: await removeOrphans(requestId), proposalsAnonymised };
+}
+
+/**
+ * ADR-062 retention: reviewed proposals lose their original photo at once (it was copied to `media`
+ * or is unneeded) and their submitter data after 90 days. Returns the number anonymised.
+ */
+export async function cleanProposals(requestId?: string) {
+  try {
+    const photos = await db.asService(
+      (tx) => tx<{ path: string }[]>`
+        with old as (select id, photo_path from public.post_proposals
+                     where status <> 'attesa' and photo_path is not null for update)
+        update public.post_proposals p set photo_path = null from old
+        where p.id = old.id returning old.photo_path as path`,
+      requestId,
+    );
+    await removeObjects(
+      'proposals',
+      photos.map((r) => r.path),
+    );
+    const done = await db.asService(
+      (tx) => tx`
+        update public.post_proposals set submitter_name = 'Anonimo', submitter_contact = null
+        where status <> 'attesa' and reviewed_at < now() - interval '90 days'
+          and (submitter_name <> 'Anonimo' or submitter_contact is not null)`,
+      requestId,
+    );
+    return done.count;
+  } catch {
+    log('warn', 'proposal cleanup failed', { requestId });
+    return 0;
+  }
+}
+
+type Orphan = { bucket: string; name: string };
+
+/**
+ * ADR-062: storage objects older than 24 h that nothing references: `media` without a media row,
+ * `proposals` not used as a photo_path. Failures are logged, they must not fail the reminders run.
+ */
+export async function removeOrphans(requestId?: string) {
+  try {
+    const rows = await db.asService(
+      (tx) => tx<Orphan[]>`
+        select o.bucket_id as bucket, o.name from storage.objects o
+        where o.created_at < now() - interval '24 hours'
+          and o.name not like '%.emptyFolderPlaceholder'
+          and ((o.bucket_id = 'media'
+                and not exists (select 1 from public.media m where m.bucket = 'media' and m.path = o.name))
+            or (o.bucket_id = 'proposals'
+                and not exists (select 1 from public.post_proposals p where p.photo_path = o.name)))`,
+      requestId,
+    );
+    let n = 0;
+    for (const bucket of ['media', 'proposals'])
+      n += await removeObjects(
+        bucket,
+        rows.filter((r) => r.bucket === bucket).map((r) => r.name),
+      );
+    return n;
+  } catch {
+    log('warn', 'orphan cleanup failed', { requestId });
+    return 0;
+  }
 }

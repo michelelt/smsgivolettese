@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "SMS Givolettese API",
-    "version": "3.0.0"
+    "version": "3.1.0"
   },
   "components": {
     "securitySchemes": {
@@ -586,6 +586,2872 @@
           "servizi",
           "convenzioni",
           "doveSiamo"
+        ],
+        "additionalProperties": false
+      },
+      "PublicPostList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicPostItem"
+            }
+          },
+          "total": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ]
+      },
+      "PublicPostItem": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/PostCategory"
+          },
+          "eventDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "location": {
+            "type": "string",
+            "nullable": true
+          },
+          "excerpt": {
+            "type": "string",
+            "nullable": true
+          },
+          "publishedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "cover": {
+            "$ref": "#/components/schemas/Media"
+          }
+        },
+        "required": [
+          "slug",
+          "title",
+          "category",
+          "eventDate",
+          "location",
+          "excerpt",
+          "publishedAt",
+          "cover"
+        ]
+      },
+      "PostCategory": {
+        "type": "string",
+        "enum": [
+          "evento",
+          "avviso",
+          "notizia"
+        ]
+      },
+      "Media": {
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "path": {
+            "type": "string"
+          },
+          "mime": {
+            "type": "string"
+          },
+          "width": {
+            "type": "integer",
+            "nullable": true
+          },
+          "height": {
+            "type": "integer",
+            "nullable": true
+          },
+          "alt": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "path",
+          "mime",
+          "width",
+          "height",
+          "alt"
+        ]
+      },
+      "PublicPost": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/PostCategory"
+          },
+          "eventDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "location": {
+            "type": "string",
+            "nullable": true
+          },
+          "excerpt": {
+            "type": "string",
+            "nullable": true
+          },
+          "publishedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "cover": {
+            "$ref": "#/components/schemas/Media"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Block"
+            },
+            "maxItems": 300
+          },
+          "media": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Media"
+            }
+          }
+        },
+        "required": [
+          "slug",
+          "title",
+          "category",
+          "eventDate",
+          "location",
+          "excerpt",
+          "publishedAt",
+          "cover",
+          "content",
+          "media"
+        ]
+      },
+      "Block": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "paragraph"
+                ]
+              },
+              "props": {
+                "type": "object",
+                "properties": {},
+                "default": {}
+              },
+              "content": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "text"
+                          ]
+                        },
+                        "text": {
+                          "type": "string",
+                          "maxLength": 5000
+                        },
+                        "styles": {
+                          "type": "object",
+                          "properties": {
+                            "bold": {
+                              "type": "boolean"
+                            },
+                            "italic": {
+                              "type": "boolean"
+                            },
+                            "underline": {
+                              "type": "boolean"
+                            }
+                          },
+                          "default": {}
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "text"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "link"
+                          ]
+                        },
+                        "href": {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        "content": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "text"
+                                ]
+                              },
+                              "text": {
+                                "type": "string",
+                                "maxLength": 5000
+                              },
+                              "styles": {
+                                "type": "object",
+                                "properties": {
+                                  "bold": {
+                                    "type": "boolean"
+                                  },
+                                  "italic": {
+                                    "type": "boolean"
+                                  },
+                                  "underline": {
+                                    "type": "boolean"
+                                  }
+                                },
+                                "default": {}
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "text"
+                            ]
+                          },
+                          "maxItems": 100
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "href",
+                        "content"
+                      ]
+                    }
+                  ]
+                },
+                "maxItems": 500,
+                "default": []
+              },
+              "children": {
+                "type": "array",
+                "items": {
+                  "nullable": true
+                },
+                "maxItems": 0,
+                "default": []
+              }
+            },
+            "required": [
+              "id",
+              "type"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "heading"
+                ]
+              },
+              "props": {
+                "type": "object",
+                "properties": {
+                  "level": {
+                    "anyOf": [
+                      {
+                        "type": "number",
+                        "enum": [
+                          1
+                        ]
+                      },
+                      {
+                        "type": "number",
+                        "enum": [
+                          2
+                        ]
+                      },
+                      {
+                        "type": "number",
+                        "enum": [
+                          3
+                        ]
+                      }
+                    ],
+                    "default": 1
+                  }
+                },
+                "default": {
+                  "level": 1
+                }
+              },
+              "content": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "text"
+                          ]
+                        },
+                        "text": {
+                          "type": "string",
+                          "maxLength": 5000
+                        },
+                        "styles": {
+                          "type": "object",
+                          "properties": {
+                            "bold": {
+                              "type": "boolean"
+                            },
+                            "italic": {
+                              "type": "boolean"
+                            },
+                            "underline": {
+                              "type": "boolean"
+                            }
+                          },
+                          "default": {}
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "text"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "link"
+                          ]
+                        },
+                        "href": {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        "content": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "text"
+                                ]
+                              },
+                              "text": {
+                                "type": "string",
+                                "maxLength": 5000
+                              },
+                              "styles": {
+                                "type": "object",
+                                "properties": {
+                                  "bold": {
+                                    "type": "boolean"
+                                  },
+                                  "italic": {
+                                    "type": "boolean"
+                                  },
+                                  "underline": {
+                                    "type": "boolean"
+                                  }
+                                },
+                                "default": {}
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "text"
+                            ]
+                          },
+                          "maxItems": 100
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "href",
+                        "content"
+                      ]
+                    }
+                  ]
+                },
+                "maxItems": 500,
+                "default": []
+              },
+              "children": {
+                "type": "array",
+                "items": {
+                  "nullable": true
+                },
+                "maxItems": 0,
+                "default": []
+              }
+            },
+            "required": [
+              "id",
+              "type"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "quote"
+                ]
+              },
+              "props": {
+                "type": "object",
+                "properties": {},
+                "default": {}
+              },
+              "content": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "text"
+                          ]
+                        },
+                        "text": {
+                          "type": "string",
+                          "maxLength": 5000
+                        },
+                        "styles": {
+                          "type": "object",
+                          "properties": {
+                            "bold": {
+                              "type": "boolean"
+                            },
+                            "italic": {
+                              "type": "boolean"
+                            },
+                            "underline": {
+                              "type": "boolean"
+                            }
+                          },
+                          "default": {}
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "text"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "link"
+                          ]
+                        },
+                        "href": {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        "content": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "text"
+                                ]
+                              },
+                              "text": {
+                                "type": "string",
+                                "maxLength": 5000
+                              },
+                              "styles": {
+                                "type": "object",
+                                "properties": {
+                                  "bold": {
+                                    "type": "boolean"
+                                  },
+                                  "italic": {
+                                    "type": "boolean"
+                                  },
+                                  "underline": {
+                                    "type": "boolean"
+                                  }
+                                },
+                                "default": {}
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "text"
+                            ]
+                          },
+                          "maxItems": 100
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "href",
+                        "content"
+                      ]
+                    }
+                  ]
+                },
+                "maxItems": 500,
+                "default": []
+              },
+              "children": {
+                "type": "array",
+                "items": {
+                  "nullable": true
+                },
+                "maxItems": 0,
+                "default": []
+              }
+            },
+            "required": [
+              "id",
+              "type"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "bulletListItem"
+                ]
+              },
+              "props": {
+                "type": "object",
+                "properties": {},
+                "default": {}
+              },
+              "content": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "text"
+                          ]
+                        },
+                        "text": {
+                          "type": "string",
+                          "maxLength": 5000
+                        },
+                        "styles": {
+                          "type": "object",
+                          "properties": {
+                            "bold": {
+                              "type": "boolean"
+                            },
+                            "italic": {
+                              "type": "boolean"
+                            },
+                            "underline": {
+                              "type": "boolean"
+                            }
+                          },
+                          "default": {}
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "text"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "link"
+                          ]
+                        },
+                        "href": {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        "content": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "text"
+                                ]
+                              },
+                              "text": {
+                                "type": "string",
+                                "maxLength": 5000
+                              },
+                              "styles": {
+                                "type": "object",
+                                "properties": {
+                                  "bold": {
+                                    "type": "boolean"
+                                  },
+                                  "italic": {
+                                    "type": "boolean"
+                                  },
+                                  "underline": {
+                                    "type": "boolean"
+                                  }
+                                },
+                                "default": {}
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "text"
+                            ]
+                          },
+                          "maxItems": 100
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "href",
+                        "content"
+                      ]
+                    }
+                  ]
+                },
+                "maxItems": 500,
+                "default": []
+              },
+              "children": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 64
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "bulletListItem"
+                          ]
+                        },
+                        "props": {
+                          "type": "object",
+                          "properties": {},
+                          "default": {}
+                        },
+                        "content": {
+                          "type": "array",
+                          "items": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "text"
+                                    ]
+                                  },
+                                  "text": {
+                                    "type": "string",
+                                    "maxLength": 5000
+                                  },
+                                  "styles": {
+                                    "type": "object",
+                                    "properties": {
+                                      "bold": {
+                                        "type": "boolean"
+                                      },
+                                      "italic": {
+                                        "type": "boolean"
+                                      },
+                                      "underline": {
+                                        "type": "boolean"
+                                      }
+                                    },
+                                    "default": {}
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "text"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "link"
+                                    ]
+                                  },
+                                  "href": {
+                                    "type": "string",
+                                    "maxLength": 2000
+                                  },
+                                  "content": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "type": {
+                                          "type": "string",
+                                          "enum": [
+                                            "text"
+                                          ]
+                                        },
+                                        "text": {
+                                          "type": "string",
+                                          "maxLength": 5000
+                                        },
+                                        "styles": {
+                                          "type": "object",
+                                          "properties": {
+                                            "bold": {
+                                              "type": "boolean"
+                                            },
+                                            "italic": {
+                                              "type": "boolean"
+                                            },
+                                            "underline": {
+                                              "type": "boolean"
+                                            }
+                                          },
+                                          "default": {}
+                                        }
+                                      },
+                                      "required": [
+                                        "type",
+                                        "text"
+                                      ]
+                                    },
+                                    "maxItems": 100
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "href",
+                                  "content"
+                                ]
+                              }
+                            ]
+                          },
+                          "maxItems": 500,
+                          "default": []
+                        },
+                        "children": {
+                          "type": "array",
+                          "items": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 64
+                                  },
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "bulletListItem"
+                                    ]
+                                  },
+                                  "props": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "default": {}
+                                  },
+                                  "content": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "enum": [
+                                                "text"
+                                              ]
+                                            },
+                                            "text": {
+                                              "type": "string",
+                                              "maxLength": 5000
+                                            },
+                                            "styles": {
+                                              "type": "object",
+                                              "properties": {
+                                                "bold": {
+                                                  "type": "boolean"
+                                                },
+                                                "italic": {
+                                                  "type": "boolean"
+                                                },
+                                                "underline": {
+                                                  "type": "boolean"
+                                                }
+                                              },
+                                              "default": {}
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "text"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "enum": [
+                                                "link"
+                                              ]
+                                            },
+                                            "href": {
+                                              "type": "string",
+                                              "maxLength": 2000
+                                            },
+                                            "content": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                  "type": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "text"
+                                                    ]
+                                                  },
+                                                  "text": {
+                                                    "type": "string",
+                                                    "maxLength": 5000
+                                                  },
+                                                  "styles": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "bold": {
+                                                        "type": "boolean"
+                                                      },
+                                                      "italic": {
+                                                        "type": "boolean"
+                                                      },
+                                                      "underline": {
+                                                        "type": "boolean"
+                                                      }
+                                                    },
+                                                    "default": {}
+                                                  }
+                                                },
+                                                "required": [
+                                                  "type",
+                                                  "text"
+                                                ]
+                                              },
+                                              "maxItems": 100
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "href",
+                                            "content"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "maxItems": 500,
+                                    "default": []
+                                  },
+                                  "children": {
+                                    "type": "array",
+                                    "items": {
+                                      "nullable": true
+                                    },
+                                    "maxItems": 0,
+                                    "default": []
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "type"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 64
+                                  },
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "numberedListItem"
+                                    ]
+                                  },
+                                  "props": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "default": {}
+                                  },
+                                  "content": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "enum": [
+                                                "text"
+                                              ]
+                                            },
+                                            "text": {
+                                              "type": "string",
+                                              "maxLength": 5000
+                                            },
+                                            "styles": {
+                                              "type": "object",
+                                              "properties": {
+                                                "bold": {
+                                                  "type": "boolean"
+                                                },
+                                                "italic": {
+                                                  "type": "boolean"
+                                                },
+                                                "underline": {
+                                                  "type": "boolean"
+                                                }
+                                              },
+                                              "default": {}
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "text"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "enum": [
+                                                "link"
+                                              ]
+                                            },
+                                            "href": {
+                                              "type": "string",
+                                              "maxLength": 2000
+                                            },
+                                            "content": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                  "type": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "text"
+                                                    ]
+                                                  },
+                                                  "text": {
+                                                    "type": "string",
+                                                    "maxLength": 5000
+                                                  },
+                                                  "styles": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "bold": {
+                                                        "type": "boolean"
+                                                      },
+                                                      "italic": {
+                                                        "type": "boolean"
+                                                      },
+                                                      "underline": {
+                                                        "type": "boolean"
+                                                      }
+                                                    },
+                                                    "default": {}
+                                                  }
+                                                },
+                                                "required": [
+                                                  "type",
+                                                  "text"
+                                                ]
+                                              },
+                                              "maxItems": 100
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "href",
+                                            "content"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "maxItems": 500,
+                                    "default": []
+                                  },
+                                  "children": {
+                                    "type": "array",
+                                    "items": {
+                                      "nullable": true
+                                    },
+                                    "maxItems": 0,
+                                    "default": []
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "type"
+                                ]
+                              }
+                            ]
+                          },
+                          "maxItems": 100,
+                          "default": []
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 64
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "numberedListItem"
+                          ]
+                        },
+                        "props": {
+                          "type": "object",
+                          "properties": {},
+                          "default": {}
+                        },
+                        "content": {
+                          "type": "array",
+                          "items": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "text"
+                                    ]
+                                  },
+                                  "text": {
+                                    "type": "string",
+                                    "maxLength": 5000
+                                  },
+                                  "styles": {
+                                    "type": "object",
+                                    "properties": {
+                                      "bold": {
+                                        "type": "boolean"
+                                      },
+                                      "italic": {
+                                        "type": "boolean"
+                                      },
+                                      "underline": {
+                                        "type": "boolean"
+                                      }
+                                    },
+                                    "default": {}
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "text"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "link"
+                                    ]
+                                  },
+                                  "href": {
+                                    "type": "string",
+                                    "maxLength": 2000
+                                  },
+                                  "content": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "type": {
+                                          "type": "string",
+                                          "enum": [
+                                            "text"
+                                          ]
+                                        },
+                                        "text": {
+                                          "type": "string",
+                                          "maxLength": 5000
+                                        },
+                                        "styles": {
+                                          "type": "object",
+                                          "properties": {
+                                            "bold": {
+                                              "type": "boolean"
+                                            },
+                                            "italic": {
+                                              "type": "boolean"
+                                            },
+                                            "underline": {
+                                              "type": "boolean"
+                                            }
+                                          },
+                                          "default": {}
+                                        }
+                                      },
+                                      "required": [
+                                        "type",
+                                        "text"
+                                      ]
+                                    },
+                                    "maxItems": 100
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "href",
+                                  "content"
+                                ]
+                              }
+                            ]
+                          },
+                          "maxItems": 500,
+                          "default": []
+                        },
+                        "children": {
+                          "type": "array",
+                          "items": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 64
+                                  },
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "bulletListItem"
+                                    ]
+                                  },
+                                  "props": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "default": {}
+                                  },
+                                  "content": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "enum": [
+                                                "text"
+                                              ]
+                                            },
+                                            "text": {
+                                              "type": "string",
+                                              "maxLength": 5000
+                                            },
+                                            "styles": {
+                                              "type": "object",
+                                              "properties": {
+                                                "bold": {
+                                                  "type": "boolean"
+                                                },
+                                                "italic": {
+                                                  "type": "boolean"
+                                                },
+                                                "underline": {
+                                                  "type": "boolean"
+                                                }
+                                              },
+                                              "default": {}
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "text"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "enum": [
+                                                "link"
+                                              ]
+                                            },
+                                            "href": {
+                                              "type": "string",
+                                              "maxLength": 2000
+                                            },
+                                            "content": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                  "type": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "text"
+                                                    ]
+                                                  },
+                                                  "text": {
+                                                    "type": "string",
+                                                    "maxLength": 5000
+                                                  },
+                                                  "styles": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "bold": {
+                                                        "type": "boolean"
+                                                      },
+                                                      "italic": {
+                                                        "type": "boolean"
+                                                      },
+                                                      "underline": {
+                                                        "type": "boolean"
+                                                      }
+                                                    },
+                                                    "default": {}
+                                                  }
+                                                },
+                                                "required": [
+                                                  "type",
+                                                  "text"
+                                                ]
+                                              },
+                                              "maxItems": 100
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "href",
+                                            "content"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "maxItems": 500,
+                                    "default": []
+                                  },
+                                  "children": {
+                                    "type": "array",
+                                    "items": {
+                                      "nullable": true
+                                    },
+                                    "maxItems": 0,
+                                    "default": []
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "type"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 64
+                                  },
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "numberedListItem"
+                                    ]
+                                  },
+                                  "props": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "default": {}
+                                  },
+                                  "content": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "enum": [
+                                                "text"
+                                              ]
+                                            },
+                                            "text": {
+                                              "type": "string",
+                                              "maxLength": 5000
+                                            },
+                                            "styles": {
+                                              "type": "object",
+                                              "properties": {
+                                                "bold": {
+                                                  "type": "boolean"
+                                                },
+                                                "italic": {
+                                                  "type": "boolean"
+                                                },
+                                                "underline": {
+                                                  "type": "boolean"
+                                                }
+                                              },
+                                              "default": {}
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "text"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "enum": [
+                                                "link"
+                                              ]
+                                            },
+                                            "href": {
+                                              "type": "string",
+                                              "maxLength": 2000
+                                            },
+                                            "content": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                  "type": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "text"
+                                                    ]
+                                                  },
+                                                  "text": {
+                                                    "type": "string",
+                                                    "maxLength": 5000
+                                                  },
+                                                  "styles": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "bold": {
+                                                        "type": "boolean"
+                                                      },
+                                                      "italic": {
+                                                        "type": "boolean"
+                                                      },
+                                                      "underline": {
+                                                        "type": "boolean"
+                                                      }
+                                                    },
+                                                    "default": {}
+                                                  }
+                                                },
+                                                "required": [
+                                                  "type",
+                                                  "text"
+                                                ]
+                                              },
+                                              "maxItems": 100
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "href",
+                                            "content"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "maxItems": 500,
+                                    "default": []
+                                  },
+                                  "children": {
+                                    "type": "array",
+                                    "items": {
+                                      "nullable": true
+                                    },
+                                    "maxItems": 0,
+                                    "default": []
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "type"
+                                ]
+                              }
+                            ]
+                          },
+                          "maxItems": 100,
+                          "default": []
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type"
+                      ]
+                    }
+                  ]
+                },
+                "maxItems": 100,
+                "default": []
+              }
+            },
+            "required": [
+              "id",
+              "type"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "numberedListItem"
+                ]
+              },
+              "props": {
+                "type": "object",
+                "properties": {},
+                "default": {}
+              },
+              "content": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "text"
+                          ]
+                        },
+                        "text": {
+                          "type": "string",
+                          "maxLength": 5000
+                        },
+                        "styles": {
+                          "type": "object",
+                          "properties": {
+                            "bold": {
+                              "type": "boolean"
+                            },
+                            "italic": {
+                              "type": "boolean"
+                            },
+                            "underline": {
+                              "type": "boolean"
+                            }
+                          },
+                          "default": {}
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "text"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "link"
+                          ]
+                        },
+                        "href": {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        "content": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "text"
+                                ]
+                              },
+                              "text": {
+                                "type": "string",
+                                "maxLength": 5000
+                              },
+                              "styles": {
+                                "type": "object",
+                                "properties": {
+                                  "bold": {
+                                    "type": "boolean"
+                                  },
+                                  "italic": {
+                                    "type": "boolean"
+                                  },
+                                  "underline": {
+                                    "type": "boolean"
+                                  }
+                                },
+                                "default": {}
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "text"
+                            ]
+                          },
+                          "maxItems": 100
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "href",
+                        "content"
+                      ]
+                    }
+                  ]
+                },
+                "maxItems": 500,
+                "default": []
+              },
+              "children": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 64
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "bulletListItem"
+                          ]
+                        },
+                        "props": {
+                          "type": "object",
+                          "properties": {},
+                          "default": {}
+                        },
+                        "content": {
+                          "type": "array",
+                          "items": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "text"
+                                    ]
+                                  },
+                                  "text": {
+                                    "type": "string",
+                                    "maxLength": 5000
+                                  },
+                                  "styles": {
+                                    "type": "object",
+                                    "properties": {
+                                      "bold": {
+                                        "type": "boolean"
+                                      },
+                                      "italic": {
+                                        "type": "boolean"
+                                      },
+                                      "underline": {
+                                        "type": "boolean"
+                                      }
+                                    },
+                                    "default": {}
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "text"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "link"
+                                    ]
+                                  },
+                                  "href": {
+                                    "type": "string",
+                                    "maxLength": 2000
+                                  },
+                                  "content": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "type": {
+                                          "type": "string",
+                                          "enum": [
+                                            "text"
+                                          ]
+                                        },
+                                        "text": {
+                                          "type": "string",
+                                          "maxLength": 5000
+                                        },
+                                        "styles": {
+                                          "type": "object",
+                                          "properties": {
+                                            "bold": {
+                                              "type": "boolean"
+                                            },
+                                            "italic": {
+                                              "type": "boolean"
+                                            },
+                                            "underline": {
+                                              "type": "boolean"
+                                            }
+                                          },
+                                          "default": {}
+                                        }
+                                      },
+                                      "required": [
+                                        "type",
+                                        "text"
+                                      ]
+                                    },
+                                    "maxItems": 100
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "href",
+                                  "content"
+                                ]
+                              }
+                            ]
+                          },
+                          "maxItems": 500,
+                          "default": []
+                        },
+                        "children": {
+                          "type": "array",
+                          "items": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 64
+                                  },
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "bulletListItem"
+                                    ]
+                                  },
+                                  "props": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "default": {}
+                                  },
+                                  "content": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "enum": [
+                                                "text"
+                                              ]
+                                            },
+                                            "text": {
+                                              "type": "string",
+                                              "maxLength": 5000
+                                            },
+                                            "styles": {
+                                              "type": "object",
+                                              "properties": {
+                                                "bold": {
+                                                  "type": "boolean"
+                                                },
+                                                "italic": {
+                                                  "type": "boolean"
+                                                },
+                                                "underline": {
+                                                  "type": "boolean"
+                                                }
+                                              },
+                                              "default": {}
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "text"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "enum": [
+                                                "link"
+                                              ]
+                                            },
+                                            "href": {
+                                              "type": "string",
+                                              "maxLength": 2000
+                                            },
+                                            "content": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                  "type": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "text"
+                                                    ]
+                                                  },
+                                                  "text": {
+                                                    "type": "string",
+                                                    "maxLength": 5000
+                                                  },
+                                                  "styles": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "bold": {
+                                                        "type": "boolean"
+                                                      },
+                                                      "italic": {
+                                                        "type": "boolean"
+                                                      },
+                                                      "underline": {
+                                                        "type": "boolean"
+                                                      }
+                                                    },
+                                                    "default": {}
+                                                  }
+                                                },
+                                                "required": [
+                                                  "type",
+                                                  "text"
+                                                ]
+                                              },
+                                              "maxItems": 100
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "href",
+                                            "content"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "maxItems": 500,
+                                    "default": []
+                                  },
+                                  "children": {
+                                    "type": "array",
+                                    "items": {
+                                      "nullable": true
+                                    },
+                                    "maxItems": 0,
+                                    "default": []
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "type"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 64
+                                  },
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "numberedListItem"
+                                    ]
+                                  },
+                                  "props": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "default": {}
+                                  },
+                                  "content": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "enum": [
+                                                "text"
+                                              ]
+                                            },
+                                            "text": {
+                                              "type": "string",
+                                              "maxLength": 5000
+                                            },
+                                            "styles": {
+                                              "type": "object",
+                                              "properties": {
+                                                "bold": {
+                                                  "type": "boolean"
+                                                },
+                                                "italic": {
+                                                  "type": "boolean"
+                                                },
+                                                "underline": {
+                                                  "type": "boolean"
+                                                }
+                                              },
+                                              "default": {}
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "text"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "enum": [
+                                                "link"
+                                              ]
+                                            },
+                                            "href": {
+                                              "type": "string",
+                                              "maxLength": 2000
+                                            },
+                                            "content": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                  "type": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "text"
+                                                    ]
+                                                  },
+                                                  "text": {
+                                                    "type": "string",
+                                                    "maxLength": 5000
+                                                  },
+                                                  "styles": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "bold": {
+                                                        "type": "boolean"
+                                                      },
+                                                      "italic": {
+                                                        "type": "boolean"
+                                                      },
+                                                      "underline": {
+                                                        "type": "boolean"
+                                                      }
+                                                    },
+                                                    "default": {}
+                                                  }
+                                                },
+                                                "required": [
+                                                  "type",
+                                                  "text"
+                                                ]
+                                              },
+                                              "maxItems": 100
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "href",
+                                            "content"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "maxItems": 500,
+                                    "default": []
+                                  },
+                                  "children": {
+                                    "type": "array",
+                                    "items": {
+                                      "nullable": true
+                                    },
+                                    "maxItems": 0,
+                                    "default": []
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "type"
+                                ]
+                              }
+                            ]
+                          },
+                          "maxItems": 100,
+                          "default": []
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 64
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "numberedListItem"
+                          ]
+                        },
+                        "props": {
+                          "type": "object",
+                          "properties": {},
+                          "default": {}
+                        },
+                        "content": {
+                          "type": "array",
+                          "items": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "text"
+                                    ]
+                                  },
+                                  "text": {
+                                    "type": "string",
+                                    "maxLength": 5000
+                                  },
+                                  "styles": {
+                                    "type": "object",
+                                    "properties": {
+                                      "bold": {
+                                        "type": "boolean"
+                                      },
+                                      "italic": {
+                                        "type": "boolean"
+                                      },
+                                      "underline": {
+                                        "type": "boolean"
+                                      }
+                                    },
+                                    "default": {}
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "text"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "link"
+                                    ]
+                                  },
+                                  "href": {
+                                    "type": "string",
+                                    "maxLength": 2000
+                                  },
+                                  "content": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "type": {
+                                          "type": "string",
+                                          "enum": [
+                                            "text"
+                                          ]
+                                        },
+                                        "text": {
+                                          "type": "string",
+                                          "maxLength": 5000
+                                        },
+                                        "styles": {
+                                          "type": "object",
+                                          "properties": {
+                                            "bold": {
+                                              "type": "boolean"
+                                            },
+                                            "italic": {
+                                              "type": "boolean"
+                                            },
+                                            "underline": {
+                                              "type": "boolean"
+                                            }
+                                          },
+                                          "default": {}
+                                        }
+                                      },
+                                      "required": [
+                                        "type",
+                                        "text"
+                                      ]
+                                    },
+                                    "maxItems": 100
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "href",
+                                  "content"
+                                ]
+                              }
+                            ]
+                          },
+                          "maxItems": 500,
+                          "default": []
+                        },
+                        "children": {
+                          "type": "array",
+                          "items": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 64
+                                  },
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "bulletListItem"
+                                    ]
+                                  },
+                                  "props": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "default": {}
+                                  },
+                                  "content": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "enum": [
+                                                "text"
+                                              ]
+                                            },
+                                            "text": {
+                                              "type": "string",
+                                              "maxLength": 5000
+                                            },
+                                            "styles": {
+                                              "type": "object",
+                                              "properties": {
+                                                "bold": {
+                                                  "type": "boolean"
+                                                },
+                                                "italic": {
+                                                  "type": "boolean"
+                                                },
+                                                "underline": {
+                                                  "type": "boolean"
+                                                }
+                                              },
+                                              "default": {}
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "text"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "enum": [
+                                                "link"
+                                              ]
+                                            },
+                                            "href": {
+                                              "type": "string",
+                                              "maxLength": 2000
+                                            },
+                                            "content": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                  "type": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "text"
+                                                    ]
+                                                  },
+                                                  "text": {
+                                                    "type": "string",
+                                                    "maxLength": 5000
+                                                  },
+                                                  "styles": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "bold": {
+                                                        "type": "boolean"
+                                                      },
+                                                      "italic": {
+                                                        "type": "boolean"
+                                                      },
+                                                      "underline": {
+                                                        "type": "boolean"
+                                                      }
+                                                    },
+                                                    "default": {}
+                                                  }
+                                                },
+                                                "required": [
+                                                  "type",
+                                                  "text"
+                                                ]
+                                              },
+                                              "maxItems": 100
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "href",
+                                            "content"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "maxItems": 500,
+                                    "default": []
+                                  },
+                                  "children": {
+                                    "type": "array",
+                                    "items": {
+                                      "nullable": true
+                                    },
+                                    "maxItems": 0,
+                                    "default": []
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "type"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 64
+                                  },
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "numberedListItem"
+                                    ]
+                                  },
+                                  "props": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "default": {}
+                                  },
+                                  "content": {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "enum": [
+                                                "text"
+                                              ]
+                                            },
+                                            "text": {
+                                              "type": "string",
+                                              "maxLength": 5000
+                                            },
+                                            "styles": {
+                                              "type": "object",
+                                              "properties": {
+                                                "bold": {
+                                                  "type": "boolean"
+                                                },
+                                                "italic": {
+                                                  "type": "boolean"
+                                                },
+                                                "underline": {
+                                                  "type": "boolean"
+                                                }
+                                              },
+                                              "default": {}
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "text"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "type": {
+                                              "type": "string",
+                                              "enum": [
+                                                "link"
+                                              ]
+                                            },
+                                            "href": {
+                                              "type": "string",
+                                              "maxLength": 2000
+                                            },
+                                            "content": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                  "type": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "text"
+                                                    ]
+                                                  },
+                                                  "text": {
+                                                    "type": "string",
+                                                    "maxLength": 5000
+                                                  },
+                                                  "styles": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                      "bold": {
+                                                        "type": "boolean"
+                                                      },
+                                                      "italic": {
+                                                        "type": "boolean"
+                                                      },
+                                                      "underline": {
+                                                        "type": "boolean"
+                                                      }
+                                                    },
+                                                    "default": {}
+                                                  }
+                                                },
+                                                "required": [
+                                                  "type",
+                                                  "text"
+                                                ]
+                                              },
+                                              "maxItems": 100
+                                            }
+                                          },
+                                          "required": [
+                                            "type",
+                                            "href",
+                                            "content"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "maxItems": 500,
+                                    "default": []
+                                  },
+                                  "children": {
+                                    "type": "array",
+                                    "items": {
+                                      "nullable": true
+                                    },
+                                    "maxItems": 0,
+                                    "default": []
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "type"
+                                ]
+                              }
+                            ]
+                          },
+                          "maxItems": 100,
+                          "default": []
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type"
+                      ]
+                    }
+                  ]
+                },
+                "maxItems": 100,
+                "default": []
+              }
+            },
+            "required": [
+              "id",
+              "type"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "image"
+                ]
+              },
+              "props": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "pattern": "^\\d{4}\\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.(webp|jpg|jpeg|png|mp4|webm)$"
+                  },
+                  "caption": {
+                    "type": "string",
+                    "maxLength": 300,
+                    "default": ""
+                  },
+                  "previewWidth": {
+                    "type": "integer",
+                    "minimum": 100,
+                    "maximum": 2000
+                  }
+                },
+                "required": [
+                  "url"
+                ]
+              },
+              "children": {
+                "type": "array",
+                "items": {
+                  "nullable": true
+                },
+                "maxItems": 0,
+                "default": []
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "props"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "gallery"
+                ]
+              },
+              "props": {
+                "type": "object",
+                "properties": {
+                  "paths": {
+                    "type": "string"
+                  },
+                  "caption": {
+                    "type": "string",
+                    "maxLength": 300,
+                    "default": ""
+                  }
+                },
+                "required": [
+                  "paths"
+                ]
+              },
+              "children": {
+                "type": "array",
+                "items": {
+                  "nullable": true
+                },
+                "maxItems": 0,
+                "default": []
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "props"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "video"
+                ]
+              },
+              "props": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "enum": [
+                      "file",
+                      "youtube",
+                      "vimeo"
+                    ]
+                  },
+                  "src": {
+                    "type": "string",
+                    "maxLength": 500
+                  },
+                  "caption": {
+                    "type": "string",
+                    "maxLength": 300,
+                    "default": ""
+                  }
+                },
+                "required": [
+                  "source",
+                  "src"
+                ]
+              },
+              "children": {
+                "type": "array",
+                "items": {
+                  "nullable": true
+                },
+                "maxItems": 0,
+                "default": []
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "props"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "buttonLink"
+                ]
+              },
+              "props": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "href": {
+                    "type": "string",
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "label",
+                  "href"
+                ]
+              },
+              "children": {
+                "type": "array",
+                "items": {
+                  "nullable": true
+                },
+                "maxItems": 0,
+                "default": []
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "props"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "divider"
+                ]
+              },
+              "props": {
+                "type": "object",
+                "properties": {},
+                "default": {}
+              },
+              "children": {
+                "type": "array",
+                "items": {
+                  "nullable": true
+                },
+                "maxItems": 0,
+                "default": []
+              }
+            },
+            "required": [
+              "id",
+              "type"
+            ]
+          }
+        ]
+      },
+      "GalleryList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GalleryItem"
+            }
+          },
+          "total": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ]
+      },
+      "GalleryItem": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "publishedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "cover": {
+            "$ref": "#/components/schemas/Media"
+          }
+        },
+        "required": [
+          "slug",
+          "title",
+          "publishedAt",
+          "cover"
+        ]
+      },
+      "UploadTarget": {
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
+          "signedUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "bucket",
+          "path",
+          "token",
+          "signedUrl"
+        ]
+      },
+      "ProposalUploadUrlBody": {
+        "type": "object",
+        "properties": {
+          "mime": {
+            "type": "string",
+            "enum": [
+              "image/webp",
+              "image/jpeg",
+              "image/png"
+            ]
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "mime",
+          "size"
+        ],
+        "additionalProperties": false
+      },
+      "ProposalCreated": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "ProposalSubmit": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "category": {
+            "$ref": "#/components/schemas/PostCategory"
+          },
+          "eventDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "location": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 3000
+          },
+          "photoPath": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.(jpg|jpeg|png|webp)$"
+          },
+          "videoUrl": {
+            "type": "string",
+            "maxLength": 500,
+            "pattern": "^https:\\/\\/"
+          },
+          "submitterName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "submitterContact": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "turnstileToken": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          }
+        },
+        "required": [
+          "title",
+          "category",
+          "body",
+          "submitterName",
+          "turnstileToken"
         ],
         "additionalProperties": false
       },
@@ -2830,6 +5696,455 @@
         ],
         "additionalProperties": false
       },
+      "StaffPostList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StaffPostItem"
+            }
+          },
+          "total": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ]
+      },
+      "StaffPostItem": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/PostCategory"
+          },
+          "eventDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "location": {
+            "type": "string",
+            "nullable": true
+          },
+          "excerpt": {
+            "type": "string",
+            "nullable": true
+          },
+          "publishedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "cover": {
+            "$ref": "#/components/schemas/Media"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "bozza",
+              "pubblicata"
+            ]
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "fromProposalId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "slug",
+          "title",
+          "category",
+          "eventDate",
+          "location",
+          "excerpt",
+          "publishedAt",
+          "cover",
+          "id",
+          "status",
+          "updatedAt",
+          "fromProposalId"
+        ]
+      },
+      "StaffPost": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/PostCategory"
+          },
+          "eventDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "location": {
+            "type": "string",
+            "nullable": true
+          },
+          "excerpt": {
+            "type": "string",
+            "nullable": true
+          },
+          "publishedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "cover": {
+            "$ref": "#/components/schemas/Media"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "bozza",
+              "pubblicata"
+            ]
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "fromProposalId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Block"
+            },
+            "maxItems": 300
+          },
+          "media": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Media"
+            }
+          }
+        },
+        "required": [
+          "slug",
+          "title",
+          "category",
+          "eventDate",
+          "location",
+          "excerpt",
+          "publishedAt",
+          "cover",
+          "id",
+          "status",
+          "updatedAt",
+          "fromProposalId",
+          "content",
+          "media"
+        ]
+      },
+      "PostCreate": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "category": {
+            "$ref": "#/components/schemas/PostCategory"
+          },
+          "eventDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "location": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "coverMediaId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Block"
+            },
+            "maxItems": 300
+          }
+        },
+        "required": [
+          "title",
+          "category"
+        ],
+        "additionalProperties": false
+      },
+      "PostPatch": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "category": {
+            "$ref": "#/components/schemas/PostCategory"
+          },
+          "eventDate": {
+            "type": "string",
+            "nullable": true,
+            "format": "date"
+          },
+          "location": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "coverMediaId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Block"
+            },
+            "maxItems": 300
+          }
+        },
+        "additionalProperties": false
+      },
+      "MediaUploadUrlBody": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "image",
+              "video"
+            ]
+          },
+          "mime": {
+            "type": "string",
+            "enum": [
+              "image/webp",
+              "image/jpeg",
+              "image/png",
+              "video/mp4",
+              "video/webm"
+            ]
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "kind",
+          "mime",
+          "size"
+        ],
+        "additionalProperties": false
+      },
+      "MediaCompleteBody": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "pattern": "^\\d{4}\\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.(webp|jpg|jpeg|png|mp4|webm)$"
+          },
+          "width": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20000
+          },
+          "height": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20000
+          },
+          "alt": {
+            "type": "string",
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "ProposalList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProposalItem"
+            }
+          },
+          "total": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ]
+      },
+      "ProposalItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/PostCategory"
+          },
+          "eventDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProposalStatus"
+          },
+          "submitterName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "hasPhoto": {
+            "type": "boolean"
+          },
+          "postId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "category",
+          "eventDate",
+          "status",
+          "submitterName",
+          "createdAt",
+          "hasPhoto",
+          "postId"
+        ]
+      },
+      "ProposalStatus": {
+        "type": "string",
+        "enum": [
+          "attesa",
+          "pubblicata",
+          "rifiutata"
+        ]
+      },
+      "Proposal": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/PostCategory"
+          },
+          "eventDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProposalStatus"
+          },
+          "submitterName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "hasPhoto": {
+            "type": "boolean"
+          },
+          "postId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "location": {
+            "type": "string",
+            "nullable": true
+          },
+          "body": {
+            "type": "string"
+          },
+          "videoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "submitterContact": {
+            "type": "string",
+            "nullable": true
+          },
+          "reviewedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "photoUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "URL firmato di lettura, valido 600 secondi"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "category",
+          "eventDate",
+          "status",
+          "submitterName",
+          "createdAt",
+          "hasPhoto",
+          "postId",
+          "location",
+          "body",
+          "videoUrl",
+          "submitterContact",
+          "reviewedAt",
+          "photoUrl"
+        ]
+      },
       "CronResult": {
         "type": "object",
         "properties": {
@@ -2838,11 +6153,19 @@
           },
           "failed": {
             "type": "integer"
+          },
+          "orphansRemoved": {
+            "type": "integer"
+          },
+          "proposalsAnonymised": {
+            "type": "integer"
           }
         },
         "required": [
           "sent",
-          "failed"
+          "failed",
+          "orphansRemoved",
+          "proposalsAnonymised"
         ],
         "additionalProperties": false
       }
@@ -3669,6 +6992,291 @@
                     "pages"
                   ],
                   "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/posts": {
+      "get": {
+        "tags": [
+          "public"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/PostCategory"
+            },
+            "required": false,
+            "name": "category",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "required": false,
+            "name": "upcoming",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 1
+            },
+            "required": false,
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 24,
+              "default": 10
+            },
+            "required": false,
+            "name": "pageSize",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Articoli pubblicati",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicPostList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dati non validi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/posts/{slug}": {
+      "get": {
+        "tags": [
+          "public"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "required": true,
+            "name": "slug",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Articolo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicPost"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Non trovato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/gallery": {
+      "get": {
+        "tags": [
+          "public"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 1
+            },
+            "required": false,
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 24,
+              "default": 10
+            },
+            "required": false,
+            "name": "pageSize",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Copertine degli articoli",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GalleryList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dati non validi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/proposals/upload-url": {
+      "post": {
+        "tags": [
+          "public"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProposalUploadUrlBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "URL di caricamento firmato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadTarget"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dati non validi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Richiede conferma o non elaborabile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Troppe richieste",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/proposals": {
+      "post": {
+        "tags": [
+          "public"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProposalSubmit"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Proposta ricevuta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProposalCreated"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dati non validi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Richiede conferma o non elaborabile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Troppe richieste",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -8700,6 +12308,1223 @@
           },
           "403": {
             "description": "Permesso negato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflitto con lo stato attuale",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/posts": {
+      "get": {
+        "tags": [
+          "posts"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 1
+            },
+            "required": false,
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            },
+            "required": false,
+            "name": "pageSize",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "bozza",
+                "pubblicata",
+                "tutte"
+              ],
+              "default": "tutte"
+            },
+            "required": false,
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/PostCategory"
+            },
+            "required": false,
+            "name": "category",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "required": false,
+            "name": "q",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Articoli",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffPostList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dati non validi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Non autenticato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permesso negato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "posts"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Bozza creata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffPost"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dati non validi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Non autenticato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permesso negato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflitto con lo stato attuale",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Richiede conferma o non elaborabile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/posts/{id}": {
+      "get": {
+        "tags": [
+          "posts"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Articolo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffPost"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dati non validi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Non autenticato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permesso negato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Non trovato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "posts"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Articolo aggiornato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffPost"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dati non validi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Non autenticato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permesso negato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Non trovato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflitto con lo stato attuale",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Richiede conferma o non elaborabile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "posts"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Eliminato"
+          },
+          "400": {
+            "description": "Dati non validi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Non autenticato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permesso negato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Non trovato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/posts/{id}/publish": {
+      "post": {
+        "tags": [
+          "posts"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Articolo pubblicato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffPost"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dati non validi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Non autenticato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permesso negato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Non trovato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflitto con lo stato attuale",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Richiede conferma o non elaborabile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/posts/{id}/unpublish": {
+      "post": {
+        "tags": [
+          "posts"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Articolo riportato in bozza",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffPost"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dati non validi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Non autenticato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permesso negato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Non trovato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflitto con lo stato attuale",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/media/upload-url": {
+      "post": {
+        "tags": [
+          "media"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaUploadUrlBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "URL di caricamento firmato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadTarget"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dati non validi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Non autenticato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permesso negato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Richiede conferma o non elaborabile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/media/complete": {
+      "post": {
+        "tags": [
+          "media"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaCompleteBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Media registrato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Media"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dati non validi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Non autenticato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permesso negato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflitto con lo stato attuale",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Richiede conferma o non elaborabile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/proposals": {
+      "get": {
+        "tags": [
+          "proposals"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 1
+            },
+            "required": false,
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            },
+            "required": false,
+            "name": "pageSize",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "attesa",
+                "pubblicata",
+                "rifiutata",
+                "tutte"
+              ],
+              "default": "attesa"
+            },
+            "required": false,
+            "name": "status",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Proposte",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProposalList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dati non validi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Non autenticato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permesso negato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/proposals/{id}": {
+      "get": {
+        "tags": [
+          "proposals"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Proposta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Proposal"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dati non validi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Non autenticato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permesso negato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Non trovato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/proposals/{id}/draft": {
+      "post": {
+        "tags": [
+          "proposals"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bozza già esistente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffPost"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Bozza creata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffPost"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dati non validi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Non autenticato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permesso negato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Non trovato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflitto con lo stato attuale",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/proposals/{id}/publish": {
+      "post": {
+        "tags": [
+          "proposals"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Articolo pubblicato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffPost"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dati non validi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Non autenticato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permesso negato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Non trovato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflitto con lo stato attuale",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Richiede conferma o non elaborabile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/proposals/{id}/reject": {
+      "post": {
+        "tags": [
+          "proposals"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Proposta rifiutata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Proposal"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dati non validi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Non autenticato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permesso negato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Non trovato",
             "content": {
               "application/json": {
                 "schema": {

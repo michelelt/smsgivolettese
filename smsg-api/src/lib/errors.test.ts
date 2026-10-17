@@ -48,3 +48,22 @@ describe('fromPostgres phase 4', () => {
     expect(fromPostgres({ code: 'P0001', message: 'CARD_NUMBER_IMMUTABLE' })?.status).toBe(409);
   });
 });
+
+describe('fromPostgres phase 6', () => {
+  it('maps bacheca constraints', () => {
+    expect(fromPostgres({ code: '23514', constraint_name: 'posts_event_date_chk' })).toMatchObject({
+      status: 422,
+      code: 'EVENT_DATE_REQUIRED',
+    });
+    expect(fromPostgres({ code: '23514', constraint_name: 'posts_title_len_chk' })?.status).toBe(
+      400,
+    );
+    expect(fromPostgres({ code: 'P0001', message: 'SLUG_FROZEN' })).toMatchObject({
+      status: 409,
+      code: 'SLUG_FROZEN',
+    });
+    expect(fromPostgres({ code: '23505', constraint_name: 'posts_slug_key' })?.code).toBe(
+      'POST_SLUG_EXISTS',
+    );
+  });
+});

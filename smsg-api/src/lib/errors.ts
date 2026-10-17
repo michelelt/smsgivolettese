@@ -62,6 +62,8 @@ const PG_UNIQUE: Record<string, [string, string]> = {
   ],
   shift_types_name_key: ['SHIFT_TYPE_EXISTS', 'Esiste già un tipo di turno con questo nome'],
   vehicles_plate_key: ['VEHICLE_PLATE_EXISTS', 'Esiste già un mezzo con questa targa'],
+  posts_slug_key: ['POST_SLUG_EXISTS', 'Esiste già un articolo con questo indirizzo'],
+  posts_from_proposal_id_key: ['PROPOSAL_ALREADY_DRAFTED', 'La proposta ha già una bozza'],
   shift_assignments_shift_id_volunteer_id_key: [
     'ALREADY_ASSIGNED',
     'Il volontario è già assegnato a questo turno',
@@ -90,6 +92,7 @@ const PG_RAISE: Record<string, [ErrorStatus, string]> = {
   MEMBER_NOT_FOUND: [404, 'Socio non trovato'],
   MEMBER_NOT_ACTIVE: [422, 'Il socio non è attivo: riattivalo prima di prenotare'],
   VOID_REASON_REQUIRED: [400, "Indica il motivo dell'annullamento"],
+  SLUG_FROZEN: [409, "L'indirizzo di un articolo già pubblicato non può cambiare"],
   CARD_NUMBER_IMMUTABLE: [409, 'Il numero di tessera non è modificabile'],
 };
 
@@ -103,6 +106,12 @@ export function fromPostgres(err: { code?: string; constraint_name?: string; mes
       return u ? new Conflict(u[1], u[0]) : new Conflict('Valore già esistente', 'DUPLICATE');
     }
     case '23514':
+      if (err.constraint_name === 'posts_event_date_chk')
+        return new Unprocessable(
+          "Indica la data dell'evento prima di pubblicare",
+          'EVENT_DATE_REQUIRED',
+        );
+      return new ValidationError('Dati non validi');
     case '23503':
       return new ValidationError('Dati non validi');
     case 'P0001': {

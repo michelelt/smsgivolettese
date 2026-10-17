@@ -53,7 +53,22 @@ from public.shift_types where name = 'Sede';
 insert into public.shift_assignments (shift_id, volunteer_id, status)
 select id, 'a0000000-0000-4000-8000-000000000003', 'proposto' from public.shifts;
 insert into public.posts (slug, title, category, content, excerpt, status, published_at) values
-  ('festa-di-esempio', 'Festa di esempio', 'evento', '[]', 'Evento fittizio per il sito.', 'pubblicata', now());
+  ('festa-di-esempio', 'Festa di esempio', 'avviso', $b$[
+    {"id":"b1","type":"heading","props":{"level":1},"content":[{"type":"text","text":"Titolo di esempio","styles":{}}],"children":[]},
+    {"id":"b2","type":"paragraph","props":{},"content":[{"type":"text","text":"Testo ","styles":{"bold":true}},{"type":"link","href":"https://example.test","content":[{"type":"text","text":"con un link (esempio)","styles":{}}]}],"children":[]},
+    {"id":"b3","type":"quote","props":{},"content":[{"type":"text","text":"Citazione fittizia","styles":{"italic":true}}],"children":[]},
+    {"id":"b4","type":"bulletListItem","props":{},"content":[{"type":"text","text":"Elemento uno","styles":{}}],"children":[{"id":"b5","type":"bulletListItem","props":{},"content":[{"type":"text","text":"Sotto-elemento","styles":{}}],"children":[]}]},
+    {"id":"b6","type":"numberedListItem","props":{},"content":[{"type":"text","text":"Primo passo","styles":{}}],"children":[]},
+    {"id":"b7","type":"video","props":{"source":"youtube","src":"dQw4w9WgXcQ","caption":"Video di esempio"},"children":[]},
+    {"id":"b8","type":"buttonLink","props":{"label":"Pulsante di esempio","href":"/chi-siamo"},"children":[]},
+    {"id":"b9","type":"divider","props":{},"children":[]}
+  ]$b$, 'Titolo di esempio Testo con un link (esempio) Citazione fittizia', 'pubblicata', now());
+insert into public.posts (slug, title, category, event_date, location, content, excerpt, status, published_at) values
+  ('gita-di-esempio', 'Gita di esempio', 'evento', current_date + 14, 'Sede (esempio)',
+   '[{"id":"e1","type":"paragraph","props":{},"content":[{"type":"text","text":"Evento fittizio per il sito.","styles":{}}],"children":[]}]',
+   'Evento fittizio per il sito.', 'pubblicata', now());
+insert into public.post_proposals (title, category, body, submitter_name, submitter_contact) values
+  ('Proposta di esempio', 'notizia', 'Testo fittizio di una proposta in attesa.', 'Mario Rossi (esempio)', 'mario@example.test');
 update public.site_settings set slogan = 'Sito di esempio', vat_number = '00000000000',
   conventions = '[{"title":"Farmacia di esempio","description":"Sconto per i soci (esempio)","url":"https://example.test/farmacia"},{"title":"Ottica di esempio","description":"Convenzione fittizia"}]',
   footer_links = '[{"group":"associazioni","label":"Pro Loco (esempio)","url":"https://example.test/proloco"},
