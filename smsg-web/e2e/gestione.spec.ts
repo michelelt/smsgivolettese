@@ -1,17 +1,11 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
+import { login } from "./session";
 
 // Needs `make dev` with the seeded local database (services, members).
 const env = (k: string) => process.env[k]!;
 
-test.beforeEach(async ({ page }) => {
-  await page.goto("/accedi");
-  const form = page.getByRole("form", { name: "Entra con la password" });
-  await form.getByLabel("Email").fill(env("E2E_STAFF_EMAIL"));
-  await form.getByLabel("Password").fill(env("E2E_PASSWORD"));
-  await form.getByRole("button", { name: "Entra" }).click();
-  await page.waitForURL("**/gestione");
-});
+test.beforeEach(({ page }) => login(page, env("E2E_STAFF_EMAIL")));
 
 const card = (page: Page, text: string) =>
   page.getByRole("listitem").filter({ hasText: text });
@@ -195,7 +189,7 @@ test("slogan edited in place shows on the public home", async ({
   await page.keyboard.press("Enter");
   await expect(page.getByText("Modifiche non salvate (1)")).toBeVisible();
   await page.getByRole("button", { name: "Salva e pubblica" }).click();
-  await expect(page.getByText("Modifiche salvate")).toBeVisible();
+  await expect(page.getByText("Modifiche salvate").first()).toBeVisible();
   const pub = await context.newPage();
   await expect(async () => {
     await pub.goto("/");
@@ -209,7 +203,7 @@ test("slogan edited in place shows on the public home", async ({
   await page.getByLabel("slogan", { exact: true }).fill(original);
   await page.keyboard.press("Enter");
   await page.getByRole("button", { name: "Salva e pubblica" }).click();
-  await expect(page.getByText("Modifiche salvate")).toBeVisible();
+  await expect(page.getByText("Modifiche salvate").first()).toBeVisible();
 });
 
 test("Chi siamo paragraph edited in place shows on the public page", async ({
@@ -228,7 +222,7 @@ test("Chi siamo paragraph edited in place shows on the public page", async ({
     await page.getByLabel("testo della sezione 1", { exact: true }).fill(text);
     await page.getByLabel("testo della sezione 1", { exact: true }).blur();
     await page.getByRole("button", { name: "Salva e pubblica" }).click();
-    await expect(page.getByText("Modifiche salvate")).toBeVisible();
+    await expect(page.getByText("Modifiche salvate").first()).toBeVisible();
   };
   await edit(`${original}\n\n${marker}`);
   const pub = await context.newPage();

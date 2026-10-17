@@ -265,8 +265,8 @@ function Editor({ post }: { post: Post }) {
               onChange={(b) => {
                 content.current = b as unknown as ApiBlock[];
               }}
-              upload={async (file, kind) =>
-                (await uploadMedia(file, kind)).path
+              upload={async (file, kind, alt) =>
+                (await uploadMedia(file, kind, alt)).path
               }
             />
           </div>

@@ -24,6 +24,10 @@ import {
 } from "@/components/gestione/issue-invoice-dialog";
 import { NewBookingDialog } from "@/components/gestione/new-booking-dialog";
 import { BookingList } from "@/components/gestione/booking-list";
+import {
+  GdprActions,
+  useIsSuperAdmin,
+} from "@/components/gestione/gdpr-actions";
 import { InvoiceActions } from "@/components/gestione/invoice-actions";
 import { TYPES } from "@/components/gestione/member-form";
 
@@ -159,6 +163,7 @@ export default function Socio() {
         "ricevuta.pdf",
       ),
   });
+  const isSa = useIsSuperAdmin();
   const m = q.data;
   const year = currentYear();
   const paid = m?.fees.some((f) => f.year === year);
@@ -226,6 +231,17 @@ export default function Socio() {
             >
               Modifica dati
             </ButtonLink>
+            {isSa && (
+              <GdprActions
+                subject="member"
+                id={m.id}
+                name={`${m.firstName} ${m.lastName}`}
+                canAnonymize={m.status === "cessato"}
+                disabledReason="Per anonimizzare il socio deve prima essere cessato."
+                anonymized={m.anonymizedAt != null}
+                onDone={() => void q.refetch()}
+              />
+            )}
             {m.status !== "attivo" && (
               <Button
                 variant="secondary"

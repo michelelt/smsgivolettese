@@ -1,18 +1,10 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { addDays, dayLabel, mondayOf, today } from "../lib/dates";
+import { login } from "./session";
 
 // Needs `make dev` with the seeded local database (shift types, demo volunteer).
 const env = (k: string) => process.env[k]!;
-
-async function login(page: Page, email: string) {
-  await page.goto("/accedi");
-  const form = page.getByRole("form", { name: "Entra con la password" });
-  await form.getByLabel("Email").fill(email);
-  await form.getByLabel("Password").fill(env("E2E_PASSWORD"));
-  await form.getByRole("button", { name: "Entra" }).click();
-  await page.waitForURL("**/gestione");
-}
 
 // Far-away random week and Monday: reruns do not collide with earlier commitments.
 const shiftDay = addDays(

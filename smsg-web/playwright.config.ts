@@ -9,6 +9,9 @@ for (const f of [".env.local", ".env.example"]) {
 
 export default defineConfig({
   testDir: "./e2e",
+  retries: 1, // dev-server recompiles (hot reload) cause one-off timeouts
+  workers: 3, // `next dev` compiles on demand: more workers make timing-sensitive tests flaky
+  globalSetup: "./e2e/global-setup.ts",
   use: { baseURL: "http://localhost:3000" },
   // Expects `make dev` (supabase + api + web) to be running.
 });

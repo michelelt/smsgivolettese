@@ -59,13 +59,20 @@ export default async function GestioneLayout({
     .filter((g) => g.items.length > 0);
   return (
     <>
+      <a
+        href="#contenuto"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded-xl focus:bg-blu focus:px-4 focus:py-3 focus:font-bold focus:text-white"
+      >
+        Vai al contenuto
+      </a>
       <GestioneNav
         groups={groups}
         roleLabel={ROLE_LABEL[role]}
+        superAdmin={role === "super_admin"}
         volunteer={role === "volontario"}
       />
       <div className="mx-auto max-w-[1800px] px-4 md:px-6 lg:px-8 py-6">
-        <main>
+        <main id="contenuto" tabIndex={-1} className="outline-none">
           <Providers>{children}</Providers>
         </main>
       </div>

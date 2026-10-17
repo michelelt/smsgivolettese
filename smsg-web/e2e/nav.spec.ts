@@ -1,15 +1,8 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
+import { login } from "./session";
 
 const out = "/home/mc/.claude/jobs/f1ba2558/tmp";
-async function login(page: Page, email: string) {
-  await page.goto("/accedi");
-  const f = page.getByRole("form", { name: "Entra con la password" });
-  await f.getByLabel("Email").fill(email);
-  await f.getByLabel("Password").fill(process.env.E2E_PASSWORD!);
-  await f.getByRole("button", { name: "Entra" }).click();
-  await page.waitForURL("**/gestione");
-}
 const axe = async (page: Page) =>
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 

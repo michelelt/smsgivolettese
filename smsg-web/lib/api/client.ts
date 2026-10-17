@@ -19,4 +19,25 @@ const bearer: Middleware = {
     return request;
   },
 };
-api.use(bearer);
+// ADR-063: an aal1 super admin gets 403 MFA_REQUIRED on super-admin actions.
+const mfaRequired: Middleware = {
+  async onResponse({ response }) {
+    if (
+      response.status === 403 &&
+      typeof window !== "undefined" &&
+      !location.pathname.startsWith("/gestione/account/sicurezza") &&
+      (
+        await response
+          .clone()
+          .json()
+          .catch(() => null)
+      )?.error?.code === "MFA_REQUIRED"
+    )
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- full reload keeps the session fresh
+      location.assign(
+        `/gestione/account/sicurezza?next=${encodeURIComponent(location.pathname)}`,
+      );
+    return undefined;
+  },
+};
+api.use(bearer, mfaRequired);

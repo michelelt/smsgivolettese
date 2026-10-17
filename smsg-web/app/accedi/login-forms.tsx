@@ -25,7 +25,16 @@ export function LoginForms({ next }: { next?: string }) {
     setErr(undefined);
     const { error } = await createClient().auth.signInWithPassword(v);
     if (error) return setErr("Email o password non corrette. Riprova.");
-    window.location.assign(safeNext(next));
+    // ADR-063: a verified TOTP factor means the code is asked after the password.
+    const supabase = createClient();
+    const { data: aal } =
+      await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    const to = safeNext(next);
+    window.location.assign(
+      aal && aal.nextLevel === "aal2" && aal.nextLevel !== aal.currentLevel
+        ? `/accedi/verifica?next=${encodeURIComponent(to)}`
+        : to,
+    );
   });
 
   const onLink = link.handleSubmit(async (v) => {

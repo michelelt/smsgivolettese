@@ -106,6 +106,7 @@ export const gallery = createReactBlockSpec(
   {
     render: function GalleryBlock({ block, editor }) {
       const upload = useUpload();
+      const [alt, setAlt] = useState("");
       const paths = block.props.paths ? block.props.paths.split(",") : [];
       const set = (p: string[]) =>
         editor.updateBlock(block, { props: { paths: p.join(",") } });
@@ -126,6 +127,7 @@ export const gallery = createReactBlockSpec(
                 <button
                   type="button"
                   className={small}
+                  aria-label={`Togli la foto ${paths.indexOf(p) + 1}`}
                   onClick={() => set(paths.filter((x) => x !== p))}
                 >
                   Togli
@@ -134,6 +136,14 @@ export const gallery = createReactBlockSpec(
             ))}
           </ul>
           {paths.length < 30 && (
+            <Text
+              label="Descrizione delle foto da aggiungere (per chi non vede)"
+              value={alt}
+              onChange={setAlt}
+              placeholder="Es. Gita a Roma, i soci davanti al Colosseo"
+            />
+          )}
+          {paths.length < 30 && (
             <Picker
               label="Aggiungi foto"
               accept="image/*"
@@ -141,7 +151,7 @@ export const gallery = createReactBlockSpec(
               onFiles={async (files) => {
                 const added: string[] = [];
                 for (const f of files.slice(0, 30 - paths.length))
-                  added.push(await upload(f, "image"));
+                  added.push(await upload(f, "image", alt));
                 set([...paths, ...added]);
               }}
             />

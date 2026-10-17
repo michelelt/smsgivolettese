@@ -179,7 +179,13 @@ function Item({
   );
 }
 
-function Account({ roleLabel }: { roleLabel: string }) {
+function Account({
+  roleLabel,
+  superAdmin,
+}: {
+  roleLabel: string;
+  superAdmin: boolean;
+}) {
   return (
     <Disclosure label="Account" icon="user" align="right">
       {() => (
@@ -194,6 +200,15 @@ function Account({ roleLabel }: { roleLabel: string }) {
               icon: "key",
             }}
           />
+          {superAdmin && (
+            <Item
+              item={{
+                href: "/gestione/account/sicurezza",
+                label: "Sicurezza (due fattori)",
+                icon: "shield",
+              }}
+            />
+          )}
           <form action="/auth/esci" method="post">
             <button
               className={`flex min-h-12 w-full items-center gap-3 rounded-xl px-3 py-2 text-left font-bold text-bordeaux hover:bg-bordeaux/10 ${focus}`}
@@ -211,10 +226,12 @@ function Account({ roleLabel }: { roleLabel: string }) {
 export function GestioneNav({
   groups,
   roleLabel,
+  superAdmin,
   volunteer,
 }: {
   groups: NavGroup[];
   roleLabel: string;
+  superAdmin: boolean;
   volunteer: boolean;
 }) {
   const path = usePathname();
@@ -258,7 +275,7 @@ export function GestioneNav({
                 </li>
               ))}
               <li>
-                <Account roleLabel={roleLabel} />
+                <Account roleLabel={roleLabel} superAdmin={superAdmin} />
               </li>
             </ul>
           </nav>
@@ -301,7 +318,7 @@ export function GestioneNav({
             Menu
           </button>
           <div className="hidden xl:block">
-            <Account roleLabel={roleLabel} />
+            <Account roleLabel={roleLabel} superAdmin={superAdmin} />
           </div>
         </div>
       </div>
@@ -328,6 +345,15 @@ export function GestioneNav({
                 icon: "key",
               }}
             />
+            {superAdmin && (
+              <Item
+                item={{
+                  href: "/gestione/account/sicurezza",
+                  label: "Sicurezza (due fattori)",
+                  icon: "shield",
+                }}
+              />
+            )}
             <form action="/auth/esci" method="post">
               <button
                 className={`flex min-h-12 w-full items-center gap-3 rounded-xl px-3 py-2 font-bold text-bordeaux ${focus}`}

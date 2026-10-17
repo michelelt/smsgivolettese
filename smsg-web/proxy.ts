@@ -57,7 +57,11 @@ export async function proxy(request: NextRequest) {
 
   if (!canAccess(role, pathname)) {
     const to = request.nextUrl.clone();
-    if (role === null) {
+    if (role === null && data?.claims) {
+      // ADR-064: valid session without app_role = invited, password not set yet.
+      to.pathname = "/imposta-password";
+      to.search = "";
+    } else if (role === null) {
       to.pathname = "/accedi";
       to.search = `?next=${encodeURIComponent(pathname)}`;
     } else {
