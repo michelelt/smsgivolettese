@@ -27,7 +27,11 @@ function setSize(v: string) {
 export function TextSize() {
   const size = useSyncExternalStore(subscribe, current, () => "m");
   return (
-    <div role="group" aria-label="Dimensione del testo" className="flex gap-2">
+    <div
+      role="group"
+      aria-label="Dimensione testo"
+      className="flex rounded-xl bg-[#edf1f8] p-1"
+    >
       {SIZES.map((s) => (
         <button
           key={s.v}
@@ -35,7 +39,7 @@ export function TextSize() {
           aria-pressed={size === s.v}
           aria-label={`${s.label} ${s.name}`}
           onClick={() => setSize(s.v)}
-          className="min-h-12 min-w-12 rounded-xl border-2 border-blu px-3 font-extrabold text-blu aria-pressed:bg-blu aria-pressed:text-white aria-pressed:underline"
+          className="min-h-11 min-w-11 rounded-lg px-3 font-extrabold text-blu hover:bg-white aria-pressed:bg-blu aria-pressed:text-white"
         >
           {s.label}
         </button>

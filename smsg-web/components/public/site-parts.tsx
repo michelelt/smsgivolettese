@@ -34,7 +34,16 @@ export function PublicHeader({ inert }: { inert?: boolean }) {
               </small>
             </span>
           </Link>
-          <TextSize />
+          <div className="flex flex-wrap items-center gap-3">
+            <TextSize />
+            <Link
+              href="/accedi"
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border-2 border-blu bg-white px-4 font-bold text-blu hover:bg-[#edf1f8]"
+            >
+              <Icon name="lock" />
+              Area riservata
+            </Link>
+          </div>
         </div>
         <MainNav />
       </div>
