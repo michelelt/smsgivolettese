@@ -20,13 +20,13 @@ const MENU: Record<string, Record<string, Pick<Item, "icon" | "desc">>> = {
     fatture: { icon: "doc", desc: "Fatture e pagamenti" },
     servizi: { icon: "tag", desc: "Elenco servizi e tariffe" },
     mezzi: { icon: "car", desc: "Veicoli dell’associazione" },
+    impostazioni: { icon: "gear", desc: "Quota, bollo e numerazioni" },
   },
   Sito: {
     bacheca: { icon: "news", desc: "Avvisi per i soci" },
     sito: { icon: "globe", desc: "Testi di tutte le pagine" },
   },
   "Super admin": {
-    impostazioni: { icon: "gear", desc: "Configurazione generale" },
     "utenti-e-ruoli": { icon: "shield", desc: "Account e permessi" },
     "registro-attivita": { icon: "list", desc: "Chi ha fatto cosa" },
   },
