@@ -43,7 +43,7 @@ export const can = (role: AppRole | null, action: Action) => rank(role) >= rank(
 | `users.invite_volunteer` | – | – | ✔ | ✔ | staff |
 | `availability.write_all` | – | – | – | ✔ | super_admin |
 | `users.invite_staff`, `users.change_role`, `users.deactivate`, `users.reset_mfa` | – | – | – | ✔ | super_admin |
-| `org_settings.write`, `counters.write` | – | – | – | ✔ | super_admin |
+| `org_settings.write`, `counters.write` | – | – | ✔ | ✔ | staff (ADR-072) |
 | `audit.read` | – | – | – | ✔ | super_admin |
 | `gdpr.export`, `gdpr.anonymize` | – | – | – | ✔ | super_admin |
 
@@ -54,7 +54,8 @@ Notes: `org_settings` is read by `issue_invoice`/receipts internally (definer), 
 |---|---|
 | `/` (dashboard by role; volunteer = "I miei impegni"), `/disponibilita` (own grid; staff see all) | volontario |
 | `soci` (also history of transports/invoices; `prenotazioni` removed, ADR-070; `utenti` "Assistiti" removed, ADR-060), `fatture`, `bacheca`, `servizi`, `sito` (Info del sito), `turni`, `trasporti`, `volontari`, `mezzi` (ADR-059) | staff |
-| `impostazioni`, `utenti-e-ruoli`, `registro-attivita` | super_admin |
+| `impostazioni` | staff (ADR-072) |
+| `utenti-e-ruoli`, `registro-attivita` | super_admin |
 Navigation hides what the role cannot do; the API is the enforcement point.
 
 ## RLS policies per table
@@ -79,12 +80,12 @@ API queries run as `authenticated`/`anon` with the caller's JWT claims (ADR-002)
 | `membership_fees` | – | – | S/I/U | D |
 | `invoices` | – | – | S/U (trigger restricts columns; I via `issue_invoice`) | |
 | `invoice_lines` | – | – | S | |
-| `invoice_counters` | – | – | S | U via `set_invoice_counter` |
+| `invoice_counters` | – | – | S, U via `set_invoice_counter` (ADR-072) | |
 | `posts` | S published | S published | S/I/U/D | |
 | `post_proposals` | – (I via function) | – | S/U | D |
 | `media` | S `bucket='media'` | S `bucket='media'` | S/I/D | |
 | `site_settings` | S | S | S/U (incl. `pages`, ADR-061; no new permission) | |
-| `org_settings` | – | – | – | S/U |
+| `org_settings` | – | – | S/U (ADR-072) | |
 | `audit_log` | – | – | – | S |
 | `rate_limit_hits` | – | – | – | (service only) |
 
