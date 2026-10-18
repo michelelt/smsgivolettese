@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { FormError, Loading, Pill } from "@/components/ui/bits";
+import { MoreActions } from "@/components/ui/actions";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog, Dialog, DialogActions } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
@@ -259,6 +260,8 @@ export function TransportPanel({ t }: { t: Transport }) {
     t.status === "assegnato" ||
     t.status === "confermato";
   const open = t.status === "assegnato" || t.status === "confermato";
+  const canClose = open && t.travelDate <= today();
+  const hasSheet = !!t.driverId && t.status !== "annullato";
   return (
     <section
       aria-labelledby="stato"
@@ -277,29 +280,23 @@ export function TransportPanel({ t }: { t: Transport }) {
       </p>
       {t.driverNotes && <p>Note dell&apos;autista: {t.driverNotes}</p>}
       <div className="mt-3 flex flex-wrap gap-3">
-        {live && (
+        {t.status === "richiesto" && (
           <Button auto onClick={() => setDlg("assign")}>
-            {t.driverId ? "Cambia autista" : "Assegna autista"}
+            Assegna autista
           </Button>
         )}
         {open && (
           <Button
             auto
-            variant="secondary"
-            disabled={unassign.isPending}
-            onClick={() => unassign.mutate()}
+            variant={canClose ? "primary" : "secondary"}
+            onClick={() => setDlg(canClose ? "complete" : "assign")}
           >
-            Togli l&apos;autista
+            {canClose ? "Chiudi con i km" : "Cambia autista"}
           </Button>
         )}
-        {open && (
-          <Button
-            auto
-            variant="secondary"
-            disabled={t.travelDate > today()}
-            onClick={() => setDlg("complete")}
-          >
-            Chiudi con i km
+        {open && canClose && (
+          <Button auto variant="secondary" onClick={() => setDlg("assign")}>
+            Cambia autista
           </Button>
         )}
         {t.status === "svolto" && !t.invoiceId && (
@@ -307,20 +304,32 @@ export function TransportPanel({ t }: { t: Transport }) {
             Emetti fattura
           </Button>
         )}
-        {t.driverId && t.status !== "annullato" && (
-          <Button
-            auto
-            variant="secondary"
-            disabled={pdf.isPending}
-            onClick={() => pdf.mutate()}
-          >
-            Foglio di viaggio (PDF)
-          </Button>
-        )}
-        {live && (
-          <Button auto variant="danger" onClick={() => setDlg("cancel")}>
-            Annulla trasporto
-          </Button>
+        {(live || hasSheet) && (
+          <MoreActions>
+            {open && (
+              <Button
+                variant="secondary"
+                disabled={unassign.isPending}
+                onClick={() => unassign.mutate()}
+              >
+                Togli l&apos;autista
+              </Button>
+            )}
+            {hasSheet && (
+              <Button
+                variant="secondary"
+                disabled={pdf.isPending}
+                onClick={() => pdf.mutate()}
+              >
+                Foglio di viaggio (PDF)
+              </Button>
+            )}
+            {live && (
+              <Button variant="danger" onClick={() => setDlg("cancel")}>
+                Annulla trasporto
+              </Button>
+            )}
+          </MoreActions>
         )}
       </div>
       {t.invoiceId && (

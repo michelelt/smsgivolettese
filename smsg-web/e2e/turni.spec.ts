@@ -11,6 +11,8 @@ const shiftDay = addDays(
   mondayOf(today()),
   7 * (2 + Math.floor(Math.random() * 500)),
 );
+// Within the demo driver's licence validity (seed: +700 days), unlike shiftDay.
+const transportDay = addDays(today(), 2 + Math.floor(Math.random() * 600));
 
 test.describe.configure({ mode: "serial" });
 
@@ -63,10 +65,13 @@ test("staff creates a shift and assigns the volunteer", async ({ page }) => {
 
 test("volunteer confirms the commitment", async ({ page }) => {
   await login(page, env("E2E_VOLUNTEER_EMAIL"));
-  const card = page
+  await page.goto(`/gestione?week=${shiftDay}`);
+  const cal = page.getByRole("region", { name: "Calendario dei miei impegni" });
+  // Innermost matching list item = the card inside its day column.
+  const card = cal
     .getByRole("listitem")
-    .filter({ hasText: dayLabel(shiftDay) })
-    .filter({ hasText: "dalle 09:00 alle 11:00" });
+    .filter({ hasText: "dalle 09:00 alle 11:00" })
+    .last();
   await card.getByRole("button", { name: "Confermo" }).click();
   await expect(page.getByText("Grazie, impegno confermato")).toBeVisible();
   await expect(card.getByText("Confermato", { exact: true })).toBeVisible();
@@ -136,19 +141,79 @@ test("staff registers a transport and opens its page", async ({ page }) => {
     .getByLabel("Cerca per nome, tessera, codice fiscale o telefono")
     .fill("Rossi");
   await page.getByRole("radio").first().check();
-  await page.getByLabel("Data").fill(shiftDay);
+  await page.getByLabel("Data").fill(transportDay);
   await page.getByLabel("Ora di partenza").fill("08:30");
   await page.getByLabel("Indirizzo di partenza").fill("Via Roma 1, Givoletto");
   await page.getByLabel("Destinazione").fill("Ospedale di Rivoli");
   await page.getByRole("button", { name: "Registra trasporto" }).click();
   await page.waitForURL(/\/gestione\/trasporti\/[0-9a-f-]{36}$/);
   await expect(page.getByText("Da assegnare").first()).toBeVisible();
+  // One primary action plus "Altro"; cancelling is inside it.
+  const bar = page.getByRole("region", { name: "Stato" });
+  await expect(
+    bar.getByRole("button", { name: "Assegna autista" }),
+  ).toBeVisible();
+  await expect(bar.getByText("Altro")).toBeVisible();
+  await expect(
+    bar.getByRole("button", { name: "Annulla trasporto" }),
+  ).toBeHidden();
   const r = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
     .analyze();
   expect(r.violations).toEqual([]);
+  const detail = page.url();
   await page.getByRole("button", { name: "Assegna autista" }).click();
+  const as = page.getByRole("dialog", { name: "Assegna autista" });
+  await as.getByRole("radio", { name: /Mario/ }).check();
+  await as.getByRole("button", { name: "Assegna", exact: true }).click();
+  await expect(page.getByText(/Autista assegnato/)).toBeVisible();
+
+  // The transport shows in the calendar of its week and its card opens the detail.
+  await page.goto(`/gestione/trasporti?week=${transportDay}`);
+  const cal = page.getByRole("region", { name: "Calendario dei trasporti" });
+  await cal
+    .getByRole("link", { name: /(esempio)/ })
+    .first()
+    .click();
+  await expect(page).toHaveURL(detail);
+});
+
+test("volunteer sees the assigned transport and can confirm it", async ({
+  page,
+}) => {
+  await login(page, env("E2E_VOLUNTEER_EMAIL"));
+  await page.goto(`/gestione?week=${transportDay}`);
+  const cal = page.getByRole("region", { name: "Calendario dei miei impegni" });
+  const card = cal
+    .getByRole("listitem")
+    .filter({ hasText: "Ospedale di Rivoli" })
+    .last();
+  await expect(card.getByText("Trasporto", { exact: true })).toBeVisible();
+  await card.getByRole("button", { name: "Confermo" }).click();
+  await expect(page.getByText("Grazie, impegno confermato")).toBeVisible();
+  await expect(card.getByRole("button", { name: "Segna svolto" })).toHaveCount(
+    0,
+  ); // future transport: not closable yet
+  const r = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+    .analyze();
+  expect(r.violations).toEqual([]);
+});
+
+test("staff availability calendar lists the volunteer on a rule weekday", async ({
+  page,
+}) => {
+  await login(page, env("E2E_STAFF_EMAIL"));
+  // shiftDay is a Monday; the volunteer set Lunedì Mattina in the first test.
+  await page.goto(`/gestione/disponibilita?week=${shiftDay}`);
+  const cal = page.getByRole("region", {
+    name: "Calendario delle disponibilità",
+  });
   await expect(
-    page.getByRole("dialog", { name: "Assegna autista" }),
-  ).toBeVisible();
+    cal.getByRole("listitem", { name: dayLabel(shiftDay) }),
+  ).toContainText("Mario");
+  const r = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+    .analyze();
+  expect(r.violations).toEqual([]);
 });

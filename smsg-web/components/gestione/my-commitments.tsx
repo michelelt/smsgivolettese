@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { FormError, Loading, Pill } from "@/components/ui/bits";
+import { FormError, Pill } from "@/components/ui/bits";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog, Dialog, DialogActions } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
@@ -12,8 +12,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/toast";
 import { api, call } from "@/lib/api/call";
 import type { components } from "@/lib/api/schema";
+import {
+  CARD,
+  useWeek,
+  WeekCalendar,
+} from "@/components/gestione/week-calendar";
 import { completeSchema, type CompleteValues } from "./transport-panel";
-import { dayLabel, fmtTime, today } from "@/lib/dates";
+import { fmtTime, today } from "@/lib/dates";
 
 type Shift = components["schemas"]["MyShift"];
 type Transport = components["schemas"]["MyTransport"];
@@ -32,6 +37,19 @@ const STATUS = {
   rifiutato: "Rifiutato",
 };
 
+// Dark text on a light tint (AA); the stripe and the status text carry the state too.
+const TONE = {
+  proposto: "border-amber-700 bg-amber-50 text-amber-950",
+  assegnato: "border-amber-700 bg-amber-50 text-amber-950",
+  confermato: "border-green-800 bg-green-50 text-green-950",
+  svolto: "border-blu bg-white text-ink",
+  rifiutato: "border-ink/50 bg-white text-ink/70",
+} as const;
+
+type Entry =
+  | { k: "shift"; day: string; s: Shift }
+  | { k: "transport"; day: string; t: Transport };
+
 function Answer({
   status,
   onAccept,
@@ -42,13 +60,9 @@ function Answer({
   onRefuse: () => void;
 }) {
   return (
-    <div className="mt-3 flex flex-wrap gap-3">
-      {status !== "confermato" && (
-        <Button auto onClick={onAccept}>
-          Confermo
-        </Button>
-      )}
-      <Button auto variant="danger" onClick={onRefuse}>
+    <div className="mt-3 flex flex-col gap-2">
+      {status !== "confermato" && <Button onClick={onAccept}>Confermo</Button>}
+      <Button variant="danger" onClick={onRefuse}>
         Non posso
       </Button>
     </div>
@@ -126,11 +140,9 @@ function TransportCard({
 }) {
   const open = t.status === "assegnato" || t.status === "confermato";
   return (
-    <li className="rounded-xl border-2 border-ink p-4">
+    <li className={`${CARD} ${TONE[t.status]}`}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-xl font-extrabold">
-          Trasporto · {dayLabel(t.travelDate)}
-        </p>
+        <p className="text-xl font-extrabold">Trasporto</p>
         <Pill>{STATUS[t.status]}</Pill>
       </div>
       <p className="mt-1 font-bold">
@@ -180,7 +192,7 @@ function TransportCard({
       {t.toAddress && (
         <p className="mt-2">
           <a
-            className="inline-flex min-h-12 items-center font-bold text-blu underline"
+            className="inline-flex min-h-12 items-center break-words font-bold text-blu underline"
             href={mapsUrl(t.fromAddress, t.toAddress)}
             target="_blank"
             rel="noopener noreferrer"
@@ -198,7 +210,7 @@ function TransportCard({
           />
           {t.travelDate <= today() && (
             <div className="mt-3">
-              <Button auto variant="secondary" onClick={onDone}>
+              <Button variant="secondary" onClick={onDone}>
                 Segna svolto
               </Button>
             </div>
@@ -211,6 +223,7 @@ function TransportCard({
 
 export function MyCommitments() {
   const toast = useToast();
+  const wk = useWeek();
   const q = useQuery({
     queryKey: ["me", "commitments"],
     queryFn: () => call(api.GET("/me/commitments")),
@@ -248,64 +261,63 @@ export function MyCommitments() {
   });
   const go = (p: Pending) => (p.accept ? respond.mutate(p) : setAsk(p));
 
-  const shifts = (q.data?.shifts ?? []).filter((s) => s.status !== "rifiutato");
-  const transports = q.data?.transports ?? [];
-  const empty = q.data && shifts.length === 0 && transports.length === 0;
+  const entries: Entry[] = [
+    ...(q.data?.shifts ?? [])
+      .filter((x) => x.status !== "rifiutato")
+      .map((x): Entry => ({ k: "shift", day: x.day, s: x })),
+    ...(q.data?.transports ?? []).map((x): Entry => ({
+      k: "transport",
+      day: x.travelDate,
+      t: x,
+    })),
+  ];
   return (
     <>
-      <Loading query={q} />
-      {empty && (
-        <p className="mt-4 text-xl">Non hai impegni nei prossimi giorni.</p>
-      )}
-      {shifts.length > 0 && (
-        <>
-          <h2 className="mt-6 text-2xl font-extrabold text-blu">Turni</h2>
-          <ul className="mt-3 space-y-3">
-            {shifts.map((s: Shift) => (
-              <li
-                key={s.assignmentId}
-                className="rounded-xl border-2 border-ink p-4"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-xl font-extrabold">{dayLabel(s.day)}</p>
-                  <Pill>{STATUS[s.status]}</Pill>
-                </div>
-                <p className="font-bold">
-                  {s.shiftType} · dalle {fmtTime(s.startTime)} alle{" "}
-                  {fmtTime(s.endTime)}
-                </p>
-                {s.notes && <p>{s.notes}</p>}
-                <Answer
-                  status={s.status}
-                  onAccept={() =>
-                    go({ kind: "shift", id: s.assignmentId, accept: true })
-                  }
-                  onRefuse={() =>
-                    go({ kind: "shift", id: s.assignmentId, accept: false })
-                  }
-                />
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-      {transports.length > 0 && (
-        <>
-          <h2 className="mt-6 text-2xl font-extrabold text-blu">Trasporti</h2>
-          <ul className="mt-3 space-y-3">
-            {transports.map((t) => (
-              <TransportCard
-                key={t.id}
-                t={t}
-                onAnswer={(accept) =>
-                  go({ kind: "transport", id: t.id, accept })
+      <WeekCalendar
+        basePath="/gestione"
+        label="Calendario dei miei impegni"
+        state={wk}
+        query={q}
+        ready={!!q.data}
+        itemsOf={(d) => entries.filter((e) => e.day === d)}
+        empty="Nessun impegno."
+        renderItem={(e) =>
+          e.k === "transport" ? (
+            <TransportCard
+              key={e.t.id}
+              t={e.t}
+              onAnswer={(accept) =>
+                go({ kind: "transport", id: e.t.id, accept })
+              }
+              onDone={() => setClosing(e.t)}
+            />
+          ) : (
+            <li
+              key={e.s.assignmentId}
+              className={`${CARD} ${TONE[e.s.status]}`}
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xl font-extrabold">Turno</p>
+                <Pill>{STATUS[e.s.status]}</Pill>
+              </div>
+              <p className="font-bold">
+                {e.s.shiftType} · dalle {fmtTime(e.s.startTime)} alle{" "}
+                {fmtTime(e.s.endTime)}
+              </p>
+              {e.s.notes && <p className="break-words">{e.s.notes}</p>}
+              <Answer
+                status={e.s.status}
+                onAccept={() =>
+                  go({ kind: "shift", id: e.s.assignmentId, accept: true })
                 }
-                onDone={() => setClosing(t)}
+                onRefuse={() =>
+                  go({ kind: "shift", id: e.s.assignmentId, accept: false })
+                }
               />
-            ))}
-          </ul>
-        </>
-      )}
+            </li>
+          )
+        }
+      />
       <ConfirmDialog
         open={!!ask}
         onClose={() => setAsk(null)}

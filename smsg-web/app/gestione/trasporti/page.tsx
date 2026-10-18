@@ -2,40 +2,52 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { Loading, Pill } from "@/components/ui/bits";
+import { PageHeader } from "@/components/ui/actions";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
+import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
-import { api, call, saveBlob } from "@/lib/api/call";
 import {
-  addDays,
-  dayLabel,
-  fmtTime,
-  isDate,
-  mondayOf,
-  today,
-} from "@/lib/dates";
+  CARD,
+  useWeek,
+  WeekCalendar,
+} from "@/components/gestione/week-calendar";
+import { api, call, saveBlob } from "@/lib/api/call";
+import { addDays, fmtTime, today } from "@/lib/dates";
 import { TRANSPORT_STATUS } from "@/components/gestione/transport-panel";
 
+// Dark text on a light tint (AA); the stripe and the status text carry the state too.
+const TONE = {
+  richiesto: "border-red-800 bg-red-50 text-red-900",
+  assegnato: "border-amber-700 bg-amber-50 text-amber-950",
+  confermato: "border-green-800 bg-green-50 text-green-950",
+  svolto: "border-blu bg-white text-ink",
+  annullato: "border-ink/50 bg-white text-ink/70",
+} as const;
+const MARK = {
+  richiesto: "✗",
+  assegnato: "◐",
+  confermato: "✓",
+  svolto: "✓",
+  annullato: "–",
+} as const;
+
 export default function Trasporti() {
-  const sp = useSearchParams();
   const toast = useToast();
-  const weekMode = sp.get("week") !== null;
-  const base = weekMode ? sp.get("week") : sp.get("day");
-  const anchor = isDate(base) ? base : today();
-  const from = weekMode ? mondayOf(anchor) : anchor;
-  const to = weekMode ? addDays(from, 6) : anchor;
-  const step = weekMode ? 7 : 1;
-  const href = (d: string, w = weekMode) =>
-    `/gestione/trasporti?${w ? "week" : "day"}=${d}`;
+  const wk = useWeek();
+  const { week } = wk;
   const [month, setMonth] = useState(today().slice(0, 7));
   const q = useQuery({
-    queryKey: ["transports", from, to],
+    queryKey: ["transports", week],
     queryFn: () =>
-      call(api.GET("/transports", { params: { query: { from, to } } })),
+      call(
+        api.GET("/transports", {
+          params: { query: { from: week, to: addDays(week, 6) } },
+        }),
+      ),
   });
+  const items = q.data?.items ?? [];
   const csv = useMutation({
     mutationFn: () =>
       saveBlob(
@@ -49,58 +61,48 @@ export default function Trasporti() {
   });
   return (
     <>
-      <h1 className="text-4xl font-extrabold text-bordeaux">Trasporti</h1>
-      <div className="mt-4 flex flex-wrap gap-3">
-        <ButtonLink href="/gestione/trasporti/nuovo">
-          Nuovo trasporto
-        </ButtonLink>
-        <ButtonLink
-          variant="secondary"
-          href={href(weekMode ? from : mondayOf(anchor), !weekMode)}
-        >
-          {weekMode ? "Vedi un giorno" : "Vedi la settimana"}
-        </ButtonLink>
-      </div>
-      <nav
-        aria-label="Periodo"
-        className="mt-4 flex flex-wrap items-center gap-3"
-      >
-        <ButtonLink variant="secondary" href={href(addDays(from, -step))}>
-          ← Prima
-        </ButtonLink>
-        <span className="font-bold">
-          {weekMode
-            ? `Dal ${dayLabel(from)} al ${dayLabel(to)}`
-            : dayLabel(from)}
-        </span>
-        <ButtonLink variant="secondary" href={href(addDays(from, step))}>
-          Dopo →
-        </ButtonLink>
-        <ButtonLink variant="secondary" href={href(today())}>
-          Oggi
-        </ButtonLink>
-      </nav>
-      <Loading query={q} />
-      {q.data?.items.length === 0 && (
-        <p className="mt-4">Nessun trasporto in questo periodo.</p>
-      )}
-      <ul className="mt-4 space-y-3">
-        {q.data?.items.map((t) => (
-          <li key={t.id} className="rounded-xl border-2 border-ink p-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-xl font-extrabold">
-                {weekMode && `${dayLabel(t.travelDate)} · `}
-                {fmtTime(t.departureTime ?? t.appointmentTime)} ·{" "}
-                <Link
-                  className="text-blu underline"
-                  href={`/gestione/trasporti/${t.id}`}
-                >
-                  {t.memberName}
-                </Link>
-              </p>
-              <Pill>{TRANSPORT_STATUS[t.status]}</Pill>
-            </div>
-            <p>
+      <PageHeader
+        title="Trasporti"
+        actions={
+          <>
+            <ButtonLink href="/gestione/trasporti/nuovo">
+              Nuovo trasporto
+            </ButtonLink>
+            <ButtonLink variant="secondary" href="#riepilogo">
+              Riepilogo mensile
+            </ButtonLink>
+          </>
+        }
+      />
+      <WeekCalendar
+        basePath="/gestione/trasporti"
+        label="Calendario dei trasporti"
+        state={wk}
+        query={q}
+        ready={!!q.data}
+        itemsOf={(d) => items.filter((t) => t.travelDate === d)}
+        empty="Nessun trasporto."
+        flagged={(d) =>
+          items.some((t) => t.travelDate === d && t.status === "richiesto")
+        }
+        flagText="trasporti da assegnare"
+        renderItem={(t) => (
+          <li key={t.id} className={`${CARD} ${TONE[t.status]}`}>
+            <p className="flex items-center gap-1 whitespace-nowrap font-extrabold">
+              <span className="lg:max-2xl:hidden">
+                <Icon name="clock" />
+              </span>
+              {fmtTime(t.departureTime ?? t.appointmentTime)}
+            </p>
+            <p className="font-bold">
+              <Link className="underline" href={`/gestione/trasporti/${t.id}`}>
+                {t.memberName}
+              </Link>
+            </p>
+            <p className="font-bold">
+              {MARK[t.status]} {TRANSPORT_STATUS[t.status]}
+            </p>
+            <p className="break-words">
               {t.fromAddress ?? "—"} → {t.toAddress ?? "—"}
             </p>
             <p>
@@ -111,9 +113,9 @@ export default function Trasporti() {
               {t.companions > 0 && ` · accompagnatori: ${t.companions}`}
             </p>
           </li>
-        ))}
-      </ul>
-      <h2 className="mt-8 text-2xl font-extrabold text-blu">
+        )}
+      />
+      <h2 id="riepilogo" className="mt-8 text-2xl font-extrabold text-blu">
         Riepilogo mensile
       </h2>
       <Field

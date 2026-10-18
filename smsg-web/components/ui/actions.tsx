@@ -1,3 +1,5 @@
+"use client";
+
 import type { ReactNode } from "react";
 
 /**
@@ -74,5 +76,38 @@ export function ActionBar({
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * "Altro": secondary actions behind a native <details> disclosure (not an ARIA menu).
+ * Keep one primary and at most one secondary button visible; put the rest here,
+ * destructive action last. The panel closes when one of its buttons is used.
+ */
+export function MoreActions({
+  label = "Altro",
+  children,
+}: {
+  label?: string;
+  children: ReactNode;
+}) {
+  return (
+    <details className="relative w-full sm:w-auto">
+      <summary className="inline-flex min-h-12 w-full cursor-pointer list-none items-center justify-center gap-2 rounded-xl border-2 border-blu bg-white px-5 text-lg font-bold text-blu marker:hidden sm:w-auto [&::-webkit-details-marker]:hidden">
+        {label} <span aria-hidden="true">▾</span>
+      </summary>
+      <div
+        onClick={(e) => {
+          if (!(e.target as HTMLElement).closest("button, a")) return;
+          const d = e.currentTarget.closest("details")!;
+          d.open = false;
+          // focus the summary first, so a dialog opened by the action returns focus there
+          d.querySelector("summary")!.focus();
+        }}
+        className="mt-2 flex flex-col gap-3 rounded-xl border-2 border-blu bg-white p-3 shadow-lg sm:absolute sm:right-0 sm:z-20 sm:w-72 [&>*]:w-full!"
+      >
+        {children}
+      </div>
+    </details>
   );
 }

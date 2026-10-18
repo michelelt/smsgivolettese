@@ -24,9 +24,9 @@ export default function Trasporto() {
       <p>
         <Link
           className="font-bold text-blu underline"
-          href="/gestione/trasporti"
+          href={`/gestione/trasporti${t ? `?week=${t.travelDate}` : ""}`}
         >
-          ← Tutti i trasporti
+          ← Calendario dei trasporti
         </Link>
       </p>
       <Loading query={q} />

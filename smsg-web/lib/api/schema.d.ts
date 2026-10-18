@@ -8137,6 +8137,7 @@ export interface components {
                 volunteerId: string;
                 firstName: string;
                 lastName: string;
+                canDrive: boolean;
                 rules: components["schemas"]["AvailabilityRule"][];
                 absences: components["schemas"]["Absence"][];
             }[];
