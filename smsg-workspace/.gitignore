@@ -13,3 +13,13 @@ CLAUDE.local.md
 **/CLAUDE.local.md
 .mcp.json
 LEGGIMI.md
+
+# Local screenshots and scratch output
+docs/shots/
+
+# OS, editors, logs
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
