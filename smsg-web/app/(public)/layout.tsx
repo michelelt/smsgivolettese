@@ -9,7 +9,8 @@ export default async function PublicLayout({
 }) {
   const site = await getSiteSettings();
   return (
-    <>
+    // Keeps the footer at the bottom on short pages.
+    <div className="flex min-h-dvh flex-col">
       <a
         href="#contenuto"
         className="sr-only focus:not-sr-only focus:block focus:bg-white focus:p-3 focus:font-bold"
@@ -21,7 +22,7 @@ export default async function PublicLayout({
       <main
         id="contenuto"
         tabIndex={-1}
-        className="mx-auto max-w-5xl p-4 outline-none sm:p-6"
+        className="mx-auto w-full max-w-5xl flex-1 p-4 outline-none sm:p-6"
       >
         {children}
       </main>
@@ -30,6 +31,6 @@ export default async function PublicLayout({
         address={site.address}
         vat={site.vatNumber}
       />
-    </>
+    </div>
   );
 }
