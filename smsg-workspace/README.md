@@ -9,7 +9,7 @@ are separate repositories cloned next to this one:
 smsgivolettese/
   smsg-api/          API, database migrations
   smsg-web/          website
-  smsg-claude-kit/   this workspace: Makefile, docs, scripts
+  smsg-workspace/    this workspace: Makefile, docs, scripts
 ```
 
 ## 1. Install the prerequisites (once)
@@ -28,8 +28,8 @@ smsgivolettese/
 mkdir smsgivolettese && cd smsgivolettese
 git clone <smsg-api URL> smsg-api
 git clone <smsg-web URL> smsg-web
-git clone <workspace URL> smsg-claude-kit
-cd smsg-claude-kit
+git clone <workspace URL> smsg-workspace
+cd smsg-workspace
 make setup
 ```
 
