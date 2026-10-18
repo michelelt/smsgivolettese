@@ -213,3 +213,8 @@ Conventions ADR-045 (camelCase, dates `YYYY-MM-DD`, times `HH:MM` Europe/Rome, m
 `OrgSettingsInput`/`OrgSettings` add required `kmRateCents: int 0..100000`; `OrgInfo` (`GET /org-info`) adds `kmRateCents: int`.
 Web prefill of the invoice amount: `km × kmRateCents` (both integers), shown in the editable money input.
 Transports CSV columns: Data, Partenza, Socio, Da, A, Autista, Targa, Km partenza, Km arrivo, Km, Carrozzina, Ausili, Accompagnatori, Note autista. Trip sheet PDF: "Accompagnatori N", "Ausili (deambulatore/stampelle) Sì/No", "Telefono" = contact phone, blank "Km partenza ____ Km arrivo ____".
+
+## API contract changed by ADR-071 (frozen; additive, `info.version` minor bump; no DB/RLS change)
+- `GET /availability` (`AvailabilityOverview`, `availability.read_all` = staff): each `items[]` adds `canDrive: boolean` (`volunteers.can_drive`). Items stay `{ volunteerId, firstName, lastName, canDrive, rules, absences }`; no phone, email, licence. Web shows names, slots and an "autista" mark only (no absence notes in the calendar).
+- Unchanged and reused: `GET /shifts?from&to`, `GET /transports?from&to` (one week per call), `GET /me/commitments`.
+- Web URL param: `?week=YYYY-MM-DD` (any day, normalised to Monday) on `/gestione/turni`, `/gestione/trasporti` (`day=` dropped), `/gestione/disponibilita` (staff) and `/gestione` (volunteer).
