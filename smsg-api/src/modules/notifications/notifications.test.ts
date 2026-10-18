@@ -23,10 +23,10 @@ describe('templates', () => {
 });
 
 describe('sendEmail', () => {
-  it('skips without a key outside production', async () => {
+  it('skips (returns false) without a key', async () => {
     const f = vi.fn();
     vi.stubGlobal('fetch', f);
-    expect(await sendEmail({ to: 'a@b.it', subject: 's', text: 't' })).toBe(true);
+    expect(await sendEmail({ to: 'a@b.it', subject: 's', text: 't' })).toBe(false);
     expect(f).not.toHaveBeenCalled();
   });
   it('posts to Resend with the idempotency key and never throws', async () => {

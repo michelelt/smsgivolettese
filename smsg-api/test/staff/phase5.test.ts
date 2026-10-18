@@ -3,6 +3,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 const sent = vi.hoisted(() => [] as { to: string; subject: string; text: string }[]);
 vi.mock('../../src/lib/email.js', () => ({
+  emailEnabled: () => true,
   sendEmail: vi.fn(async (m: { to: string; subject: string; text: string }) => {
     sent.push(m);
     return true;

@@ -3,15 +3,13 @@ import { log } from './logger.js';
 
 export type Email = { to: string; subject: string; text: string; idempotencyKey?: string };
 
-/** ADR-057: Resend over plain fetch. Never throws; returns false on failure. Without a key outside production it only logs. */
+export const emailEnabled = () => !!(env.RESEND_API_KEY && env.EMAIL_FROM);
+
+/** ADR-057: Resend over plain fetch. Never throws; returns false on failure or when skipped (RESEND_API_KEY/EMAIL_FROM unset, only logs). */
 export async function sendEmail(m: Email): Promise<boolean> {
   if (!env.RESEND_API_KEY || !env.EMAIL_FROM) {
-    if (env.NODE_ENV === 'production') {
-      log('error', 'email.failed', { reason: 'not configured' });
-      return false;
-    }
-    log('info', 'email.skipped', { subject: m.subject }); // no address in logs
-    return true;
+    log('warn', 'email.skipped', { subject: m.subject }); // no address in logs
+    return false;
   }
   try {
     const res = await fetch('https://api.resend.com/emails', {

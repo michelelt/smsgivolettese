@@ -7834,7 +7834,7 @@ export interface components {
             videoUrl?: string;
             submitterName: string;
             submitterContact?: string;
-            turnstileToken: string;
+            turnstileToken?: string;
         };
         MemberPage: {
             items: components["schemas"]["Member"][];
@@ -8527,6 +8527,7 @@ export interface components {
         CronResult: {
             sent: number;
             failed: number;
+            skipped: number;
             orphansRemoved: number;
             proposalsAnonymised: number;
         };

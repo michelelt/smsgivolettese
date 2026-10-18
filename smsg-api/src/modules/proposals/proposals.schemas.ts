@@ -66,7 +66,7 @@ export const ProposalSubmit = z
       .optional(),
     submitterName: z.string().trim().min(1).max(120),
     submitterContact: z.string().trim().min(1).max(200).optional(),
-    turnstileToken: z.string().min(1).max(4096),
+    turnstileToken: z.string().max(4096).optional(), // required only when TURNSTILE_SECRET_KEY is set
   })
   .openapi('ProposalSubmit');
 export const ProposalCreated = z.object({ id: z.uuid() }).openapi('ProposalCreated');

@@ -1,9 +1,16 @@
 import { env } from '../config/env.js';
 import { log } from './logger.js';
 
-/** Fails closed: empty token, missing secret, timeout, network error or non-success. */
-export async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
-  if (!token || !env.TURNSTILE_SECRET_KEY) return false;
+let warned = false;
+
+/** Without TURNSTILE_SECRET_KEY the check is off (per-IP rate limit only). With it, fails closed: empty token, timeout, network error or non-success. */
+export async function verifyTurnstile(token: string | undefined, ip: string): Promise<boolean> {
+  if (!env.TURNSTILE_SECRET_KEY) {
+    if (!warned) log('warn', 'turnstile disabled: TURNSTILE_SECRET_KEY not set');
+    warned = true;
+    return true;
+  }
+  if (!token) return false;
   try {
     const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
       method: 'POST',

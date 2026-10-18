@@ -15,6 +15,7 @@ const daily = createRoute({
         .strictObject({
           sent: z.number().int(),
           failed: z.number().int(),
+          skipped: z.number().int(),
           orphansRemoved: z.number().int(),
           proposalsAnonymised: z.number().int(),
         })

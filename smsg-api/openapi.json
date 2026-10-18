@@ -3472,7 +3472,6 @@
           },
           "turnstileToken": {
             "type": "string",
-            "minLength": 1,
             "maxLength": 4096
           }
         },
@@ -3480,8 +3479,7 @@
           "title",
           "category",
           "body",
-          "submitterName",
-          "turnstileToken"
+          "submitterName"
         ],
         "additionalProperties": false
       },
@@ -6343,6 +6341,9 @@
           "failed": {
             "type": "integer"
           },
+          "skipped": {
+            "type": "integer"
+          },
           "orphansRemoved": {
             "type": "integer"
           },
@@ -6353,6 +6354,7 @@
         "required": [
           "sent",
           "failed",
+          "skipped",
           "orphansRemoved",
           "proposalsAnonymised"
         ],

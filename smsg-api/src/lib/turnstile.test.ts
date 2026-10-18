@@ -23,6 +23,15 @@ describe('verifyTurnstile', () => {
     expect(await verifyTurnstile('', '1.1.1.1')).toBe(false);
     expect(m).not.toHaveBeenCalled();
   });
+  it('unset secret skips the check without calling Cloudflare', async () => {
+    const m = stub(ok({ success: false }));
+    const prev = env.TURNSTILE_SECRET_KEY;
+    env.TURNSTILE_SECRET_KEY = undefined;
+    expect(await verifyTurnstile(undefined, '1.1.1.1')).toBe(true);
+    expect(await verifyTurnstile('', '1.1.1.1')).toBe(true);
+    expect(m).not.toHaveBeenCalled();
+    env.TURNSTILE_SECRET_KEY = prev;
+  });
   it('success true passes', async () => {
     stub(ok({ success: true }));
     expect(await verifyTurnstile('t', '1.1.1.1')).toBe(true);

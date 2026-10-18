@@ -23,15 +23,17 @@ export const schema = z
   })
   .superRefine((e, ctx) => {
     if (e.NODE_ENV !== 'production') return;
-    // Turnstile hostname check and revalidation need it; without it every proposal fails closed
+    // Turnstile hostname check and revalidation need it
     if (!e.WEB_URL)
       ctx.addIssue({ code: 'custom', path: ['WEB_URL'], message: 'required in production' });
     if (!e.SUPERADMIN_MFA)
       ctx.addIssue({ code: 'custom', path: ['SUPERADMIN_MFA'], message: 'required in production' });
-    for (const k of ['RESEND_API_KEY', 'EMAIL_FROM', 'CRON_SECRET'] as const)
-      if (!e[k]) ctx.addIssue({ code: 'custom', path: [k], message: 'required in production' });
+    if (!e.CRON_SECRET)
+      ctx.addIssue({ code: 'custom', path: ['CRON_SECRET'], message: 'required in production' });
+    // Turnstile, Resend and EMAIL_FROM are optional in production (free tier); when set they must be real
     for (const k of ['API_PROXY_SECRET', 'REVALIDATE_SECRET', 'TURNSTILE_SECRET_KEY'] as const) {
       const v = e[k];
+      if (k === 'TURNSTILE_SECRET_KEY' && v === undefined) continue;
       // dev- placeholders and Cloudflare dummy keys (1x0000..., 2x0000..., 3x0000...) must never reach prod
       if (!v || v.startsWith('dev-') || /^[123]x0000/.test(v)) {
         ctx.addIssue({

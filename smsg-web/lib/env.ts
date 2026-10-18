@@ -7,7 +7,6 @@ const DEV = {
   API_URL: "http://localhost:3001",
   API_PROXY_SECRET: "dev-proxy-secret",
   REVALIDATE_SECRET: "dev-revalidate-secret",
-  NEXT_PUBLIC_TURNSTILE_SITE_KEY: "1x00000000000000000000AA",
   SITE_URL: "http://localhost:3000",
 };
 
@@ -23,7 +22,15 @@ export const envSchema = z
     SITE_URL: opt(z.url()),
   })
   .transform((e, ctx) => {
-    const out = { ...DEV };
+    // Turnstile is optional: unset in production means no widget, no token.
+    const out = {
+      ...DEV,
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY: (e.NODE_ENV === "production"
+        ? undefined
+        : "1x00000000000000000000AA") as string | undefined,
+    };
+    if (e.NEXT_PUBLIC_TURNSTILE_SITE_KEY)
+      out.NEXT_PUBLIC_TURNSTILE_SITE_KEY = e.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
     for (const k of Object.keys(DEV) as (keyof typeof DEV)[]) {
       if (e[k]) out[k] = e[k];
       else if (e.NODE_ENV === "production") {
@@ -35,14 +42,19 @@ export const envSchema = z
       }
     }
     if (e.NODE_ENV === "production") {
-      const bad = (k: keyof typeof DEV, message: string) =>
+      const bad = (k: keyof typeof out, message: string) =>
         ctx.addIssue({ code: "custom", path: [k], message });
       for (const k of ["API_PROXY_SECRET", "REVALIDATE_SECRET"] as const)
         if (out[k].startsWith("dev-")) bad(k, `${k} must not be a dev value`);
-      if (TEST_SITE_KEY.test(out.NEXT_PUBLIC_TURNSTILE_SITE_KEY))
+      if (TEST_SITE_KEY.test(out.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""))
         bad(
           "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
           "Turnstile test key in production",
+        );
+      if (out.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.startsWith("dev-"))
+        bad(
+          "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
+          "Turnstile dev value in production",
         );
     }
     return out;

@@ -57,7 +57,7 @@ async function uploadPhoto(file: File): Promise<string> {
   return t.path;
 }
 
-export function ProposalForm({ siteKey }: { siteKey: string }) {
+export function ProposalForm({ siteKey }: { siteKey?: string }) {
   const [token, setToken] = useState("");
   const [reset, setReset] = useState(0);
   const [photo, setPhoto] = useState<File>();
@@ -79,7 +79,8 @@ export function ProposalForm({ siteKey }: { siteKey: string }) {
   const e = f.formState.errors;
 
   const submit = f.handleSubmit(async (v) => {
-    if (!token) return setErr("Confermi di non essere un robot, qui sotto.");
+    if (siteKey && !token)
+      return setErr("Confermi di non essere un robot, qui sotto.");
     setState("busy");
     setErr("");
     try {
@@ -96,7 +97,7 @@ export function ProposalForm({ siteKey }: { siteKey: string }) {
             videoUrl: v.videoUrl || undefined,
             submitterName: v.submitterName,
             submitterContact: v.submitterContact.trim() || undefined,
-            turnstileToken: token,
+            turnstileToken: token || undefined,
           },
         }),
       );
@@ -188,9 +189,11 @@ export function ProposalForm({ siteKey }: { siteKey: string }) {
         </Link>
         .
       </p>
-      <div className="mt-4">
-        <Turnstile siteKey={siteKey} onToken={setToken} resetKey={reset} />
-      </div>
+      {siteKey && (
+        <div className="mt-4">
+          <Turnstile siteKey={siteKey} onToken={setToken} resetKey={reset} />
+        </div>
+      )}
       <FormError message={err} />
       <p role="status" className="mt-2">
         {state === "busy" && "Invio in corso…"}

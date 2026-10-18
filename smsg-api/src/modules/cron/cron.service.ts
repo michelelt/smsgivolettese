@@ -1,7 +1,7 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { env } from '../../config/env.js';
 import { db } from '../../lib/db.js';
-import { sendEmail } from '../../lib/email.js';
+import { emailEnabled, sendEmail } from '../../lib/email.js';
 import { log } from '../../lib/logger.js';
 import { removeObjects } from '../../lib/storage.js';
 import { reminder } from '../notifications/templates.js';
@@ -55,7 +55,10 @@ export async function daily(requestId?: string) {
     byVolunteer.set(r.volunteerId, [...(byVolunteer.get(r.volunteerId) ?? []), r]);
   let sent = 0;
   let failed = 0;
-  for (const [volunteerId, items] of byVolunteer) {
+  // Email off: nothing is sent and reminder_sent_at stays null, so reminders go out if email is enabled later the same day.
+  const skipped = emailEnabled() ? 0 : byVolunteer.size;
+  if (skipped) log('warn', 'cron.reminders skipped: email not configured', { skipped });
+  for (const [volunteerId, items] of skipped ? [] : byVolunteer) {
     const first = items[0]!;
     const ok = await sendEmail({
       to: first.email,
@@ -78,7 +81,13 @@ export async function daily(requestId?: string) {
     }, requestId);
   }
   const proposalsAnonymised = await cleanProposals(requestId);
-  return { sent, failed, orphansRemoved: await removeOrphans(requestId), proposalsAnonymised };
+  return {
+    sent,
+    failed,
+    skipped,
+    orphansRemoved: await removeOrphans(requestId),
+    proposalsAnonymised,
+  };
 }
 
 /**

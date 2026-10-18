@@ -28,11 +28,12 @@ function build(scriptSrc: string, frames: string) {
 const EMBEDS = "https://www.youtube-nocookie.com https://player.vimeo.com";
 
 // ADR-036: no hash or nonce here, it would disable 'unsafe-inline' and break Next's inline scripts.
-export const publicCsp = () =>
-  build(
-    "'self' 'unsafe-inline' https://challenges.cloudflare.com",
-    `https://challenges.cloudflare.com ${EMBEDS}`,
-  );
+export const publicCsp = () => {
+  const cf = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
+    ? " https://challenges.cloudflare.com"
+    : "";
+  return build(`'self' 'unsafe-inline'${cf}`, `${cf.trim()} ${EMBEDS}`.trim());
+};
 
 export const privateCsp = (nonce: string) =>
   build(`'self' 'nonce-${nonce}' ${textSizeHash}`, EMBEDS);

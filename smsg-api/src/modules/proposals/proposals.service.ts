@@ -171,6 +171,7 @@ const tooLarge = () =>
 export async function uploadUrl(input: z.infer<typeof ProposalUploadBody>, ip: string) {
   if (input.size > PHOTO_MAX_BYTES) throw tooLarge();
   if (!(await consumeRateLimit(`proposal-upload:${ip}`, 5, 3600))) throw new RateLimited();
+  if (!(await consumeRateLimit('proposal-upload:global', 50, 86400))) throw new RateLimited();
   return signedUpload('proposals', `${randomUUID()}.${MIME_EXT[input.mime]}`);
 }
 
@@ -180,6 +181,7 @@ export async function submit(
   requestId?: string,
 ) {
   if (!(await consumeRateLimit(`proposal:${ip}`, 3, 3600))) throw new RateLimited();
+  if (!(await consumeRateLimit('proposal:global', 30, 86400))) throw new RateLimited();
   if (!(await verifyTurnstile(input.turnstileToken, ip))) throw new TurnstileFailed();
   if (input.photoPath) {
     const info = await objectInfo('proposals', input.photoPath);

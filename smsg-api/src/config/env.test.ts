@@ -22,8 +22,7 @@ describe('env in production', () => {
     expect(schema.safeParse({ ...good, WEB_URL: undefined }).success).toBe(false);
     expect(schema.safeParse({ ...good, SUPERADMIN_MFA: undefined }).success).toBe(false);
     expect(schema.safeParse({ ...good, SUPERADMIN_MFA: 'maybe' }).success).toBe(false);
-    for (const k of ['RESEND_API_KEY', 'EMAIL_FROM', 'CRON_SECRET'])
-      expect(schema.safeParse({ ...good, [k]: undefined }).success).toBe(false);
+    expect(schema.safeParse({ ...good, CRON_SECRET: undefined }).success).toBe(false);
     expect(schema.safeParse({ ...good, REVALIDATE_SECRET: 'dev-x' }).success).toBe(false);
     expect(
       schema.safeParse({ ...good, TURNSTILE_SECRET_KEY: '1x0000000000000000000000000000000AA' })
@@ -32,6 +31,10 @@ describe('env in production', () => {
     expect(
       schema.safeParse({ ...good, TURNSTILE_SECRET_KEY: '3x00000000000000000000FF' }).success,
     ).toBe(false);
+  });
+  it('Turnstile, Resend and EMAIL_FROM are optional in production', () => {
+    for (const k of ['TURNSTILE_SECRET_KEY', 'RESEND_API_KEY', 'EMAIL_FROM'])
+      expect(schema.safeParse({ ...good, [k]: undefined }).success).toBe(true);
   });
   it('does not require them outside production', () => {
     expect(schema.safeParse({}).success).toBe(true);
