@@ -9,7 +9,7 @@ CONCURRENTLY := pnpm dlx concurrently@9.2.5
 API := ../smsg-api
 WEB := ../smsg-web
 
-.PHONY: help setup dev test e2e db-reset db-demo gen-api superadmin deploy-check
+.PHONY: help setup dev test e2e db-reset db-demo gen-api superadmin deploy-check vercel-env superadmin-remote
 
 help: ## Show available targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-13s %s\n", $$1, $$2}'
@@ -73,5 +73,11 @@ db-demo: ## Load demo users and data used by the tests (local only; `make db-res
 superadmin: ## Create the first super admin from secrets.env (idempotent)
 	@$(LOAD_SECRETS); pnpm -C $(API) superadmin
 
-deploy-check: ## Check env vars on Vercel and Supabase (phase 8)
-	@echo "deploy-check: not implemented yet (roadmap phase 8)"; exit 1
+deploy-check: ## Read-only check of Supabase + live URLs for ENV=staging|production (ADR-073)
+	@scripts/deploy-check.sh $(ENV)
+
+vercel-env: ## Set Vercel env vars for ENV=staging|production (ADR-073), values never printed
+	@$(LOAD_SECRETS); scripts/vercel-env.sh $(ENV)
+
+superadmin-remote: ## Create the first super admin on ENV=staging|production
+	@$(LOAD_SECRETS); scripts/superadmin-remote.sh $(ENV)
