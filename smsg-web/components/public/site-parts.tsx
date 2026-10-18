@@ -161,30 +161,20 @@ export function SiteFooter({
 }) {
   const shown = renderLink ? links : httpsOnly(links);
   return (
-    <footer className="mt-8 bg-[#f7efe9]">
-      <div
-        aria-hidden
-        className="h-2 bg-linear-to-r from-blu via-[#b0334a] to-bordeaux"
-      />
-      <div className="mx-auto max-w-5xl space-y-6 p-4 pt-6">
-        <div className="flex items-center gap-3">
-          <Image src="/logo.svg" alt="" width={48} height={48} unoptimized />
-          <p className="text-xl font-extrabold text-bordeaux">
-            Dal 1882 ci aiutiamo a vicenda. <span aria-hidden>♥</span>
-          </p>
-        </div>
+    <footer className="mt-8 border-t-4 border-bordeaux bg-[#f7efe9] text-sm">
+      <div className="mx-auto max-w-5xl space-y-3 px-4 py-4">
         {(renderLink ||
           FOOTER_GROUPS.some(([g]) => shown.some((l) => l.group === g))) && (
-          <div className="grid gap-6 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-3">
             {FOOTER_GROUPS.map(([g, title]) => {
               const inGroup = shown.filter((l) => l.group === g);
               return (
                 (renderLink || inGroup.length > 0) && (
                   <nav key={g} aria-label={title}>
-                    <h2 className="text-xl font-extrabold text-bordeaux">
+                    <h2 className="font-extrabold text-bordeaux">
                       {title}
                     </h2>
-                    <ul className="mt-2 space-y-1">
+                    <ul>
                       {inGroup.map((l, i) => (
                         <li key={`${i}-${l.url}`}>
                           {renderLink ? (
@@ -194,7 +184,7 @@ export function SiteFooter({
                               href={l.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex min-h-11 items-center font-bold text-blu underline"
+                              className="inline-flex min-h-8 items-center font-bold text-blu underline"
                             >
                               {l.label}
                               <span className="sr-only">
@@ -213,7 +203,7 @@ export function SiteFooter({
             })}
           </div>
         )}
-        <div className="flex flex-wrap justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 border-t border-bordeaux/20 pt-2">
           <p>
             © Società di Mutuo Soccorso Givolettese
             {address && <> · {address}</>}
@@ -222,7 +212,7 @@ export function SiteFooter({
           <Link
             href="/privacy"
             inert={inert}
-            className="inline-flex min-h-11 items-center font-bold text-blu underline"
+            className="inline-flex min-h-8 items-center font-bold text-blu underline"
           >
             Informativa sulla privacy
           </Link>
