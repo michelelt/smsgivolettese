@@ -1,0 +1,38 @@
+# Monorepo root. Each project folder keeps its own .gitignore as well.
+
+# Claude Code: never versioned
+smsg-claude-kit/
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+**/CLAUDE.md
+**/CLAUDE.local.md
+.mcp.json
+
+# Secrets and local env files (only the examples are versioned)
+secrets.env
+.env
+.env.*
+!.env.example
+
+# Dependencies, builds, caches
+node_modules/
+.next/
+dist/
+out/
+coverage/
+.vercel/
+*.tsbuildinfo
+supabase/.temp/
+supabase/.branches/
+
+# Test output
+test-results/
+playwright-report/
+
+# OS, editors, logs
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
