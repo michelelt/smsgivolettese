@@ -317,9 +317,14 @@ describe('vehicles and volunteers', () => {
     expect(l.data.items.some((v: J) => v.id === ids.a)).toBe(true);
     const p = await staff('PATCH', `/volunteers/${ids.g}`, { phone: '3331112222', notes: 'n' });
     expect(p.data).toMatchObject({ phone: '3331112222', notes: 'n', rules: [], absences: [] });
+    await call('a', 'POST', '/me/absences', { startsOn: monday, endsOn: monday, note: 'ricovero' });
     const ov = await staff('GET', '/availability');
     const a = ov.data.items.find((i: J) => i.volunteerId === ids.a);
     expect(a.rules).toEqual([{ weekday: 1, startTime: '08:00', endTime: '12:00' }]);
+    expect(typeof a.canDrive).toBe('boolean');
+    // absence dates only, never the note (ADR-071 review)
+    expect(a.absences.length).toBeGreaterThan(0);
+    for (const x of a.absences as J[]) expect(x).not.toHaveProperty('note');
     expect(a).not.toHaveProperty('email');
   });
 });

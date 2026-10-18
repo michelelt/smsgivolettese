@@ -72,8 +72,9 @@ export const AvailabilityOverview = z
         volunteerId: z.uuid(),
         firstName: z.string(),
         lastName: z.string(),
+        canDrive: z.boolean(),
         rules: z.array(AvailabilityRule),
-        absences: z.array(Absence),
+        absences: z.array(Absence.omit({ note: true })),
       }),
     ),
   })

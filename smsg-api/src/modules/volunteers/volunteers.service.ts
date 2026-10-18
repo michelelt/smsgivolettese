@@ -52,8 +52,12 @@ export const overview = (ctx: Ctx) =>
         volunteerId: v.id,
         firstName: v.firstName,
         lastName: v.lastName,
+        canDrive: v.canDrive,
         rules: rules.filter((r) => r.volunteerId === v.id).map(strip),
-        absences: absences.filter((a) => a.volunteerId === v.id).map(strip),
+        // dates only: the note may hold health reasons (minimisation)
+        absences: absences
+          .filter((a) => a.volunteerId === v.id)
+          .map(({ id, startsOn, endsOn }) => ({ id, startsOn, endsOn })),
       })),
     };
   });
