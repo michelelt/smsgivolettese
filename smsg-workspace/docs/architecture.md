@@ -69,13 +69,10 @@ API module list (`src/modules/*`): `health`, `public` (services without prices, 
 All routes require a session; permission key → minimum role in `permissions.ts` (all `staff`).
 | Route | Permission | Notes |
 |---|---|---|
-| `GET /bookings?status=aperte\|attesa\|confermata\|eseguita\|da_fatturare\|annullata\|tutte&q&from&to&memberId&page&pageSize` | `bookings.read` | default `aperte`, sort `day, time`; item has `memberId`, member name/phone/card number, service, `priceAppliedCents`, `invoiceNumber` |
-| `GET /bookings/kpis` | `bookings.read` | `{ toConfirm, today, toInvoice, invoicedMonthCents, toCollectCents }` (Europe/Rome) |
-| `POST /bookings` `{ memberId, serviceId, day, slot, time?, notes? ≤600 }` | `bookings.write` | 201; ADR-046/060 (price = `services.price_cents` snapshot); `422 SERVICE_INACTIVE`, `422 MEMBER_NOT_ACTIVE` |
-| `POST /bookings/:id/confirm` `{ time? }` · `/execute` · `/cancel` `{ by: staff\|utente }` · `/restore` | `bookings.change_status` | `409 BOOKING_INVALID_TRANSITION` |
+| ~~`/bookings*`~~ | – | removed by ADR-070 (every service request is a transport; contract in `data-model.md` §API contract) |
 | `GET /members?filter=attivi\|da_rinnovare\|cessati\|tutti&q&page&pageSize` | `members.read` | item adds `feePaidCurrentYear`; `q` matches name, card number, tax code, phone: also the member picker of booking/transport forms (`filter=attivi`) |
 | `GET /members/kpis` | `members.read` | `{ active, paidCurrentYear, unpaidCurrentYear, joinedCurrentYear }` |
-| `GET /members/:id` | `members.read` | member + fees + `bookings` (all, desc) + `transports` (all, desc) + `invoices` (history) |
+| `GET /members/:id` | `members.read` | member + fees + `transports` (all, desc) + `invoices` (history) |
 | `POST /members` `{ …member fields, taxCodeConfirmed?, feeMethod? }` | `members.write` | `register_member`; 201 with `cardNumber`; `409 MEMBER_TAX_CODE_EXISTS`; also used by the inline "Nuovo socio" dialog |
 | `PATCH /members/:id` (same fields, no card/status) | `members.write` | |
 | `POST /members/:id/end` `{ endedOn?, endReason }` · `/reactivate` | `members.end` | `409 MEMBER_INVALID_TRANSITION` |
@@ -85,7 +82,7 @@ All routes require a session; permission key → minimum role in `permissions.ts
 | `GET /invoices?status=emessa\|pagata\|annullata\|tutte&year&q&page&pageSize` | `invoices.read` | sort `year desc, number desc` |
 | `GET /invoices/kpis?year` | `invoices.read` | `{ count, totalCents, collectedCents, toCollectCents }` (non-void) |
 | `GET /invoices/:id` · `GET /invoices/:id/pdf` | `invoices.read` | |
-| `POST /invoices` `{ memberId, bookingIds[], customerTaxCode?, taxCodeConfirmed?, customerAddress?, paymentMethod? }` | `invoices.issue` | `issue_invoice`; given tax code also saved on the member (same tx), address only snapshotted; 201; `404 MEMBER_NOT_FOUND` |
+| `POST /invoices` `{ transportId, amountCents, customerTaxCode?, taxCodeConfirmed?, customerAddress?, paymentMethod? }` | `invoices.issue` | `issue_invoice` (ADR-070: one `svolto` transport, amount as confirmed by staff); given tax code also saved on the member (same tx), address only snapshotted; 201; `409 TRANSPORT_NOT_INVOICEABLE` |
 | `POST /invoices/:id/pay` `{ method, paidOn? }` | `invoices.mark_paid` | `emessa` only, else `409 INVOICE_NOT_PAYABLE` |
 | `POST /invoices/:id/void` `{ reason 1..300 }` | `invoices.void` | `void_invoice` |
 | `GET /invoices/export.csv?year` | `invoices.export` | ADR-050 |
@@ -115,7 +112,7 @@ Web serves images with `next/image` (`remotePatterns` = Supabase Storage host). 
 
 ## Errors, logging, audit
 - Domain errors in `src/lib/errors.ts`: `ValidationError` 400, `Unauthorized` 401, `Forbidden` 403, `NotFound` 404, `Conflict` 409, `RateLimited` 429, else 500. Body `{ error: { code, message, details? } }`, `message` in Italian for end users, `code` stable UPPER_SNAKE.
-- Postgres mapping in one place: `23P01` → `COMMITMENT_OVERLAP` 409; `23505` → by constraint name (e.g. `members_tax_code_key` → `MEMBER_TAX_CODE_EXISTS`) 409; `P0001` with message = code (`DRIVER_NOT_ELIGIBLE`, `LAST_SUPER_ADMIN`, `BOOKINGS_NOT_INVOICEABLE`, `INVOICE_IMMUTABLE`, …) 409/422; `42501` (RLS) → 403.
+- Postgres mapping in one place: `23P01` → `COMMITMENT_OVERLAP` 409; `23505` → by constraint name (e.g. `members_tax_code_key` → `MEMBER_TAX_CODE_EXISTS`) 409; `P0001` with message = code (`DRIVER_NOT_ELIGIBLE`, `LAST_SUPER_ADMIN`, `TRANSPORT_NOT_INVOICEABLE`, `INVOICE_IMMUTABLE`, …) 409/422; `42501` (RLS) → 403.
 - Logs: `src/lib/logger.ts`, one JSON line per event via `console` (`level, msg, requestId, method, route, status, durationMs, role`). No names, emails, phones, tax codes, bodies or tokens. `x-request-id` echoed in responses.
 - Audit: DB triggers (`data-model.md` §audit_log) — captures every write including SQL-function writes, actor from JWT claims, `request_id` from `app.request_id`. Viewable/filterable at `/gestione/registro-attivita` (`GET /audit?table=&actor=&from=&to=`).
 
