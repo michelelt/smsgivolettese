@@ -1,0 +1,20 @@
+node_modules
+.env*
+!.env.example
+dist
+.vercel
+supabase/.temp
+supabase/.branches
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+.mcp.json
+
+# Build, test, OS, editors, logs
+*.tsbuildinfo
+coverage
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
