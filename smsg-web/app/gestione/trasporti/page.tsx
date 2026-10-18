@@ -90,7 +90,7 @@ export default function Trasporti() {
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-xl font-extrabold">
                 {weekMode && `${dayLabel(t.travelDate)} · `}
-                {fmtTime(t.departureTime)} ·{" "}
+                {fmtTime(t.departureTime ?? t.appointmentTime)} ·{" "}
                 <Link
                   className="text-blu underline"
                   href={`/gestione/trasporti/${t.id}`}
@@ -107,7 +107,8 @@ export default function Trasporti() {
               Autista: {t.driverName ?? "da assegnare"}
               {t.vehiclePlate && ` · ${t.vehiclePlate}`}
               {t.wheelchair && " · carrozzina"}
-              {t.companion && " · accompagnatore"}
+              {t.mobilityAids && " · ausili"}
+              {t.companions > 0 && ` · accompagnatori: ${t.companions}`}
             </p>
           </li>
         ))}

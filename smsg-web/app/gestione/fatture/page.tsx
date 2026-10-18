@@ -120,8 +120,7 @@ export default function Fatture() {
         <>
           {list.data.items.length === 0 && (
             <p className="mt-4">
-              Nessuna fattura. Si emettono dalle prenotazioni segnate come
-              eseguite.
+              Nessuna fattura. Si emettono dai trasporti segnati come svolti.
             </p>
           )}
           <ul className="mt-4 space-y-3">

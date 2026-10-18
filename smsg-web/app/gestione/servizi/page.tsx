@@ -17,19 +17,13 @@ import { api, call } from "@/lib/api/call";
 import { useServices } from "@/lib/api/hooks";
 import type { components } from "@/lib/api/schema";
 import { optText, orNull } from "@/lib/forms";
-import { centsToInput, formatEuro, parseEuro } from "@/lib/money";
 
 type Service = components["schemas"]["StaffService"];
 
-const euro = z
-  .string()
-  .refine((v) => parseEuro(v) !== null, "scriva un importo, per esempio 12,50");
 const schema = z.object({
   name: z.string().trim().min(1, "scriva il nome").max(120),
   description: optText(1000),
   scheduleNote: optText(200),
-  price: euro,
-  requiresTransport: z.boolean(),
   active: z.boolean(),
   sortOrder: z
     .string()
@@ -51,8 +45,6 @@ function Body({
       name: service?.name ?? "",
       description: service?.description ?? "",
       scheduleNote: service?.scheduleNote ?? "",
-      price: service ? centsToInput(service.priceCents) : "",
-      requiresTransport: service?.requiresTransport ?? false,
       active: service?.active ?? true,
       sortOrder: String(service?.sortOrder ?? 0),
     },
@@ -65,8 +57,6 @@ function Body({
         name: v.name,
         description: orNull(v.description),
         scheduleNote: orNull(v.scheduleNote),
-        priceCents: parseEuro(v.price)!,
-        requiresTransport: v.requiresTransport,
         active: v.active,
         sortOrder: Number(v.sortOrder),
       };
@@ -103,25 +93,12 @@ function Body({
         error={e.scheduleNote?.message}
       />
       <Field
-        label="Prezzo (euro)"
-        inputMode="decimal"
-        {...f.register("price")}
-        error={e.price?.message}
-      />
-      <Field
         label="Posizione nell'elenco"
         inputMode="numeric"
         {...f.register("sortOrder")}
         error={e.sortOrder?.message}
       />
-      <Checkbox
-        label="Richiede un trasporto"
-        {...f.register("requiresTransport")}
-      />
-      <Checkbox
-        label="Attivo (visibile sul sito e prenotabile)"
-        {...f.register("active")}
-      />
+      <Checkbox label="Attivo (visibile sul sito)" {...f.register("active")} />
       <FormError message={m.error?.message} />
       <DialogActions>
         <Button auto type="submit" disabled={m.isPending}>
@@ -153,11 +130,7 @@ export default function Servizi() {
               <p className="text-xl font-extrabold">{s.name}</p>
               <Pill>{s.active ? "Attivo" : "Non attivo"}</Pill>
             </div>
-            <p>
-              Prezzo {formatEuro(s.priceCents)}
-              {s.requiresTransport && " · Richiede trasporto"}
-              {s.scheduleNote && ` · ${s.scheduleNote}`}
-            </p>
+            {s.scheduleNote && <p>{s.scheduleNote}</p>}
             <ActionBar label={`Azioni su ${s.name}`} compact>
               <Button
                 variant="secondary"

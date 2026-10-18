@@ -1068,542 +1068,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/bookings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: {
-                    page?: number;
-                    pageSize?: number;
-                    status?: "aperte" | "attesa" | "confermata" | "eseguita" | "da_fatturare" | "annullata" | "tutte";
-                    q?: string;
-                    from?: string;
-                    to?: string;
-                    memberId?: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Prenotazioni */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BookingPage"];
-                    };
-                };
-                /** @description Dati non validi */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non autenticato */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Permesso negato */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["BookingCreate"];
-                };
-            };
-            responses: {
-                /** @description Prenotazione creata */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Booking"];
-                    };
-                };
-                /** @description Dati non validi */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non autenticato */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Permesso negato */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non trovato */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Richiede conferma o non elaborabile */
-                422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/bookings/kpis": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Indicatori */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["BookingKpis"];
-                    };
-                };
-                /** @description Dati non validi */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non autenticato */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Permesso negato */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/bookings/{id}/confirm": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["BookingConfirm"];
-                };
-            };
-            responses: {
-                /** @description Prenotazione aggiornata */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Booking"];
-                    };
-                };
-                /** @description Dati non validi */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non autenticato */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Permesso negato */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non trovato */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Conflitto con lo stato attuale */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/bookings/{id}/execute": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Prenotazione aggiornata */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Booking"];
-                    };
-                };
-                /** @description Dati non validi */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non autenticato */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Permesso negato */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non trovato */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Conflitto con lo stato attuale */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/bookings/{id}/cancel": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["BookingCancel"];
-                };
-            };
-            responses: {
-                /** @description Prenotazione aggiornata */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Booking"];
-                    };
-                };
-                /** @description Dati non validi */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non autenticato */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Permesso negato */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non trovato */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Conflitto con lo stato attuale */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/bookings/{id}/restore": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Prenotazione aggiornata */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Booking"];
-                    };
-                };
-                /** @description Dati non validi */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non autenticato */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Permesso negato */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non trovato */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Conflitto con lo stato attuale */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/members": {
         parameters: {
             query?: never;
@@ -7582,14 +7046,17 @@ export interface components {
             fromAddress: string | null;
             toAddress: string | null;
             wheelchair: boolean;
-            companion: boolean;
+            mobilityAids: boolean;
+            companions: number;
             /** @enum {string} */
             status: "assegnato" | "confermato" | "svolto";
+            odometerStart: number | null;
+            odometerEnd: number | null;
             km: number | null;
             driverNotes: string | null;
             memberFirstName: string;
             memberLastName: string;
-            memberPhone: string | null;
+            contactPhone: string | null;
             vehiclePlate: string | null;
             vehicleModel: string | null;
         };
@@ -7597,7 +7064,8 @@ export interface components {
             accept: boolean;
         };
         MyTransportComplete: {
-            km: number;
+            odometerStart: number;
+            odometerEnd: number;
             driverNotes?: string | null;
         };
         PageTexts: {
@@ -8368,62 +7836,6 @@ export interface components {
             submitterContact?: string;
             turnstileToken: string;
         };
-        BookingPage: {
-            items: components["schemas"]["Booking"][];
-            total: number;
-        };
-        Booking: {
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            memberId: string;
-            memberName: string;
-            memberPhone: string | null;
-            /** Format: uuid */
-            serviceId: string;
-            serviceName: string;
-            day: string;
-            /** @enum {string} */
-            slot: "mattina" | "pomeriggio";
-            time: string | null;
-            /** @enum {string} */
-            status: "attesa" | "confermata" | "eseguita" | "annullata";
-            priceAppliedCents: number;
-            /** @enum {string} */
-            origin: "online" | "telefono";
-            notes: string | null;
-            /** @enum {string|null} */
-            cancelledBy: "staff" | "utente" | null;
-            /** Format: uuid */
-            invoiceId: string | null;
-            invoiceNumber: string | null;
-        };
-        BookingKpis: {
-            toConfirm: number;
-            today: number;
-            toInvoice: number;
-            invoicedMonthCents: number;
-            toCollectCents: number;
-        };
-        BookingCreate: {
-            /** Format: uuid */
-            memberId: string;
-            /** Format: uuid */
-            serviceId: string;
-            /** Format: date */
-            day: string;
-            /** @enum {string} */
-            slot: "mattina" | "pomeriggio";
-            time?: string;
-            notes?: string;
-        };
-        BookingConfirm: {
-            time?: string;
-        };
-        BookingCancel: {
-            /** @enum {string} */
-            by: "staff" | "utente";
-        };
         MemberPage: {
             items: components["schemas"]["Member"][];
             total: number;
@@ -8463,7 +7875,6 @@ export interface components {
         };
         MemberDetail: components["schemas"]["Member"] & {
             fees: components["schemas"]["MembershipFee"][];
-            bookings: components["schemas"]["Booking"][];
             transports: components["schemas"]["Transport"][];
             invoices: components["schemas"]["Invoice"][];
         };
@@ -8484,17 +7895,16 @@ export interface components {
             /** Format: uuid */
             memberId: string;
             memberName: string;
-            memberPhone: string | null;
+            contactPhone: string | null;
             travelDate: string;
             departureTime: string | null;
             appointmentTime: string | null;
             returnTime: string | null;
             fromAddress: string | null;
             toAddress: string | null;
-            requestedBy: string | null;
-            reason: string | null;
             wheelchair: boolean;
-            companion: boolean;
+            mobilityAids: boolean;
+            companions: number;
             notes: string | null;
             /** @enum {string} */
             status: "richiesto" | "assegnato" | "confermato" | "svolto" | "annullato";
@@ -8504,10 +7914,12 @@ export interface components {
             /** Format: uuid */
             vehicleId: string | null;
             vehiclePlate: string | null;
+            odometerStart: number | null;
+            odometerEnd: number | null;
             km: number | null;
             driverNotes: string | null;
             /** Format: uuid */
-            bookingId: string | null;
+            invoiceId: string | null;
         };
         Invoice: {
             /** Format: uuid */
@@ -8611,13 +8023,13 @@ export interface components {
                 description: string;
                 amountCents: number;
                 /** Format: uuid */
-                bookingId: string | null;
+                transportId: string | null;
             }[];
         };
         InvoiceIssue: {
             /** Format: uuid */
-            memberId: string;
-            bookingIds: string[];
+            transportId: string;
+            amountCents: number;
             customerTaxCode?: string | null;
             taxCodeConfirmed?: boolean;
             customerAddress?: string | null;
@@ -8642,27 +8054,21 @@ export interface components {
             name: string;
             description: string | null;
             scheduleNote: string | null;
-            priceCents: number;
             active: boolean;
-            requiresTransport: boolean;
             sortOrder: number;
         };
         ServiceCreate: {
             name: string;
             description?: string | null;
             scheduleNote?: string | null;
-            priceCents: number;
             active?: boolean;
-            requiresTransport?: boolean;
             sortOrder?: number;
         };
         ServicePatch: {
             name?: string;
             description?: string | null;
             scheduleNote?: string | null;
-            priceCents?: number;
             active?: boolean;
-            requiresTransport?: boolean;
             sortOrder?: number;
         };
         SiteSettingsInput: {
@@ -8693,6 +8099,7 @@ export interface components {
             stampDutyThresholdCents: number;
             stampDutyAmountCents: number;
             nextCardNumber: number;
+            kmRateCents: number;
         };
         VolunteerPage: {
             items: components["schemas"]["Volunteer"][];
@@ -8870,10 +8277,10 @@ export interface components {
             returnTime?: string | null;
             fromAddress?: string | null;
             toAddress?: string | null;
-            requestedBy?: string | null;
-            reason?: string | null;
+            contactPhone?: string | null;
             wheelchair?: boolean;
-            companion?: boolean;
+            mobilityAids?: boolean;
+            companions?: number;
             notes?: string | null;
         };
         TransportPatch: {
@@ -8884,10 +8291,10 @@ export interface components {
             returnTime?: string | null;
             fromAddress?: string | null;
             toAddress?: string | null;
-            requestedBy?: string | null;
-            reason?: string | null;
+            contactPhone?: string | null;
             wheelchair?: boolean;
-            companion?: boolean;
+            mobilityAids?: boolean;
+            companions?: number;
             notes?: string | null;
         };
         TransportAssign: {
@@ -8897,7 +8304,8 @@ export interface components {
             vehicleId?: string | null;
         };
         TransportComplete: {
-            km: number;
+            odometerStart: number;
+            odometerEnd: number;
             driverNotes?: string | null;
         };
         UserPage: {
@@ -8952,6 +8360,7 @@ export interface components {
             stampDutyThresholdCents: number;
             stampDutyAmountCents: number;
             membershipFeeCents: number;
+            kmRateCents: number;
             videoMaxMb: number;
         };
         CountersInput: {

@@ -56,6 +56,7 @@ const orgSchema = z.object({
   stampDutyThreshold: euro("Soglia"),
   stampDutyAmount: euro("Importo"),
   membershipFee: euro("Quota"),
+  kmRate: euro("Importo"),
   videoMaxMb: int(1, 50),
 });
 type OrgIn = z.input<typeof orgSchema>;
@@ -73,6 +74,7 @@ function OrgForm({ s }: { s: OrgSettings }) {
       stampDutyThreshold: centsToInput(s.stampDutyThresholdCents),
       stampDutyAmount: centsToInput(s.stampDutyAmountCents),
       membershipFee: centsToInput(s.membershipFeeCents),
+      kmRate: centsToInput(s.kmRateCents),
       videoMaxMb: String(s.videoMaxMb),
     },
   });
@@ -89,6 +91,7 @@ function OrgForm({ s }: { s: OrgSettings }) {
         stampDutyThresholdCents: parseEuro(x.stampDutyThreshold)!,
         stampDutyAmountCents: parseEuro(x.stampDutyAmount)!,
         membershipFeeCents: parseEuro(x.membershipFee)!,
+        kmRateCents: parseEuro(x.kmRate)!,
         videoMaxMb: Number(x.videoMaxMb),
       });
     },
@@ -151,6 +154,13 @@ function OrgForm({ s }: { s: OrgSettings }) {
         inputMode="decimal"
         {...f.register("membershipFee")}
         error={e.membershipFee?.message}
+      />
+      <Field
+        label="Importo per ogni chilometro dei trasporti (euro)"
+        hint="Per esempio 0,35. Serve a proporre l'importo della fattura."
+        inputMode="decimal"
+        {...f.register("kmRate")}
+        error={e.kmRate?.message}
       />
       <h2 className="mt-8 text-2xl font-extrabold text-bordeaux">Sito</h2>
       <Field

@@ -8,7 +8,6 @@ type Item = NavGroup["items"][number];
 /** Order of groups and of the links inside them, with the one-line help shown in the menus. */
 const MENU: Record<string, Record<string, Pick<Item, "icon" | "desc">>> = {
   Attività: {
-    prenotazioni: { icon: "cal", desc: "Richieste e appuntamenti" },
     turni: { icon: "clock", desc: "Turni della settimana" },
     trasporti: { icon: "car", desc: "Viaggi e accompagnamenti" },
     disponibilita: { icon: "hands", desc: "Chi può aiutare e quando" },

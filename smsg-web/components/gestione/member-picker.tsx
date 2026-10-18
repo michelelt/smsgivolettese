@@ -26,7 +26,7 @@ function NewMemberBody({
   onDone,
   onClose,
 }: {
-  onDone: (m: { id: string; name: string }) => void;
+  onDone: (m: PickedMember) => void;
   onClose: () => void;
 }) {
   const f = useForm<Values>({
@@ -42,7 +42,12 @@ function NewMemberBody({
         }),
       ),
     (m) => {
-      onDone({ id: m.id, name: `${m.firstName} ${m.lastName}` });
+      onDone({
+        id: m.id,
+        name: `${m.firstName} ${m.lastName}`,
+        address: m.address,
+        phone: m.phone,
+      });
     },
   );
   return (
@@ -93,9 +98,22 @@ function NewMemberBody({
 }
 
 /** Search active members by name, card, tax code or phone, or enrol a new one inline (ADR-060). */
-export function MemberPicker({ onPick }: { onPick: (id: string) => void }) {
+export type PickedMember = {
+  id: string;
+  name: string;
+  address: string | null;
+  phone: string | null;
+};
+
+export function MemberPicker({
+  onPick,
+  initial,
+}: {
+  onPick: (m: PickedMember) => void;
+  initial?: PickedMember;
+}) {
   const [q, setQ] = useState("");
-  const [picked, setPicked] = useState<{ id: string; name: string }>();
+  const [picked, setPicked] = useState<PickedMember | undefined>(initial);
   const [adding, setAdding] = useState(false);
   const dq = useDebounced(q);
   const list = useQuery({
@@ -107,9 +125,9 @@ export function MemberPicker({ onPick }: { onPick: (id: string) => void }) {
         }),
       ),
   });
-  const pick = (m: { id: string; name: string }) => {
+  const pick = (m: PickedMember) => {
     setPicked(m);
-    onPick(m.id);
+    onPick(m);
   };
   return (
     <fieldset className="mt-4">
@@ -133,7 +151,12 @@ export function MemberPicker({ onPick }: { onPick: (id: string) => void }) {
               className="size-6 accent-bordeaux"
               checked={picked?.id === m.id}
               onChange={() =>
-                pick({ id: m.id, name: `${m.firstName} ${m.lastName}` })
+                pick({
+                  id: m.id,
+                  name: `${m.firstName} ${m.lastName}`,
+                  address: m.address,
+                  phone: m.phone,
+                })
               }
             />
             {m.firstName} {m.lastName} · tessera n. {m.cardNumber}

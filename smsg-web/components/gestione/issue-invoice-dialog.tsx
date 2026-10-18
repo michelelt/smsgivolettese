@@ -1,44 +1,45 @@
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Loading, SaveErrors } from "@/components/ui/bits";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogActions } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
 import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast";
 import { api, call } from "@/lib/api/call";
 import type { components } from "@/lib/api/schema";
-import { useMember, useGuardedMutation } from "@/lib/api/hooks";
+import { useMember, useGuardedMutation, useOrgInfo } from "@/lib/api/hooks";
 import { fmtDate } from "@/lib/dates";
 import { METHODS, orNull } from "@/lib/forms";
-import { formatEuro } from "@/lib/money";
+import { centsToInput, parseEuro } from "@/lib/money";
 
+type Transport = components["schemas"]["Transport"];
 type Detail = components["schemas"]["MemberDetail"];
 type Method = components["schemas"]["InvoicePay"]["method"];
-type Values = { taxCode: string; address: string; method: "" | Method };
-
-export const invoiceable = (c: Detail) =>
-  c.bookings.filter((b) => b.status === "eseguita" && !b.invoiceId);
+type Values = {
+  amount: string;
+  taxCode: string;
+  address: string;
+  method: "" | Method;
+};
 
 function Form({
+  t,
   member,
-  preselect,
+  kmRateCents,
   onClose,
 }: {
+  t: Transport;
   member: Detail;
-  preselect?: string;
+  kmRateCents: number;
   onClose: () => void;
 }) {
   const toast = useToast();
-  const list = invoiceable(member);
-  const [picked, setPicked] = useState(
-    () => new Set(preselect ? [preselect] : list.map((b) => b.id)),
-  );
   const f = useForm<Values>({
     defaultValues: {
+      // km and rate are integers: the prefill is exact, staff may change it.
+      amount: centsToInput((t.km ?? 0) * kmRateCents),
       taxCode: member.taxCode ?? "",
       address: member.address ?? "",
       method: "",
@@ -49,8 +50,8 @@ function Form({
       call(
         api.POST("/invoices", {
           body: {
-            memberId: member.id,
-            bookingIds: [...picked],
+            transportId: t.id,
+            amountCents: parseEuro(v.amount)!,
             customerTaxCode: orNull(v.taxCode),
             customerAddress: orNull(v.address),
             ...(v.method && { paymentMethod: v.method }),
@@ -63,34 +64,24 @@ function Form({
       onClose();
     },
   );
-  const total = list
-    .filter((b) => picked.has(b.id))
-    .reduce((s, b) => s + b.priceAppliedCents, 0);
   return (
     <form onSubmit={f.handleSubmit(g.submit)} noValidate>
       <p className="mt-2 font-bold">
         {member.firstName} {member.lastName}
       </p>
-      <fieldset className="mt-4">
-        <legend className="font-bold">Prestazioni da fatturare</legend>
-        {list.length === 0 && <p>Nessuna prestazione eseguita da fatturare.</p>}
-        {list.map((b) => (
-          <Checkbox
-            key={b.id}
-            label={`${fmtDate(b.day)} · ${b.serviceName} · ${formatEuro(b.priceAppliedCents)}`}
-            checked={picked.has(b.id)}
-            onChange={(e) =>
-              setPicked((s) => {
-                const n = new Set(s);
-                if (e.target.checked) n.add(b.id);
-                else n.delete(b.id);
-                return n;
-              })
-            }
-          />
-        ))}
-      </fieldset>
-      <p className="mt-2 font-bold">Totale prestazioni: {formatEuro(total)}</p>
+      <p>
+        Trasporto del {fmtDate(t.travelDate)} · {t.km ?? 0} km
+      </p>
+      <Field
+        label="Importo (euro)"
+        hint={`${t.km ?? 0} km × ${centsToInput(kmRateCents)} euro al km. Si può cambiare.`}
+        inputMode="decimal"
+        {...f.register("amount", {
+          validate: (v) =>
+            parseEuro(v) !== null || "scriva un importo, per esempio 12,50",
+        })}
+        error={f.formState.errors.amount?.message}
+      />
       <Field
         label="Codice fiscale del socio"
         autoComplete="off"
@@ -111,7 +102,7 @@ function Form({
       </Select>
       <SaveErrors g={g} />
       <DialogActions>
-        <Button auto type="submit" disabled={g.pending || picked.size === 0}>
+        <Button auto type="submit" disabled={g.pending}>
           Emetti fattura
         </Button>
         <Button auto type="button" variant="secondary" onClick={onClose}>
@@ -122,20 +113,19 @@ function Form({
   );
 }
 
-function Body(props: {
-  memberId: string;
-  preselect?: string;
-  onClose: () => void;
-}) {
-  const q = useMember(props.memberId);
+function Body({ t, onClose }: { t: Transport; onClose: () => void }) {
+  const q = useMember(t.memberId);
+  const org = useOrgInfo();
   return (
     <>
       <Loading query={q} />
-      {q.data && (
+      <Loading query={org} />
+      {q.data && org.data && (
         <Form
+          t={t}
           member={q.data}
-          preselect={props.preselect}
-          onClose={props.onClose}
+          kmRateCents={org.data.kmRateCents}
+          onClose={onClose}
         />
       )}
     </>
@@ -143,19 +133,15 @@ function Body(props: {
 }
 
 export function IssueInvoiceDialog({
-  memberId,
-  preselect,
+  transport,
   onClose,
 }: {
-  memberId: string | null;
-  preselect?: string;
+  transport: Transport | null;
   onClose: () => void;
 }) {
   return (
-    <Dialog open={!!memberId} onClose={onClose} title="Emetti fattura">
-      {memberId && (
-        <Body memberId={memberId} preselect={preselect} onClose={onClose} />
-      )}
+    <Dialog open={!!transport} onClose={onClose} title="Emetti fattura">
+      {transport && <Body t={transport} onClose={onClose} />}
     </Dialog>
   );
 }

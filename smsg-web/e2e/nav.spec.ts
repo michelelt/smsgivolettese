@@ -19,10 +19,8 @@ test("staff menu: disclosure, Esc returns focus, axe", async ({ page }) => {
   await expect(b).toHaveAttribute("aria-expanded", "false");
   await expect(b).toBeFocused();
   await b.click();
-  await page.getByRole("link", { name: /^Prenotazioni/ }).click();
-  await expect(page.getByRole("link", { name: /^Prenotazioni/ })).toHaveCount(
-    0,
-  );
+  await page.getByRole("link", { name: /^Trasporti Viaggi/ }).click();
+  await expect(page.getByRole("link", { name: /^Trasporti/ })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Attività" })).toBeVisible();
 });
 

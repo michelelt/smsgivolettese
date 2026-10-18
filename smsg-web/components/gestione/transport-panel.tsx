@@ -1,8 +1,10 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { FormError, Loading, Pill } from "@/components/ui/bits";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog, Dialog, DialogActions } from "@/components/ui/dialog";
@@ -13,6 +15,7 @@ import { useToast } from "@/components/ui/toast";
 import { api, call, saveBlob } from "@/lib/api/call";
 import type { components } from "@/lib/api/schema";
 import { today } from "@/lib/dates";
+import { IssueInvoiceDialog } from "./issue-invoice-dialog";
 import { NO_HEALTH } from "./transport-form";
 
 type Transport = components["schemas"]["Transport"];
@@ -134,22 +137,43 @@ function AssignBody({ t, onClose }: { t: Transport; onClose: () => void }) {
   );
 }
 
+const km = z
+  .string()
+  .refine((v) => /^\d{1,7}$/.test(v.trim()), "scriva un numero intero");
+export const completeSchema = z
+  .object({ odometerStart: km, odometerEnd: km, driverNotes: z.string() })
+  .refine(
+    (v) =>
+      Number(v.odometerEnd) >= Number(v.odometerStart) &&
+      Number(v.odometerEnd) - Number(v.odometerStart) <= 2000,
+    {
+      path: ["odometerEnd"],
+      message:
+        "Controlli i chilometri: l'arrivo deve essere uguale o maggiore della partenza (al massimo 2000 km)",
+    },
+  );
+export type CompleteValues = z.infer<typeof completeSchema>;
+
 function CompleteBody({ t, onClose }: { t: Transport; onClose: () => void }) {
   const toast = useToast();
-  const f = useForm<{ km: string; driverNotes: string }>({
+  const f = useForm<CompleteValues>({
+    resolver: zodResolver(completeSchema),
     defaultValues: {
-      km: t.km != null ? String(t.km) : "",
+      odometerStart: t.odometerStart != null ? String(t.odometerStart) : "",
+      odometerEnd: t.odometerEnd != null ? String(t.odometerEnd) : "",
       driverNotes: t.driverNotes ?? "",
     },
   });
+  const e = f.formState.errors;
   const m = useMutation({
     meta: { inline: true },
-    mutationFn: (v: { km: string; driverNotes: string }) =>
+    mutationFn: (v: CompleteValues) =>
       call(
         api.POST("/transports/{id}/complete", {
           params: { path: { id: t.id } },
           body: {
-            km: Number(v.km.replace(",", ".")),
+            odometerStart: Number(v.odometerStart),
+            odometerEnd: Number(v.odometerEnd),
             driverNotes: v.driverNotes.trim() || null,
           },
         }),
@@ -162,18 +186,16 @@ function CompleteBody({ t, onClose }: { t: Transport; onClose: () => void }) {
   return (
     <form onSubmit={f.handleSubmit((v) => m.mutate(v))} noValidate>
       <Field
-        label="Chilometri percorsi"
-        inputMode="decimal"
-        {...f.register("km", {
-          validate: (v) => {
-            const n = Number(v.replace(",", "."));
-            return (
-              (v.trim() !== "" && n >= 0 && n <= 9999.9) ||
-              "scriva i chilometri, per esempio 25,5"
-            );
-          },
-        })}
-        error={f.formState.errors.km?.message}
+        label="Chilometri del contachilometri alla partenza"
+        inputMode="numeric"
+        {...f.register("odometerStart")}
+        error={e.odometerStart?.message}
+      />
+      <Field
+        label="Chilometri del contachilometri all'arrivo"
+        inputMode="numeric"
+        {...f.register("odometerEnd")}
+        error={e.odometerEnd?.message}
       />
       <Textarea
         label="Note dell'autista (facoltative)"
@@ -196,7 +218,9 @@ function CompleteBody({ t, onClose }: { t: Transport; onClose: () => void }) {
 
 export function TransportPanel({ t }: { t: Transport }) {
   const toast = useToast();
-  const [dlg, setDlg] = useState<"assign" | "cancel" | "complete" | null>(null);
+  const [dlg, setDlg] = useState<
+    "assign" | "cancel" | "complete" | "invoice" | null
+  >(null);
   const close = () => setDlg(null);
   const unassign = useMutation({
     mutationFn: () =>
@@ -248,7 +272,8 @@ export function TransportPanel({ t }: { t: Transport }) {
       </p>
       <p className="mt-2">
         Autista: {t.driverName ?? "—"} · Mezzo: {t.vehiclePlate ?? "—"}
-        {t.status === "svolto" && ` · Km: ${t.km ?? "—"}`}
+        {t.status === "svolto" &&
+          ` · Km: ${t.km ?? "—"} (contachilometri ${t.odometerStart ?? "—"} → ${t.odometerEnd ?? "—"})`}
       </p>
       {t.driverNotes && <p>Note dell&apos;autista: {t.driverNotes}</p>}
       <div className="mt-3 flex flex-wrap gap-3">
@@ -277,6 +302,11 @@ export function TransportPanel({ t }: { t: Transport }) {
             Chiudi con i km
           </Button>
         )}
+        {t.status === "svolto" && !t.invoiceId && (
+          <Button auto onClick={() => setDlg("invoice")}>
+            Emetti fattura
+          </Button>
+        )}
         {t.driverId && t.status !== "annullato" && (
           <Button
             auto
@@ -293,6 +323,9 @@ export function TransportPanel({ t }: { t: Transport }) {
           </Button>
         )}
       </div>
+      {t.invoiceId && (
+        <p className="mt-2">Il trasporto è già stato fatturato.</p>
+      )}
       {open && t.travelDate > today() && (
         <p className="mt-2">Si può chiudere dal giorno del viaggio.</p>
       )}
@@ -306,6 +339,10 @@ export function TransportPanel({ t }: { t: Transport }) {
       >
         <CompleteBody t={t} onClose={close} />
       </Dialog>
+      <IssueInvoiceDialog
+        transport={dlg === "invoice" ? t : null}
+        onClose={close}
+      />
       <ConfirmDialog
         open={dlg === "cancel"}
         onClose={() => {

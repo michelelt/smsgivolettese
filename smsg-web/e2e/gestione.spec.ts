@@ -1,6 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { login } from "./session";
+import { invoicedTransport } from "./transport";
 
 // Needs `make dev` with the seeded local database (services, members).
 const env = (k: string) => process.env[k]!;
@@ -15,44 +16,8 @@ test("invoice issuance end to end", async ({ page }) => {
   const last = `Prova${Date.now()}`;
   const name = `E2E ${last}`;
 
-  // Phone booking for a brand new member created inline.
-  await page.goto("/gestione/prenotazioni?nuova=1");
-  const dlg = page.getByRole("dialog", { name: "Nuova prenotazione" });
-  const nm = page.getByRole("dialog", { name: "Nuovo socio" });
-  // Esc on the nested dialog closes only that one.
-  await dlg.getByRole("button", { name: "Nuovo socio" }).click();
-  await expect(nm).toBeVisible();
-  await page.keyboard.press("Escape");
-  await expect(nm).toBeHidden();
-  await expect(dlg).toBeVisible();
-  await dlg.getByRole("button", { name: "Nuovo socio" }).click();
-  await nm.getByLabel("Nome", { exact: true }).fill("E2E");
-  await nm.getByLabel("Cognome").fill(last);
-  await nm.getByLabel("Telefono").fill("3331112222");
-  await nm.getByRole("button", { name: "Registra socio" }).click();
-  await expect(dlg.getByText(`Socio scelto: E2E ${last}`)).toBeVisible();
-  await dlg
-    .getByLabel("Servizio")
-    .selectOption(
-      (await dlg
-        .locator("option", { hasText: /Prelievi/ })
-        .getAttribute("value"))!,
-    );
-  await dlg.getByRole("button", { name: "Registra prenotazione" }).click();
-  await expect(page.getByText("Prenotazione registrata.")).toBeVisible();
-
-  // Executed, then invoiced.
-  await page.getByLabel("Cerca per nome, telefono o servizio").fill(last);
-  const row = card(page, name);
-  await row.getByRole("button", { name: "Eseguita" }).click();
-  // It leaves "Aperte"; find it under "Eseguite da fatturare".
-  await page.getByRole("button", { name: "Eseguite da fatturare" }).click();
-  await row.getByRole("button", { name: "Fattura" }).click();
-  await page
-    .getByRole("dialog", { name: "Emetti fattura" })
-    .getByRole("button", { name: "Emetti fattura" })
-    .click();
-  await expect(page.getByText(/Fattura n\. \d+\/\d{4} emessa/)).toBeVisible();
+  // Transport for a brand new member created inline, closed and invoiced.
+  const url = await invoicedTransport(page, last);
 
   // PDF, paid, void.
   await page.goto("/gestione/fatture");
@@ -83,17 +48,15 @@ test("invoice issuance end to end", async ({ page }) => {
   await v.getByRole("button", { name: "Annulla fattura" }).click();
   await expect(inv.getByText("Annullata", { exact: true })).toBeVisible();
 
-  // The booking can be invoiced again.
-  await page.goto("/gestione/prenotazioni");
-  await page.getByRole("button", { name: "Eseguite da fatturare" }).click();
-  await page.getByLabel("Cerca per nome, telefono o servizio").fill(last);
+  // The transport can be invoiced again.
+  await page.goto(url);
   await expect(
-    card(page, name).getByRole("button", { name: "Fattura" }),
+    page.getByRole("button", { name: "Emetti fattura" }),
   ).toBeVisible();
 });
 
 test("a doubtful tax code can be saved anyway", async ({ page }) => {
-  await page.goto("/gestione/prenotazioni?nuova=1");
+  await page.goto("/gestione/trasporti/nuovo");
   await page.getByRole("button", { name: "Nuovo socio" }).click();
   const dlg = page.getByRole("dialog", { name: "Nuovo socio" });
   await dlg.getByLabel("Nome", { exact: true }).fill("E2E");
@@ -125,8 +88,8 @@ async function axe(page: Page, path: string) {
 
 for (const p of [
   "/gestione",
-  "/gestione/prenotazioni",
-  "/gestione/prenotazioni?nuova=1",
+  "/gestione/trasporti",
+  "/gestione/trasporti/nuovo",
   "/gestione/soci",
   "/gestione/soci/nuovo",
   "/gestione/fatture",

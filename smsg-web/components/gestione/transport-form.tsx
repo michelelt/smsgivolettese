@@ -4,16 +4,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
-import { FormError } from "@/components/ui/bits";
+import { FormError, Loading } from "@/components/ui/bits";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
-import { MemberPicker } from "./member-picker";
+import { MemberPicker, type PickedMember } from "./member-picker";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/toast";
 import { api, call } from "@/lib/api/call";
+import { useMember } from "@/lib/api/hooks";
 import type { components } from "@/lib/api/schema";
 import { fmtTime, today } from "@/lib/dates";
 
@@ -22,29 +23,44 @@ type Transport = components["schemas"]["Transport"];
 const time = z
   .string()
   .refine((v) => v === "" || /^\d{2}:\d{2}$/.test(v), "orario non valido");
-const schema = z.object({
-  travelDate: z.string().min(1, "scelga la data"),
-  departureTime: time,
-  appointmentTime: time,
-  returnTime: time,
-  fromAddress: z.string().max(200, "al massimo 200 caratteri"),
-  toAddress: z.string().max(200, "al massimo 200 caratteri"),
-  requestedBy: z.string().max(200, "al massimo 200 caratteri"),
-  reason: z.string().max(300, "al massimo 300 caratteri"),
-  wheelchair: z.boolean(),
-  companion: z.boolean(),
-  notes: z.string().max(1000, "al massimo 1000 caratteri"),
-});
+const schema = z
+  .object({
+    travelDate: z.string().min(1, "scelga la data"),
+    departureTime: time,
+    appointmentTime: time,
+    returnTime: time,
+    fromAddress: z.string().max(200, "al massimo 200 caratteri"),
+    toAddress: z.string().max(200, "al massimo 200 caratteri"),
+    contactPhone: z.string().trim().max(40, "al massimo 40 caratteri"),
+    wheelchair: z.boolean(),
+    mobilityAids: z.boolean(),
+    companions: z
+      .string()
+      .refine((v) => /^[0-8]$/.test(v.trim()), "scriva un numero da 0 a 8"),
+    notes: z.string().max(500, "al massimo 500 caratteri"),
+  })
+  .refine((v) => v.departureTime !== "" || v.appointmentTime !== "", {
+    path: ["departureTime"],
+    message: "Indichi l'ora di partenza da casa o l'ora dell'appuntamento",
+  });
 type Values = z.infer<typeof schema>;
 const nul = (s: string) => s.trim() || null;
 
 export const NO_HEALTH =
-  "Non scriva informazioni sulla salute (malattie, diagnosi, terapie): il motivo può essere solo, per esempio, «visita in ospedale».";
+  "Non scriva informazioni sulla salute (malattie, diagnosi, terapie).";
 
-export function TransportForm({ transport }: { transport?: Transport }) {
+export function TransportForm({
+  transport,
+  initialMember,
+}: {
+  transport?: Transport;
+  initialMember?: PickedMember;
+}) {
   const router = useRouter();
   const toast = useToast();
-  const [memberId, setMemberId] = useState(transport?.memberId ?? "");
+  const [memberId, setMemberId] = useState(
+    transport?.memberId ?? initialMember?.id ?? "",
+  );
   const [memberErr, setMemberErr] = useState<string>();
   const f = useForm<Values>({
     resolver: zodResolver(schema),
@@ -57,16 +73,20 @@ export function TransportForm({ transport }: { transport?: Transport }) {
         ? fmtTime(transport.appointmentTime)
         : "",
       returnTime: transport?.returnTime ? fmtTime(transport.returnTime) : "",
-      fromAddress: transport?.fromAddress ?? "",
+      fromAddress: transport?.fromAddress ?? initialMember?.address ?? "",
       toAddress: transport?.toAddress ?? "",
-      requestedBy: transport?.requestedBy ?? "",
-      reason: transport?.reason ?? "",
+      contactPhone: transport?.contactPhone ?? initialMember?.phone ?? "",
       wheelchair: transport?.wheelchair ?? false,
-      companion: transport?.companion ?? false,
+      mobilityAids: transport?.mobilityAids ?? false,
+      companions: String(transport?.companions ?? 0),
       notes: transport?.notes ?? "",
     },
   });
   const e = f.formState.errors;
+  const [dep, appt] = useWatch({
+    control: f.control,
+    name: ["departureTime", "appointmentTime"],
+  });
   const m = useMutation({
     meta: { inline: true },
     mutationFn: (v: Values) => {
@@ -77,10 +97,10 @@ export function TransportForm({ transport }: { transport?: Transport }) {
         returnTime: nul(v.returnTime),
         fromAddress: nul(v.fromAddress),
         toAddress: nul(v.toAddress),
-        requestedBy: nul(v.requestedBy),
-        reason: nul(v.reason),
+        contactPhone: nul(v.contactPhone),
         wheelchair: v.wheelchair,
-        companion: v.companion,
+        mobilityAids: v.mobilityAids,
+        companions: Number(v.companions),
         notes: nul(v.notes),
       };
       return transport
@@ -108,13 +128,18 @@ export function TransportForm({ transport }: { transport?: Transport }) {
       })}
     >
       {transport ? (
-        <p className="mt-4 text-xl font-bold">
-          {transport.memberName}
-          {transport.memberPhone && ` · ${transport.memberPhone}`}
-        </p>
+        <p className="mt-4 text-xl font-bold">{transport.memberName}</p>
       ) : (
         <>
-          <MemberPicker onPick={setMemberId} />
+          <MemberPicker
+            initial={initialMember}
+            onPick={(m) => {
+              setMemberId(m.id);
+              // Prefill from the member card; both stay editable.
+              f.setValue("fromAddress", m.address ?? "");
+              f.setValue("contactPhone", m.phone ?? "");
+            }}
+          />
           <FormError message={memberErr} />
         </>
       )}
@@ -125,7 +150,8 @@ export function TransportForm({ transport }: { transport?: Transport }) {
         error={e.travelDate?.message}
       />
       <Field
-        label="Ora di partenza"
+        label="Ora di partenza da casa"
+        hint="Indichi almeno l'ora di partenza o quella dell'appuntamento."
         type="time"
         {...f.register("departureTime")}
         error={e.departureTime?.message}
@@ -136,6 +162,9 @@ export function TransportForm({ transport }: { transport?: Transport }) {
         {...f.register("appointmentTime")}
         error={e.appointmentTime?.message}
       />
+      <p aria-live="polite" className="mt-2 font-bold">
+        {!dep && appt && "Per assegnare l'autista serve l'ora di partenza."}
+      </p>
       <Field
         label="Ora di ritorno"
         type="time"
@@ -155,22 +184,22 @@ export function TransportForm({ transport }: { transport?: Transport }) {
         error={e.toAddress?.message}
       />
       <Field
-        label="Chi lo ha richiesto (facoltativo)"
+        label="Telefono per contattare il socio"
+        type="tel"
         autoComplete="off"
-        {...f.register("requestedBy")}
-        error={e.requestedBy?.message}
-      />
-      <Field
-        label="Motivo (facoltativo)"
-        hint={NO_HEALTH}
-        autoComplete="off"
-        {...f.register("reason")}
-        error={e.reason?.message}
+        {...f.register("contactPhone")}
+        error={e.contactPhone?.message}
       />
       <Checkbox label="Serve la carrozzina" {...f.register("wheelchair")} />
       <Checkbox
-        label="Viaggia con un accompagnatore"
-        {...f.register("companion")}
+        label="Usa deambulatore o stampelle"
+        {...f.register("mobilityAids")}
+      />
+      <Field
+        label="Numero di accompagnatori"
+        inputMode="numeric"
+        {...f.register("companions")}
+        error={e.companions?.message}
       />
       <Textarea
         label="Note per lo staff (facoltative)"
@@ -185,5 +214,31 @@ export function TransportForm({ transport }: { transport?: Transport }) {
         </Button>
       </div>
     </form>
+  );
+}
+
+/** New transport preselecting a member (link from the member card); inactive members are ignored. */
+export function TransportFormForMember({ memberId }: { memberId: string }) {
+  const q = useMember(memberId);
+  if (q.isPending || q.error) return <Loading query={q} />;
+  const m = q.data.status === "attivo" ? q.data : undefined;
+  return (
+    <>
+      {!m && (
+        <p role="status" className="mt-4">
+          Il socio non è attivo: ne scelga un altro.
+        </p>
+      )}
+      <TransportForm
+        initialMember={
+          m && {
+            id: m.id,
+            name: `${m.firstName} ${m.lastName}`,
+            address: m.address,
+            phone: m.phone,
+          }
+        }
+      />
+    </>
   );
 }

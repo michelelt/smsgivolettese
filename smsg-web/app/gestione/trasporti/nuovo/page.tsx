@@ -1,7 +1,19 @@
 import Link from "next/link";
-import { TransportForm } from "@/components/gestione/transport-form";
+import { z } from "zod";
+import {
+  TransportForm,
+  TransportFormForMember,
+} from "@/components/gestione/transport-form";
 
-export default function NuovoTrasporto() {
+export default async function NuovoTrasporto({
+  searchParams,
+}: {
+  searchParams: Promise<{ member?: string }>;
+}) {
+  const member = z
+    .string()
+    .uuid()
+    .safeParse((await searchParams).member);
   return (
     <>
       <p>
@@ -15,7 +27,11 @@ export default function NuovoTrasporto() {
       <h1 className="mt-2 text-4xl font-extrabold text-bordeaux">
         Nuovo trasporto
       </h1>
-      <TransportForm />
+      {member.data ? (
+        <TransportFormForMember memberId={member.data} />
+      ) : (
+        <TransportForm />
+      )}
     </>
   );
 }

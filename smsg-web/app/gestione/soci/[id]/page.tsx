@@ -19,12 +19,6 @@ import { currentYear, fmtDate, today } from "@/lib/dates";
 import { METHODS } from "@/lib/forms";
 import { formatEuro } from "@/lib/money";
 import {
-  invoiceable,
-  IssueInvoiceDialog,
-} from "@/components/gestione/issue-invoice-dialog";
-import { NewBookingDialog } from "@/components/gestione/new-booking-dialog";
-import { BookingList } from "@/components/gestione/booking-list";
-import {
   GdprActions,
   useIsSuperAdmin,
 } from "@/components/gestione/gdpr-actions";
@@ -144,9 +138,7 @@ export default function Socio() {
   const { id } = useParams<{ id: string }>();
   const toast = useToast();
   const q = useMember(id);
-  const [dlg, setDlg] = useState<"fee" | "end" | "book" | "invoice" | null>(
-    null,
-  );
+  const [dlg, setDlg] = useState<"fee" | "end" | null>(null);
   const close = () => setDlg(null);
   const reactivate = useMutation({
     mutationFn: () =>
@@ -213,17 +205,12 @@ export default function Socio() {
               </Button>
             )}
             {m.status === "attivo" && (
-              <Button
+              <ButtonLink
                 variant={paid ? "primary" : "secondary"}
-                onClick={() => setDlg("book")}
+                href={`/gestione/trasporti/nuovo?member=${m.id}`}
               >
-                Nuova prenotazione
-              </Button>
-            )}
-            {invoiceable(m).length > 0 && (
-              <Button variant="secondary" onClick={() => setDlg("invoice")}>
-                Fattura {invoiceable(m).length} prestazioni eseguite
-              </Button>
+                Nuovo trasporto
+              </ButtonLink>
             )}
             <ButtonLink
               variant="secondary"
@@ -309,10 +296,6 @@ export default function Socio() {
             ))}
           </ul>
           <h2 className="mt-8 text-2xl font-extrabold text-bordeaux">
-            Prenotazioni
-          </h2>
-          <BookingList items={m.bookings} />
-          <h2 className="mt-8 text-2xl font-extrabold text-bordeaux">
             Trasporti
           </h2>
           {m.transports.length === 0 && (
@@ -361,15 +344,6 @@ export default function Socio() {
           >
             <FeeBody m={m} onClose={close} />
           </Dialog>
-          <NewBookingDialog
-            open={dlg === "book"}
-            onClose={close}
-            memberId={m.id}
-          />
-          <IssueInvoiceDialog
-            memberId={dlg === "invoice" ? m.id : null}
-            onClose={close}
-          />
           <Dialog
             open={dlg === "end"}
             onClose={close}

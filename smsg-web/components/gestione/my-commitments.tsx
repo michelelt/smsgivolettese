@@ -1,5 +1,6 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -11,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/toast";
 import { api, call } from "@/lib/api/call";
 import type { components } from "@/lib/api/schema";
+import { completeSchema, type CompleteValues } from "./transport-panel";
 import { dayLabel, fmtTime, today } from "@/lib/dates";
 
 type Shift = components["schemas"]["MyShift"];
@@ -55,17 +57,20 @@ function Answer({
 
 function CompleteBody({ t, onClose }: { t: Transport; onClose: () => void }) {
   const toast = useToast();
-  const f = useForm<{ km: string; driverNotes: string }>({
-    defaultValues: { km: "", driverNotes: "" },
+  const f = useForm<CompleteValues>({
+    resolver: zodResolver(completeSchema),
+    defaultValues: { odometerStart: "", odometerEnd: "", driverNotes: "" },
   });
+  const e = f.formState.errors;
   const m = useMutation({
     meta: { inline: true },
-    mutationFn: (v: { km: string; driverNotes: string }) =>
+    mutationFn: (v: CompleteValues) =>
       call(
         api.POST("/me/transports/{id}/complete", {
           params: { path: { id: t.id } },
           body: {
-            km: Number(v.km.replace(",", ".")),
+            odometerStart: Number(v.odometerStart),
+            odometerEnd: Number(v.odometerEnd),
             driverNotes: v.driverNotes.trim() || null,
           },
         }),
@@ -78,19 +83,18 @@ function CompleteBody({ t, onClose }: { t: Transport; onClose: () => void }) {
   return (
     <form onSubmit={f.handleSubmit((v) => m.mutate(v))} noValidate>
       <Field
-        label="Chilometri percorsi"
-        inputMode="decimal"
+        label="Chilometri sul contachilometri alla partenza"
+        inputMode="numeric"
         autoComplete="off"
-        {...f.register("km", {
-          validate: (v) => {
-            const n = Number(v.replace(",", "."));
-            return (
-              (v.trim() !== "" && n >= 0 && n <= 9999.9) ||
-              "scriva i chilometri, per esempio 25,5"
-            );
-          },
-        })}
-        error={f.formState.errors.km?.message}
+        {...f.register("odometerStart")}
+        error={e.odometerStart?.message}
+      />
+      <Field
+        label="Chilometri sul contachilometri all'arrivo"
+        inputMode="numeric"
+        autoComplete="off"
+        {...f.register("odometerEnd")}
+        error={e.odometerEnd?.message}
       />
       <Textarea
         label="Note (facoltative)"
@@ -130,20 +134,24 @@ function TransportCard({
         <Pill>{STATUS[t.status]}</Pill>
       </div>
       <p className="mt-1 font-bold">
-        Partenza {fmtTime(t.departureTime)}
-        {t.appointmentTime && ` · Appuntamento ${fmtTime(t.appointmentTime)}`}
-        {t.returnTime && ` · Ritorno ${fmtTime(t.returnTime)}`}
+        {[
+          t.departureTime && `Partenza ${fmtTime(t.departureTime)}`,
+          t.appointmentTime && `Appuntamento ${fmtTime(t.appointmentTime)}`,
+          t.returnTime && `Ritorno ${fmtTime(t.returnTime)}`,
+        ]
+          .filter(Boolean)
+          .join(" · ")}
       </p>
       <p>
         {t.memberFirstName} {t.memberLastName}
-        {open && t.memberPhone && (
+        {open && t.contactPhone && (
           <>
             {" · "}
             <a
               className="font-bold text-blu underline"
-              href={`tel:${t.memberPhone}`}
+              href={`tel:${t.contactPhone}`}
             >
-              Chiama {t.memberPhone}
+              Chiama {t.contactPhone}
             </a>
           </>
         )}
@@ -153,11 +161,15 @@ function TransportCard({
         <br />
         A: {t.toAddress ?? "—"}
       </p>
-      {(t.wheelchair || t.companion || t.vehiclePlate) && (
+      {(t.wheelchair ||
+        t.mobilityAids ||
+        t.companions > 0 ||
+        t.vehiclePlate) && (
         <p>
           {[
             t.wheelchair && "Con carrozzina",
-            t.companion && "Con accompagnatore",
+            t.mobilityAids && "Con ausili (deambulatore/stampelle)",
+            t.companions > 0 && `Accompagnatori: ${t.companions}`,
             t.vehiclePlate && `Mezzo ${t.vehicleModel ?? ""} ${t.vehiclePlate}`,
           ]
             .filter(Boolean)

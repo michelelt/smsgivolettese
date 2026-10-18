@@ -653,7 +653,7 @@ export function SiteEditor({
                   rel="noopener noreferrer"
                   className="font-bold text-blu underline"
                 >
-                  Servizi e prezzi (si apre in una nuova scheda)
+                  Servizi (si apre in una nuova scheda)
                 </Link>
                 . Qui si vedono solo i servizi attivi.
               </p>

@@ -1,6 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { login } from "./session";
+import { invoicedTransport } from "./transport";
 
 // Super admin flows (ADR-068). Local SUPERADMIN_MFA=off; MFA is not covered here.
 const env = (k: string) => process.env[k]!;
@@ -163,6 +164,7 @@ test("GDPR: export a member, anonymise a ceased one with invoices", async ({
   }).toPass();
   await page.getByRole("button", { name: "Registra socio" }).click();
   await page.waitForURL(/\/gestione\/soci\/[0-9a-f-]{36}$/);
+  const memberUrl = page.url();
 
   // Export.
   const [dl] = await Promise.all([
@@ -176,25 +178,9 @@ test("GDPR: export a member, anonymise a ceased one with invoices", async ({
     page.getByRole("button", { name: `Anonimizza ${full}` }),
   ).toBeDisabled();
 
-  // A booking, executed and invoiced, so there is an invoice to retain.
-  await page.getByRole("button", { name: "Nuova prenotazione" }).click();
-  const book = page.getByRole("dialog", { name: "Nuova prenotazione" });
-  await book
-    .getByLabel("Servizio")
-    .selectOption(
-      (await book
-        .locator("option", { hasText: /Prelievi/ })
-        .getAttribute("value"))!,
-    );
-  await book.getByRole("button", { name: "Registra prenotazione" }).click();
-  await expect(page.getByText("Prenotazione registrata.")).toBeVisible();
-  await page.getByRole("button", { name: "Eseguita" }).first().click();
-  await page.getByRole("button", { name: /^Fattura 1 prestazion/ }).click();
-  await page
-    .getByRole("dialog", { name: "Emetti fattura" })
-    .getByRole("button", { name: "Emetti fattura" })
-    .click();
-  await expect(page.getByText(/Fattura n\. \d+\/\d{4} emessa/)).toBeVisible();
+  // A closed, invoiced transport, so there is an invoice to retain.
+  await invoicedTransport(page, last, true);
+  await page.goto(memberUrl);
 
   // Cease, then anonymise.
   await page.getByRole("button", { name: "Cessa iscrizione" }).first().click();
