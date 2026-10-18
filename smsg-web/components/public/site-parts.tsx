@@ -182,7 +182,7 @@ export function SiteFooter({
                               href={l.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex min-h-8 items-center font-bold text-blu underline"
+                              className="inline-flex min-h-6 items-center font-bold text-blu underline"
                             >
                               {l.label}
                               <span className="sr-only">
@@ -210,7 +210,7 @@ export function SiteFooter({
           <Link
             href="/privacy"
             inert={inert}
-            className="inline-flex min-h-8 items-center font-bold text-blu underline"
+            className="inline-flex min-h-6 items-center font-bold text-blu underline"
           >
             Informativa sulla privacy
           </Link>
