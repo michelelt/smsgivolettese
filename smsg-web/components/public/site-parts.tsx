@@ -171,9 +171,7 @@ export function SiteFooter({
               return (
                 (renderLink || inGroup.length > 0) && (
                   <nav key={g} aria-label={title}>
-                    <h2 className="font-extrabold text-bordeaux">
-                      {title}
-                    </h2>
+                    <h2 className="font-extrabold text-bordeaux">{title}</h2>
                     <ul>
                       {inGroup.map((l, i) => (
                         <li key={`${i}-${l.url}`}>
