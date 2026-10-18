@@ -9,3 +9,12 @@ supabase/.branches
 CLAUDE.md
 CLAUDE.local.md
 .mcp.json
+
+# Build, test, OS, editors, logs
+*.tsbuildinfo
+coverage
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
