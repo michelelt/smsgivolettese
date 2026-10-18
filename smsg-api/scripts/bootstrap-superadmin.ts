@@ -16,7 +16,10 @@ const admin = supabaseAdmin();
 
 // shortcut: first 1000 users only, enough for this association; upgrade if the user count grows.
 const { data: list, error: listErr } = await admin.auth.admin.listUsers({ perPage: 1000 });
-if (listErr) throw new Error('Cannot list auth users');
+if (listErr)
+  throw new Error(
+    `Cannot list auth users (is Supabase running? start 'make dev' first): ${listErr.message}`,
+  );
 let user = list.users.find((u) => u.email?.toLowerCase() === email);
 let created = false;
 if (!user) {
