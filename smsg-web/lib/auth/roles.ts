@@ -42,8 +42,8 @@ export const SECTIONS = [
   {
     slug: "impostazioni",
     label: "Impostazioni",
-    min: "super_admin",
-    group: "Super admin",
+    min: "staff",
+    group: "Amministrazione",
   },
   {
     slug: "utenti-e-ruoli",

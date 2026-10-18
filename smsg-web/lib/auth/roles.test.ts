@@ -28,7 +28,7 @@ describe("canAccess", () => {
   });
   it("lets staff see staff sections but not admin ones", () => {
     expect(canAccess("staff", "/gestione/soci/12")).toBe(true);
-    expect(canAccess("staff", "/gestione/impostazioni")).toBe(false);
+    expect(canAccess("staff", "/gestione/impostazioni")).toBe(true);
     expect(canAccess("staff", "/gestione/registro-attivita")).toBe(false);
   });
   it("lets super_admin see everything and closes unknown sections to others", () => {
