@@ -379,7 +379,7 @@ describe('members and counters', () => {
   it('register_member numbers from the counter, adds the fee, and a failed insert does not burn a number', async () => {
     await rolledBack(async (tx) => {
       await world(tx);
-      await tx`update org_settings set last_card_number = 9001`;
+      await tx`update org_settings set last_card_number = 9001, membership_fee_cents = 2000`;
       await actAs(tx, 'staff');
       const [m] =
         await tx`select * from register_member('{"first_name":"A","last_name":"B","tax_code":"BBBBBBBBBBBBBBBB"}'::jsonb, 'pos')`;
