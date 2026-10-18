@@ -1,0 +1,1507 @@
+<title>SMS Givolettese</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bitter:wght@600;700;800&display=swap">
+<style>
+/* Layout: colonna unica ampia, testata con telefono sempre visibile, menu a grandi pulsanti; area staff a schede. */
+/* Colori sociali: bordeaux (identità), blu (azioni e telefono), bianco (fondo). */
+:root{
+  --paper:#F5F6F9; --surface:#FFFFFF; --ink:#1A1D2B; --muted:#4E5468; --line:#D6DAE4;
+  --accent:#7A1E2C; --accent-2:#5E1520; --accent-ink:#FFFFFF; --soft:#F4E4E7;
+  --sun:#1F3F7A; --sun-ink:#FFFFFF; --sun-soft:#E3EAF6;
+  --hero-bg:#7A1E2C; --hero-ink:#FFFFFF; --sky:#C9D8F4; --bar-bg:#1F3F7A; --bar-ink:#FFFFFF;
+  --ok:#1C7343; --ok-soft:#DDF1E4; --warn:#9A5600; --warn-soft:#FBEBD3;
+  --bad:#B3261E; --bad-soft:#F9DEDC; --info:#1F3F7A; --info-soft:#E3EAF6;
+  --shadow:0 1px 2px rgba(26,29,43,.06),0 6px 20px rgba(26,29,43,.07);
+  --f-display:"Bitter",Georgia,"Times New Roman",serif;
+  --f-body:"Atkinson Hyperlegible",Verdana,"Segoe UI",system-ui,sans-serif;
+  --radius:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#12141B; --surface:#1B1F2A; --ink:#EEF0F5; --muted:#AEB4C6; --line:#2E3446;
+  --accent:#E8909C; --accent-2:#F2AEB7; --accent-ink:#2A0A10; --soft:#33202A;
+  --sun:#8FB0F0; --sun-ink:#0B1530; --sun-soft:#1C2840;
+  --hero-bg:#5C1622; --hero-ink:#FBF1F3; --sky:#A9C1F0; --bar-bg:#182C55; --bar-ink:#EEF2FB;
+  --ok:#68D395; --ok-soft:#173326; --warn:#F0A848; --warn-soft:#3A2A12;
+  --bad:#FF8A80; --bad-soft:#3D1D1B; --info:#8FB0F0; --info-soft:#1C2840;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --paper:#12141B; --surface:#1B1F2A; --ink:#EEF0F5; --muted:#AEB4C6; --line:#2E3446;
+  --accent:#E8909C; --accent-2:#F2AEB7; --accent-ink:#2A0A10; --soft:#33202A;
+  --sun:#8FB0F0; --sun-ink:#0B1530; --sun-soft:#1C2840;
+  --hero-bg:#5C1622; --hero-ink:#FBF1F3; --sky:#A9C1F0; --bar-bg:#182C55; --bar-ink:#EEF2FB;
+  --ok:#68D395; --ok-soft:#173326; --warn:#F0A848; --warn-soft:#3A2A12;
+  --bad:#FF8A80; --bad-soft:#3D1D1B; --info:#8FB0F0; --info-soft:#1C2840;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+  color-scheme:dark;
+}
+html{font-size:19px}
+html.t1{font-size:21.5px} html.t2{font-size:24px}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:1rem;line-height:1.55;margin:0}
+*{box-sizing:border-box}
+h1,h2,h3,h4{font-family:var(--f-display);line-height:1.2;text-wrap:balance;margin:0;color:var(--ink)}
+h1{font-size:clamp(1.9rem,5vw,2.9rem);font-weight:800}
+h2{font-size:clamp(1.45rem,3.4vw,1.9rem);font-weight:700}
+h3{font-size:1.2rem;font-weight:700}
+p{margin:0}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--sun);outline-offset:3px;border-radius:6px}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:18px}
+.stack{display:flex;flex-direction:column;gap:1rem}
+.row{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center}
+.muted{color:var(--muted)}
+.small{font-size:.86rem}
+.num{font-variant-numeric:tabular-nums}
+.icon{width:1.25em;height:1.25em;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---- testata ---- */
+.topbar{background:var(--bar-bg);color:var(--bar-ink)}
+.topbar .wrap{display:flex;flex-wrap:wrap;gap:.5rem 1.25rem;align-items:center;justify-content:space-between;padding-block:.45rem}
+.topbar .call{display:flex;align-items:center;gap:.5rem;font-weight:700;font-size:1.05rem}
+.textsize{display:flex;gap:.35rem;align-items:center}
+.textsize span{font-size:.85rem;margin-right:.25rem}
+.textsize button{font:inherit;font-weight:700;background:transparent;color:var(--bar-ink);border:2px solid currentColor;border-radius:8px;min-width:2.6rem;min-height:2.3rem;cursor:pointer;opacity:.85}
+.textsize button[aria-pressed="true"]{background:var(--bar-ink);color:var(--bar-bg);opacity:1}
+.textsize button:nth-of-type(1){font-size:.85rem}.textsize button:nth-of-type(2){font-size:1rem}.textsize button:nth-of-type(3){font-size:1.15rem}
+header.brand{background:var(--surface);border-bottom:6px solid transparent;border-image:linear-gradient(90deg,var(--hero-bg) 0 50%,var(--bar-bg) 50% 100%) 1;position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
+header.brand .wrap{display:flex;flex-direction:column;gap:.7rem;padding-block:.8rem}
+.logo{display:flex;align-items:center;gap:.8rem;text-decoration:none;color:var(--ink);background:none;border:0;padding:0;cursor:pointer;text-align:left;font:inherit}
+.logo svg{width:58px;height:58px;flex:none}
+.logo b{font-family:var(--f-display);font-size:1.25rem;display:block;line-height:1.1}
+.logo small{color:var(--muted);font-size:.85rem}
+nav.main{display:grid;grid-template-columns:repeat(auto-fit,minmax(8.2rem,1fr));gap:.5rem}
+nav.main button{font:inherit;font-weight:700;display:flex;align-items:center;justify-content:center;gap:.45rem;min-height:3.1rem;padding:.4rem .6rem;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;font-size:.98rem}
+nav.main button:hover{border-color:var(--accent)}
+nav.main button[aria-current="page"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+nav.main button.staffbtn{border-style:dashed}
+@media (min-width:900px){header.brand .wrap{flex-direction:row;align-items:center;justify-content:space-between}nav.main{grid-template-columns:repeat(7,auto)}}
+
+/* ---- comuni ---- */
+main{padding-block:1.6rem 3rem}
+section.page{display:flex;flex-direction:column;gap:2rem}
+.btn{font:inherit;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:3.2rem;padding:.55rem 1.3rem;border-radius:12px;border:2px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer;text-decoration:none;font-size:1rem;line-height:1.2;text-align:center}
+.btn:hover{background:var(--accent-2);border-color:var(--accent-2)}
+.btn.big{min-height:4rem;font-size:1.15rem;padding-inline:1.6rem}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.ghost:hover{background:var(--soft)}
+.btn.sun{background:var(--sun);border-color:var(--sun);color:var(--sun-ink)}
+.btn.danger{background:transparent;border-color:var(--bad);color:var(--bad)}
+.btn.sm{min-height:2.5rem;padding:.3rem .8rem;font-size:.88rem;border-radius:10px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:1.3rem;box-shadow:var(--shadow)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:1.3rem}
+.grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fill,minmax(min(100%,17rem),1fr))}
+.grid > *{min-width:0}
+.eyebrow{font-size:.8rem;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:var(--accent)}
+.section-head{display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:end;justify-content:space-between}
+.pill{display:inline-flex;align-items:center;gap:.35rem;padding:.15rem .7rem;border-radius:999px;font-size:.82rem;font-weight:700;white-space:nowrap}
+.pill.attesa{background:var(--warn-soft);color:var(--warn)}
+.pill.confermata{background:var(--info-soft);color:var(--info)}
+.pill.eseguita{background:var(--ok-soft);color:var(--ok)}
+.pill.annullata,.pill.rifiutata{background:var(--bad-soft);color:var(--bad)}
+.pill.fatturata,.pill.pagata,.pill.pubblicata{background:var(--ok-soft);color:var(--ok)}
+.pill.emessa{background:var(--sun-soft);color:var(--warn)}
+.pill.evento{background:var(--sun-soft);color:var(--warn)}
+.pill.avviso{background:var(--bad-soft);color:var(--bad)}
+.pill.notizia{background:var(--info-soft);color:var(--info)}
+.empty{border:2px dashed var(--line);border-radius:var(--radius);padding:1.5rem;color:var(--muted);text-align:center}
+.notice{display:flex;gap:.8rem;align-items:flex-start;background:var(--sun-soft);border-radius:var(--radius);padding:1rem 1.2rem;color:var(--ink)}
+.notice .icon{color:var(--warn);margin-top:.15rem}
+
+/* ---- form ---- */
+label.f{display:flex;flex-direction:column;gap:.35rem;font-weight:700}
+label.f .hint{font-weight:400;color:var(--muted);font-size:.86rem}
+input,select,textarea{font:inherit;font-size:1rem;color:var(--ink);background:var(--surface);border:2px solid var(--line);border-radius:10px;padding:.65rem .8rem;min-height:3.1rem;width:100%}
+textarea{min-height:7rem;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--soft)}
+.fgrid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr))}
+.fgrid .full{grid-column:1/-1}
+.choice{display:flex;gap:.6rem;flex-wrap:wrap}
+.choice label{display:flex;align-items:center;gap:.5rem;padding:.6rem 1rem;border:2px solid var(--line);border-radius:12px;cursor:pointer;font-weight:700;background:var(--surface);min-height:3.1rem}
+.choice input{width:1.3rem;height:1.3rem;min-height:0;accent-color:var(--accent)}
+.choice label:has(input:checked){border-color:var(--accent);background:var(--soft)}
+
+/* ---- home ---- */
+.hero{position:relative;overflow:hidden;border-radius:22px;background:var(--hero-bg);color:var(--hero-ink);padding:clamp(1.6rem,5vw,3.2rem);display:grid;gap:1.6rem;grid-template-columns:1fr}
+.hero h1{color:var(--hero-ink);max-width:16ch}
+.hero p.lead{font-size:1.2rem;max-width:40ch;opacity:.95}
+.hero .ctas{display:flex;flex-wrap:wrap;gap:.75rem;position:relative;z-index:2}
+.hero .btn.light{background:var(--hero-ink);border-color:var(--hero-ink);color:var(--hero-bg)}
+.hero .btn.outline{background:transparent;border-color:var(--hero-ink);color:var(--hero-ink)}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:8px;background:linear-gradient(90deg,var(--hero-ink) 0 50%,var(--bar-bg) 50% 100%);opacity:.9}
+.hero .mount{position:absolute;inset:auto 0 0 0;width:100%;height:42%;opacity:.16;pointer-events:none}
+.hero .txt{position:relative;z-index:2;display:flex;flex-direction:column;gap:1.1rem}
+.hero .seal{display:none;position:relative;z-index:2}
+@media (min-width:820px){.hero{grid-template-columns:1.5fr 1fr;align-items:center}.hero .seal{display:block;justify-self:center;width:min(270px,100%)}}
+.callbox{display:grid;gap:1rem;grid-template-columns:1fr;align-items:center;background:var(--sun-soft);border:2px solid var(--sun);color:var(--ink);border-radius:var(--radius);padding:1.3rem}
+@media (min-width:720px){.callbox{grid-template-columns:auto 1fr auto}}
+.callbox .bigphone{font-family:var(--f-display);font-size:clamp(1.6rem,4vw,2.2rem);font-weight:800;letter-spacing:.02em;user-select:all}
+.callicon{width:3.4rem;height:3.4rem;border-radius:50%;background:var(--sun);color:var(--sun-ink);display:grid;place-items:center}
+.callicon .icon{width:1.7rem;height:1.7rem}
+.steps3{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));counter-reset:s}
+.steps3 li{list-style:none;display:flex;gap:.9rem;align-items:flex-start}
+.steps3 li::before{counter-increment:s;content:counter(s);flex:none;width:2.6rem;height:2.6rem;border-radius:50%;background:var(--soft);color:var(--accent);font-family:var(--f-display);font-weight:800;font-size:1.3rem;display:grid;place-items:center}
+.steps3{padding:0;margin:0}
+.law{border-left:5px solid var(--sun);padding:.4rem 0 .4rem 1.2rem;font-family:var(--f-display);font-size:1.15rem;font-weight:600;max-width:60ch}
+.law small{display:block;font-family:var(--f-body);font-weight:400;font-size:.85rem;color:var(--muted);margin-top:.5rem}
+
+/* ---- notizie ---- */
+.news{display:flex;gap:1rem;align-items:flex-start}
+.datebox{flex:none;width:4.6rem;border-radius:12px;overflow:hidden;text-align:center;border:2px solid var(--line);background:var(--surface)}
+.datebox .m{background:var(--accent);color:var(--accent-ink);font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:.15rem 0}
+.datebox .d{font-family:var(--f-display);font-size:1.8rem;font-weight:800;line-height:1.3}
+.datebox .w{font-size:.72rem;color:var(--muted);padding-bottom:.25rem}
+.datebox.none .d{font-size:1rem;padding:.6rem 0}
+.news .body{min-width:0;display:flex;flex-direction:column;gap:.4rem}
+.news .body p{white-space:pre-line}
+.chips{display:flex;flex-wrap:wrap;gap:.5rem}
+.chips button{font:inherit;font-weight:700;padding:.45rem 1rem;min-height:2.8rem;border-radius:999px;border:2px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+
+/* ---- servizi ---- */
+.svc{display:flex;flex-direction:column;gap:.7rem}
+.svc .prices{display:flex;gap:1.2rem;flex-wrap:wrap;margin-top:auto;padding-top:.4rem;border-top:1px dashed var(--line)}
+.svc .prices div{display:flex;flex-direction:column}
+.svc .prices b{font-family:var(--f-display);font-size:1.35rem}
+.svc .prices span{font-size:.8rem;color:var(--muted)}
+
+/* ---- wizard ---- */
+.wsteps{display:flex;gap:.4rem;flex-wrap:wrap;padding:0;margin:0;list-style:none}
+.wsteps li{flex:1 1 7rem;display:flex;align-items:center;gap:.5rem;padding:.5rem .7rem;border-radius:10px;background:var(--surface);border:2px solid var(--line);font-weight:700;font-size:.9rem;color:var(--muted)}
+.wsteps li b{width:1.8rem;height:1.8rem;border-radius:50%;display:grid;place-items:center;background:var(--soft);color:var(--accent);flex:none}
+.wsteps li.on{border-color:var(--accent);color:var(--ink)}
+.wsteps li.on b{background:var(--accent);color:var(--accent-ink)}
+.wsteps li.done b{background:var(--ok);color:var(--surface)}
+.opts{display:grid;gap:.7rem;grid-template-columns:repeat(auto-fill,minmax(min(100%,16rem),1fr))}
+.opt{font:inherit;text-align:left;display:flex;flex-direction:column;gap:.25rem;padding:1rem 1.1rem;border-radius:14px;border:2px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;min-height:4.2rem}
+.opt:hover{border-color:var(--accent)}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--soft);box-shadow:inset 0 0 0 2px var(--accent)}
+.opt b{font-size:1.05rem}
+.opt span{color:var(--muted);font-size:.88rem}
+.days{display:grid;gap:.55rem;grid-template-columns:repeat(auto-fill,minmax(min(100%,8.2rem),1fr))}
+.days .opt{align-items:center;text-align:center;padding:.6rem}
+.days .opt b{font-family:var(--f-display);font-size:1.6rem;line-height:1.1}
+.wfoot{display:flex;flex-wrap:wrap;gap:.75rem;justify-content:space-between}
+.summary{display:grid;grid-template-columns:auto 1fr;gap:.5rem 1.2rem}
+.summary dt{color:var(--muted)}
+.summary dd{margin:0;font-weight:700;min-width:0;overflow-wrap:anywhere}
+.mine{display:flex;flex-direction:column;gap:.6rem}
+.mine .item{display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:center;justify-content:space-between;padding:.9rem 1rem;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.mine .item > div{min-width:0}
+
+/* ---- staff ---- */
+.staffhead{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between}
+.tabs{display:flex;gap:.4rem;flex-wrap:wrap;border-bottom:2px solid var(--line);padding-bottom:.6rem}
+.tabs button{font:inherit;font-weight:700;padding:.5rem 1rem;min-height:2.9rem;border-radius:10px;border:0;background:transparent;color:var(--muted);cursor:pointer;display:flex;gap:.45rem;align-items:center}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--paper)}
+.tabs .count{background:var(--sun);color:var(--sun-ink);border-radius:999px;padding:0 .5rem;font-size:.78rem}
+.kpis{display:grid;gap:.8rem;grid-template-columns:repeat(auto-fit,minmax(min(100%,11rem),1fr))}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:.9rem 1rem}
+.kpi span{font-size:.82rem;color:var(--muted);display:block}
+.kpi b{font-family:var(--f-display);font-size:1.7rem;font-variant-numeric:tabular-nums}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{padding:.7rem .8rem;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.76rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);background:var(--paper);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right}
+td .acts{display:flex;gap:.35rem;flex-wrap:wrap}
+.toolbar{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;justify-content:space-between}
+.toolbar input[type=search]{max-width:20rem}
+.split{display:grid;gap:1.2rem;grid-template-columns:1fr}
+@media (min-width:960px){.split{grid-template-columns:1.3fr 1fr}}
+.split > *{min-width:0}
+.person{display:flex;flex-direction:column;gap:.4rem;cursor:pointer;text-align:left;font:inherit;color:var(--ink)}
+.person[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
+
+.tessera{display:flex;flex-direction:column;gap:.35rem;border-radius:16px;padding:1.1rem 1.2rem;color:var(--hero-ink);background:linear-gradient(135deg,var(--hero-bg) 0 62%,var(--bar-bg) 62% 100%)}
+.tessera small{opacity:.85;letter-spacing:.08em;text-transform:uppercase;font-size:.72rem}
+.tessera b{font-family:var(--f-display);font-size:1.4rem}
+.tessera .n{font-family:var(--f-display);font-size:2rem;font-weight:800;font-variant-numeric:tabular-nums}
+fieldset{border:1px solid var(--line);border-radius:12px;padding:1rem;margin:0;display:flex;flex-direction:column;gap:1rem;min-width:0}
+legend{font-weight:700;padding:0 .4rem;color:var(--accent)}
+/* ---- notizie con foto ---- */
+.ncard{padding:0;overflow:hidden;display:flex;flex-direction:column}
+.ncard .cov{display:block;width:100%}
+.ncard .cover{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.ncard .news{padding:1.2rem}
+.zoom{all:unset;cursor:zoom-in;display:block;border-radius:12px}
+.zoom:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
+.mimg{background:var(--soft);min-height:6rem;max-width:100%}
+.mimg.ok{min-height:0}
+.art{display:flex;flex-direction:column;gap:1.2rem;max-width:46rem}
+.art-body{display:flex;flex-direction:column;gap:1.15rem;font-size:1.08rem;line-height:1.65}
+.art-body h2{font-size:1.5rem;margin-top:.6rem}
+.art-body h3{font-size:1.2rem;margin-top:.3rem}
+.art-body a:not(.btn):not(.vcard){color:var(--accent);font-weight:700}
+.mfig{margin:0;display:flex;flex-direction:column}
+.mfig img{width:100%;border-radius:12px;display:block}
+.mfig.size-small{max-width:min(100%,18rem)}
+.mfig.size-medium{max-width:min(100%,30rem)}
+figcaption{font-size:.88rem;color:var(--muted);margin-top:.45rem}
+.gal{margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,9.5rem),1fr));gap:.5rem}
+.gal img{aspect-ratio:1;object-fit:cover;width:100%;border-radius:10px;display:block}
+.gal figcaption{grid-column:1/-1}
+.blist{margin:0;padding-left:1.4rem;display:flex;flex-direction:column;gap:.3rem}
+.sep{border:0;border-top:3px solid var(--line);width:30%;margin:.8rem auto}
+.vcard{display:flex;gap:1rem;align-items:center;padding:1rem 1.2rem;border-radius:14px;background:var(--hero-bg);color:var(--hero-ink);text-decoration:none}
+.vcard:hover{filter:brightness(1.08)}
+.vcard .play{width:3.8rem;height:3.8rem;border-radius:50%;background:var(--hero-ink);display:grid;place-items:center;flex:none}
+.vcard .play svg{width:1.7rem;height:1.7rem;fill:var(--hero-bg);margin-left:.2rem}
+.vcard b{display:block;font-size:1.1rem}
+.vcard span span{display:block;font-size:.88rem;opacity:.9}
+.prprev{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+.prprev img{max-height:9rem;border-radius:10px}
+.pthumb{max-height:14rem;width:auto;max-width:100%;border-radius:10px;object-fit:cover;align-self:flex-start}
+.lthumb{width:4.5rem;height:4.5rem;object-fit:cover;border-radius:10px;min-height:0;flex:none}
+.lightbox{position:fixed;inset:0;z-index:120;background:rgba(8,10,16,.93);display:flex;flex-direction:column;gap:1rem;align-items:center;justify-content:center;padding:calc(1rem + env(safe-area-inset-top,0px)) 16px calc(1rem + env(safe-area-inset-bottom,0px))}
+.lightbox img{max-height:76vh;max-width:100%;object-fit:contain;border-radius:8px;background:transparent}
+.lb-top,.lb-nav{display:flex;gap:.8rem;align-items:center;justify-content:space-between;width:min(100%,60rem);color:#fff}
+.lb-nav{justify-content:center}
+/* ---- editor a blocchi ---- */
+.ed-top{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:space-between;align-items:center}
+.ed-layout{display:grid;gap:1.2rem;grid-template-columns:1fr}
+@media (min-width:1000px){.ed-layout{grid-template-columns:minmax(0,1fr) 19rem;align-items:start}}
+.ed-layout > *{min-width:0}
+.ed-canvas{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:clamp(1rem,3vw,2.2rem);display:flex;flex-direction:column;gap:.3rem;box-shadow:var(--shadow)}
+.ed-title{font-family:var(--f-display);font-size:clamp(1.6rem,4vw,2.3rem);font-weight:800;line-height:1.2;border:0;border-bottom:2px dashed var(--line);border-radius:0;padding:.3rem 0 .5rem;min-height:0;resize:none;overflow:hidden;background:transparent;margin-bottom:.6rem}
+.ed-title:focus{box-shadow:none;border-bottom-color:var(--sun)}
+.blk{position:relative;border:2px solid transparent;border-radius:12px;padding:.5rem .7rem;display:flex;flex-direction:column;gap:.6rem}
+.blk:hover{border-color:var(--line)}
+.blk:focus-within{border-color:var(--sun);background:color-mix(in srgb,var(--sun-soft) 35%,transparent)}
+.blk.busy{opacity:.6;pointer-events:none}
+.blk-bar{display:none;flex-wrap:wrap;gap:.2rem;align-items:center;padding:.25rem;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow)}
+.blk:focus-within .blk-bar,.blk:hover .blk-bar{display:flex}
+@media (hover:none){.blk-bar{display:flex}}
+.blk-bar button{font:inherit;font-size:.85rem;font-weight:700;min-width:2.5rem;min-height:2.5rem;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0 .5rem}
+.blk-bar button:hover{background:var(--paper);border-color:var(--line)}
+.blk-bar button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.blk-bar button[disabled]{opacity:.3;cursor:not-allowed}
+.blk-bar button.del{color:var(--bad)}
+.blk-name{display:inline-flex;gap:.35rem;align-items:center;font-size:.8rem;font-weight:700;color:var(--muted);padding:0 .5rem 0 .3rem}
+.blk-bar .sp{flex:1}
+.rich{min-height:1.7em;outline:none;font-size:1.08rem;line-height:1.65;overflow-wrap:anywhere}
+.rich:empty::before{content:attr(data-ph);color:var(--muted)}
+.rich a{color:var(--accent);font-weight:700}
+.qrich{border-left:5px solid var(--sun);padding-left:1rem;font-family:var(--f-display);font-size:1.15rem;font-weight:600}
+.ed-h{border:0;padding:.2rem 0;font-family:var(--f-display);font-weight:700;background:transparent;min-height:0;border-radius:0}
+.ed-h:focus,.ed-cap:focus{box-shadow:none}
+.lvl2{font-size:1.5rem}.lvl3{font-size:1.2rem}
+.ed-cap{border:0;border-bottom:1px dashed var(--line);border-radius:0;padding:.3rem 0;min-height:0;font-size:.92rem;color:var(--muted);background:transparent}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:1.4rem 1rem;display:flex;flex-direction:column;align-items:center;gap:.55rem;text-align:center;color:var(--muted)}
+.drop > .icon{width:2.2rem;height:2.2rem;color:var(--accent)}
+.drop b{color:var(--ink)}
+.drop.over{border-color:var(--sun);background:var(--sun-soft)}
+.upl{cursor:pointer}
+.ins{display:flex;justify-content:center;align-items:center;position:relative;min-height:1.6rem}
+.ins::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:2px dashed var(--line);opacity:0}
+.ins:hover::before,.ins:focus-within::before{opacity:1}
+.ins button{position:relative;z-index:1;width:2.1rem;height:2.1rem;border-radius:50%;border:2px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer;opacity:.5;padding:0}
+.ins:hover button,.ins button:focus-visible{opacity:1;border-color:var(--sun);color:var(--sun)}
+.ins.last{margin-top:.8rem}
+.ins.last button{width:100%;height:auto;min-height:3.4rem;border-radius:12px;padding:.6rem 1.2rem;opacity:1;display:flex;gap:.5rem;justify-content:center;font:inherit;font-weight:700;border-style:dashed;color:var(--sun)}
+.palette{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,8.5rem),1fr));gap:.5rem;padding:.9rem;border:2px solid var(--sun);border-radius:14px;background:var(--surface);box-shadow:var(--shadow);margin:.3rem 0}
+.pal-head{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.palette [data-add]{font:inherit;display:flex;flex-direction:column;align-items:center;gap:.25rem;padding:.8rem .4rem;border-radius:12px;border:2px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;text-align:center}
+.palette [data-add]:hover,.palette [data-add]:focus-visible{border-color:var(--sun);background:var(--sun-soft)}
+.palette [data-add] .icon{width:1.7rem;height:1.7rem;color:var(--accent)}
+.palette [data-add] span{font-size:.75rem;color:var(--muted);line-height:1.25}
+.gthumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(6.5rem,1fr));gap:.5rem}
+.gthumbs div{position:relative}
+.gthumbs img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;display:block;min-height:0}
+.gthumbs button{position:absolute;top:.3rem;right:.3rem;width:2rem;height:2rem;border-radius:50%;border:0;background:var(--ink);color:var(--paper);cursor:pointer;font-weight:700}
+.covprev{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;display:block}
+/* ---- modal / toast ---- */
+.modal{position:fixed;inset:0;background:rgba(10,18,20,.55);display:grid;place-items:center;padding:18px;z-index:100}
+.modal .box{background:var(--surface);color:var(--ink);border-radius:18px;padding:1.5rem;max-width:30rem;width:100%;display:flex;flex-direction:column;gap:1.1rem;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.toast{position:fixed;left:50%;bottom:calc(1.2rem + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:.9rem 1.4rem;border-radius:14px;font-weight:700;z-index:110;max-width:calc(100% - 36px);box-shadow:0 10px 30px rgba(0,0,0,.25)}
+footer.site{background:var(--ink);color:var(--paper);padding-block:2rem}
+footer.site .wrap{display:grid;gap:1.4rem;grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr))}
+footer.site h4{color:var(--paper);font-size:1rem;margin-bottom:.4rem}
+footer.site a{color:var(--paper)}
+footer.site p,footer.site li{font-size:.88rem;opacity:.85}
+footer.site ul{margin:0;padding-left:1.1rem}
+@media (prefers-reduced-motion:no-preference){.page{animation:in .25s ease}@keyframes in{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/><path d="M8 11h2l1.5-2.5 2 5 1.5-2.5h2"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 15h3"/></symbol>
+    <symbol id="i-news" viewBox="0 0 24 24"><path d="M4 4h13v16H6a2 2 0 0 1-2-2z"/><path d="M17 8h3v10a2 2 0 0 1-2 2M8 8h5M8 12h5M8 16h3"/></symbol>
+    <symbol id="i-hands" viewBox="0 0 24 24"><circle cx="9" cy="7" r="3.5"/><path d="M2.5 21v-1.5A5.5 5.5 0 0 1 8 14h2a5.5 5.5 0 0 1 5.5 5.5V21"/><circle cx="17.5" cy="8.5" r="2.5"/><path d="M17 13.5h1a4 4 0 0 1 4 4V21"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-euro" viewBox="0 0 24 24"><path d="M18 7a7 7 0 1 0 0 10M4 10h10M4 14h10"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2.5"/><path d="M13 10h5M13 14h4"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></symbol>
+    <symbol id="i-gallery" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></symbol>
+    <symbol id="i-video" viewBox="0 0 24 24"><rect x="2" y="5" width="15" height="14" rx="2"/><path d="m17 10 5-3v10l-5-3"/></symbol>
+    <symbol id="i-quote" viewBox="0 0 24 24"><path d="M3 21c3 0 7-1 7-8V5H3v7h4c0 3-1 5-4 5zM14 21c3 0 7-1 7-8V5h-7v7h4c0 3-1 5-4 5z"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></symbol>
+    <symbol id="i-title" viewBox="0 0 24 24"><path d="M6 4v16M18 4v16M6 12h12"/></symbol>
+    <symbol id="i-para" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h10"/></symbol>
+    <symbol id="i-sep" viewBox="0 0 24 24"><path d="M3 12h18M8 6h8M8 18h8"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></symbol>
+    <symbol id="i-down2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 6 10 7 10-7"/></symbol>
+  </defs>
+</svg>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="call"><svg class="icon"><use href="#i-phone"/></svg><span>Per prenotare chiami: <span class="num" data-bind="telefono">—</span></span></div>
+    <div class="textsize" role="group" aria-label="Grandezza del testo">
+      <span>Testo</span>
+      <button type="button" data-size="0" aria-pressed="true" aria-label="Testo normale">A</button>
+      <button type="button" data-size="1" aria-pressed="false" aria-label="Testo grande">A+</button>
+      <button type="button" data-size="2" aria-pressed="false" aria-label="Testo molto grande">A++</button>
+    </div>
+  </div>
+</div>
+
+<header class="brand">
+  <div class="wrap">
+    <button class="logo" type="button" data-go="home" aria-label="Torna alla pagina iniziale">
+      <svg viewBox="0 0 120 120" aria-hidden="true">
+        <circle cx="60" cy="60" r="57" fill="var(--hero-bg)"/>
+        <path d="M3 60 A57 57 0 0 0 117 60 Z" fill="var(--bar-bg)"/>
+        <circle cx="60" cy="60" r="44" fill="none" stroke="var(--hero-ink)" stroke-width="2" opacity=".7"/>
+        <path d="M24 60 L42 40 L52 50 L64 30 L80 48 L88 42 L96 60 Z" fill="var(--hero-ink)"/>
+        <text x="60" y="88" text-anchor="middle" font-family="Bitter,Georgia,serif" font-weight="800" font-size="22" fill="var(--hero-ink)">SMS</text>
+      </svg>
+      <span><b>SMS Givolettese</b><small>Società di Mutuo Soccorso · Givoletto</small></span>
+    </button>
+    <nav class="main" aria-label="Menu principale">
+      <button type="button" data-go="home"><svg class="icon"><use href="#i-home"/></svg>Home</button>
+      <button type="button" data-go="servizi"><svg class="icon"><use href="#i-heart"/></svg>Servizi</button>
+      <button type="button" data-go="prenota"><svg class="icon"><use href="#i-cal"/></svg>Prenota</button>
+      <button type="button" data-go="notizie"><svg class="icon"><use href="#i-news"/></svg>Notizie</button>
+      <button type="button" data-go="chisiamo"><svg class="icon"><use href="#i-hands"/></svg>Chi siamo</button>
+      <button type="button" data-go="contatti"><svg class="icon"><use href="#i-pin"/></svg>Contatti</button>
+      <button type="button" data-go="staff" class="staffbtn"><svg class="icon"><use href="#i-lock"/></svg>Area staff</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- ================= HOME ================= -->
+<section class="page" id="p-home" data-page="home">
+  <div class="hero">
+    <svg class="mount" viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true"><path d="M0 200 L0 150 L120 120 L210 140 L330 70 L420 95 L520 30 L600 70 L690 55 L780 110 L880 90 L1000 130 L1000 200 Z" fill="var(--hero-ink)"/></svg>
+    <div class="txt">
+      <span class="eyebrow" style="color:var(--sky)">Ai piedi del Musinè, dal mutuo soccorso</span>
+      <h1 data-bind="slogan">Ci aiutiamo a vicenda, qui a Givoletto.</h1>
+      <p class="lead" data-bind="intro">Visite, prelievi, accompagnamenti e momenti insieme per i soci e le loro famiglie. Prenotare è semplice: bastano pochi tocchi oppure una telefonata.</p>
+      <div class="ctas">
+        <button class="btn big light" type="button" data-go="prenota"><svg class="icon"><use href="#i-cal"/></svg>Prenota una prestazione</button>
+        <button class="btn big outline" type="button" data-go="notizie"><svg class="icon"><use href="#i-news"/></svg>Notizie ed eventi</button>
+      </div>
+    </div>
+    <svg class="seal" viewBox="0 0 240 240" aria-hidden="true">
+      <defs><path id="ring" d="M120 120 m-92 0 a92 92 0 1 1 184 0 a92 92 0 1 1 -184 0"/></defs>
+      <circle cx="120" cy="120" r="112" fill="none" stroke="var(--hero-ink)" stroke-width="2" opacity=".55"/>
+      <circle cx="120" cy="120" r="74" fill="var(--hero-ink)"/>
+      <path d="M46 120 A74 74 0 0 0 194 120 Z" fill="var(--bar-bg)"/>
+      <text font-family="Bitter,Georgia,serif" font-weight="700" font-size="15.5" letter-spacing="3.2" fill="var(--hero-ink)"><textPath href="#ring">SOCIETÀ DI MUTUO SOCCORSO · GIVOLETTESE · </textPath></text>
+      <text x="120" y="112" text-anchor="middle" font-family="Bitter,Georgia,serif" font-weight="800" font-size="44" fill="var(--hero-bg)">SMS</text>
+      <text x="120" y="150" text-anchor="middle" font-family="Atkinson Hyperlegible,Verdana,sans-serif" font-weight="700" font-size="13" letter-spacing="2" fill="var(--hero-ink)">UNIONE · AIUTO</text>
+    </svg>
+  </div>
+
+  <div class="callbox">
+    <div class="callicon"><svg class="icon"><use href="#i-phone"/></svg></div>
+    <div>
+      <p><b>Preferisce parlare con una persona?</b> Ci chiami: prenotiamo noi per Lei.</p>
+      <p class="bigphone num" data-bind="telefono">—</p>
+      <p class="small muted" data-bind="orari"></p>
+    </div>
+    <button class="btn sun" type="button" data-copy="telefono"><svg class="icon"><use href="#i-copy"/></svg>Copia il numero</button>
+  </div>
+
+  <div class="stack">
+    <div class="section-head"><h2>Prossimi appuntamenti</h2><button class="btn ghost sm" type="button" data-go="notizie">Vedi tutte le notizie</button></div>
+    <div class="grid" id="home-news"></div>
+  </div>
+
+  <div class="stack">
+    <h2>Prenotare in tre passi</h2>
+    <ol class="steps3">
+      <li><div><b>Scelga il servizio</b><p class="muted">Visita, prelievo, accompagnamento: tutto è elencato con il prezzo.</p></div></li>
+      <li><div><b>Scelga il giorno</b><p class="muted">Tocchi la data che preferisce, di mattina o di pomeriggio.</p></div></li>
+      <li><div><b>Lasci nome e telefono</b><p class="muted">La richiamiamo noi per confermare l'orario preciso.</p></div></li>
+    </ol>
+  </div>
+
+  <div class="stack">
+    <div class="section-head"><h2>I nostri servizi</h2><button class="btn ghost sm" type="button" data-go="servizi">Tutti i servizi e i prezzi</button></div>
+    <div class="grid" id="home-svc"></div>
+  </div>
+
+  <blockquote class="law" style="margin:0">Le Società di Mutuo Soccorso non hanno finalità di lucro, ma perseguono finalità di interesse generale, sulla base del principio costituzionale di sussidiarietà.<small>Legge 15 aprile 1886, n. 3818, articolo 1</small></blockquote>
+</section>
+
+<!-- ================= SERVIZI ================= -->
+<section class="page" id="p-servizi" data-page="servizi" hidden>
+  <div class="stack">
+    <span class="eyebrow">Servizi e prestazioni</span>
+    <h1>Cosa possiamo fare per Lei</h1>
+    <p class="muted" style="max-width:60ch">I prezzi per i soci sono più bassi grazie alla quota associativa. Le prestazioni sanitarie sono esenti IVA.</p>
+  </div>
+  <div class="grid" id="svc-list"></div>
+</section>
+
+<!-- ================= PRENOTA ================= -->
+<section class="page" id="p-prenota" data-page="prenota" hidden>
+  <div class="stack">
+    <span class="eyebrow">Prenotazioni</span>
+    <h1>Prenoti una prestazione</h1>
+  </div>
+  <div id="wiz-guest" class="notice" hidden>
+    <svg class="icon"><use href="#i-info"/></svg>
+    <div>Da questo dispositivo non è possibile prenotare online. Nessun problema: <b>ci chiami al <span class="num" data-bind="telefono">—</span></b> e prenotiamo noi per Lei.</div>
+  </div>
+  <div id="wiz" class="stack"></div>
+  <div class="stack" id="mine-wrap" hidden>
+    <h2>Le mie prenotazioni</h2>
+    <div class="mine" id="mine"></div>
+  </div>
+</section>
+
+<!-- ================= NOTIZIE ================= -->
+<section class="page" id="p-notizie" data-page="notizie" hidden>
+  <div class="stack">
+    <span class="eyebrow">Bacheca</span>
+    <h1>Notizie ed eventi</h1>
+    <div class="chips" role="group" aria-label="Filtra le notizie">
+      <button type="button" data-filter="tutte" aria-pressed="true">Tutte</button>
+      <button type="button" data-filter="evento" aria-pressed="false">Eventi</button>
+      <button type="button" data-filter="avviso" aria-pressed="false">Avvisi</button>
+      <button type="button" data-filter="notizia" aria-pressed="false">Notizie</button>
+    </div>
+  </div>
+  <div class="stack" id="news-list"></div>
+
+  <div class="panel stack" id="propose">
+    <div>
+      <span class="eyebrow">Per i soci</span>
+      <h2>Ha una notizia o un evento da segnalare?</h2>
+      <p class="muted">Una gita, una festa, un avviso utile. La scriva qui: il personale la controlla e la pubblica in bacheca.</p>
+    </div>
+    <div id="prop-guest" class="notice" hidden><svg class="icon"><use href="#i-info"/></svg><div>Da questo dispositivo non si possono inviare proposte. Può portarla in sede o telefonarci.</div></div>
+    <form id="prop-form" class="stack" autocomplete="on">
+      <div class="fgrid">
+        <label class="f full">Titolo<input id="pr-titolo" required maxlength="120" placeholder="Es. Castagnata in piazza"></label>
+        <div class="f full"><b>Di che cosa si tratta?</b>
+          <div class="choice">
+            <label><input type="radio" name="pr-cat" value="evento" checked> Un evento</label>
+            <label><input type="radio" name="pr-cat" value="avviso"> Un avviso</label>
+            <label><input type="radio" name="pr-cat" value="notizia"> Una notizia</label>
+          </div>
+        </div>
+        <label class="f">Giorno dell'evento <span class="hint">Se c'è una data</span><input id="pr-data" type="date"></label>
+        <label class="f">Luogo <span class="hint">Facoltativo</span><input id="pr-luogo" maxlength="120" placeholder="Es. Salone SMS"></label>
+        <label class="f full">Testo<textarea id="pr-testo" required maxlength="3000" placeholder="Scriva qui i dettagli: orari, costi, a chi rivolgersi…"></textarea></label>
+        <label class="f full">Una foto <span class="hint">Facoltativa: la può scegliere dalla galleria del telefono</span><input id="pr-foto" type="file" accept="image/*"></label>
+        <div id="pr-prev" class="full prprev" hidden></div>
+        <label class="f full">Link a un video <span class="hint">Facoltativo: YouTube o Facebook</span><input id="pr-video" inputmode="url" maxlength="300" placeholder="https://…"></label>
+        <label class="f">Il suo nome<input id="pr-nome" required maxlength="80" autocomplete="name"></label>
+      </div>
+      <div><button class="btn big" type="submit"><svg class="icon"><use href="#i-check"/></svg>Invia la proposta</button></div>
+    </form>
+    <div id="myprops" class="mine"></div>
+  </div>
+</section>
+
+<!-- ================= ARTICOLO ================= -->
+<section class="page" id="p-articolo" data-page="articolo" hidden><div id="art"></div></section>
+
+<!-- ================= CHI SIAMO ================= -->
+<section class="page" id="p-chisiamo" data-page="chisiamo" hidden>
+  <div class="stack" style="max-width:68ch">
+    <span class="eyebrow">Chi siamo</span>
+    <h1>Una società di persone che si aiutano</h1>
+    <p>La Società di Mutuo Soccorso Givolettese fa parte di una lunga tradizione piemontese: lavoratori e famiglie che, versando una piccola quota, si sostengono a vicenda nei momenti di bisogno.</p>
+    <p>Oggi questo aiuto prende la forma di servizi sanitari a prezzi agevolati, accompagnamenti, attività culturali e ricreative, e di un luogo dove ritrovarsi.</p>
+  </div>
+  <div class="grid">
+    <div class="card stack"><h3>Senza scopo di lucro</h3><p class="muted">Ogni euro raccolto torna ai soci sotto forma di servizi e sostegno.</p></div>
+    <div class="card stack"><h3>Porta aperta</h3><p class="muted">Chiunque può iscriversi. Una volta soci, non si viene esclusi per età o per salute.</p></div>
+    <div class="card stack"><h3>Decidono i soci</h3><p class="muted">L'assemblea dei soci elegge il consiglio e approva il bilancio ogni anno.</p></div>
+  </div>
+  <div class="panel stack">
+    <h2>Diventare socio</h2>
+    <p data-bind="quota">Passi in sede durante gli orari di apertura con un documento d'identità e il codice fiscale.</p>
+    <div class="row"><button class="btn" type="button" data-go="contatti"><svg class="icon"><use href="#i-pin"/></svg>Dove siamo e orari</button></div>
+  </div>
+  <blockquote class="law" style="margin:0">Le Società di Mutuo Soccorso non hanno finalità di lucro, ma perseguono finalità di interesse generale, sulla base del principio costituzionale di sussidiarietà.<small>Legge 15 aprile 1886, n. 3818, articolo 1</small></blockquote>
+</section>
+
+<!-- ================= CONTATTI ================= -->
+<section class="page" id="p-contatti" data-page="contatti" hidden>
+  <div class="stack"><span class="eyebrow">Contatti</span><h1>Dove siamo e quando</h1></div>
+  <div class="grid">
+    <div class="card stack"><div class="row"><svg class="icon"><use href="#i-pin"/></svg><h3>Indirizzo</h3></div><p data-bind="indirizzo" style="font-size:1.15rem">—</p><a class="btn ghost sm" id="maplink" href="https://www.openstreetmap.org/search?query=Givoletto" target="_blank" rel="noopener">Apri la mappa</a></div>
+    <div class="card stack"><div class="row"><svg class="icon"><use href="#i-phone"/></svg><h3>Telefono</h3></div><p class="num" data-bind="telefono" style="font-size:1.5rem;font-weight:700;user-select:all">—</p><button class="btn ghost sm" type="button" data-copy="telefono"><svg class="icon"><use href="#i-copy"/></svg>Copia il numero</button></div>
+    <div class="card stack"><div class="row"><svg class="icon"><use href="#i-mail"/></svg><h3>Email</h3></div><p data-bind="email" style="font-size:1.1rem;overflow-wrap:anywhere;user-select:all">—</p><button class="btn ghost sm" type="button" data-copy="email"><svg class="icon"><use href="#i-copy"/></svg>Copia l'indirizzo</button></div>
+    <div class="card stack"><div class="row"><svg class="icon"><use href="#i-clock"/></svg><h3>Orari di apertura</h3></div><p data-bind="orari" style="white-space:pre-line">—</p></div>
+  </div>
+</section>
+
+<!-- ================= STAFF ================= -->
+<section class="page" id="p-staff" data-page="staff" hidden>
+  <div id="staff-lock" class="panel stack" style="max-width:40rem">
+    <div class="row"><svg class="icon" style="width:2rem;height:2rem;color:var(--accent)"><use href="#i-lock"/></svg><h1 style="font-size:1.8rem">Area riservata al personale</h1></div>
+    <p>Quest'area è per chi gestisce prenotazioni, fatture e bacheca. Per entrare serve un accesso da Editor alla pagina, concesso dal responsabile.</p>
+    <p class="muted small" id="staff-lock-why">Sto verificando i permessi…</p>
+  </div>
+  <div id="staff" class="stack" hidden>
+    <div class="staffhead">
+      <div><span class="eyebrow">Area staff</span><h1 style="font-size:2rem">Gestione SMS</h1></div>
+      <div class="row"><button class="btn" type="button" id="btn-newsocio"><svg class="icon"><use href="#i-plus"/></svg>Nuovo socio</button><button class="btn ghost" type="button" id="btn-newtel"><svg class="icon"><use href="#i-phone"/></svg>Prenotazione telefonica</button></div>
+    </div>
+    <div class="tabs" role="tablist">
+      <button role="tab" type="button" data-tab="pren" aria-selected="true"><svg class="icon"><use href="#i-cal"/></svg>Prenotazioni <span class="count" id="c-pren" hidden></span></button>
+      <button role="tab" type="button" data-tab="soci" aria-selected="false"><svg class="icon"><use href="#i-card"/></svg>Soci <span class="count" id="c-soci" hidden></span></button>
+      <button role="tab" type="button" data-tab="pers" aria-selected="false"><svg class="icon"><use href="#i-hands"/></svg>Utenti</button>
+      <button role="tab" type="button" data-tab="fatt" aria-selected="false"><svg class="icon"><use href="#i-euro"/></svg>Fatture</button>
+      <button role="tab" type="button" data-tab="bach" aria-selected="false"><svg class="icon"><use href="#i-news"/></svg>Bacheca <span class="count" id="c-prop" hidden></span></button>
+      <button role="tab" type="button" data-tab="serv" aria-selected="false"><svg class="icon"><use href="#i-heart"/></svg>Servizi e prezzi</button>
+      <button role="tab" type="button" data-tab="info" aria-selected="false"><svg class="icon"><use href="#i-info"/></svg>Info del sito</button>
+    </div>
+
+    <!-- prenotazioni -->
+    <div data-tabpanel="pren" class="stack">
+      <div class="kpis" id="kpis"></div>
+      <div class="toolbar">
+        <div class="chips" role="group" aria-label="Filtra per stato" id="st-filter">
+          <button type="button" data-st="aperte" aria-pressed="true">Da gestire</button>
+          <button type="button" data-st="attesa" aria-pressed="false">In attesa</button>
+          <button type="button" data-st="confermata" aria-pressed="false">Confermate</button>
+          <button type="button" data-st="dafatt" aria-pressed="false">Da fatturare</button>
+          <button type="button" data-st="tutte" aria-pressed="false">Tutte</button>
+        </div>
+        <input type="search" id="st-q" placeholder="Cerca nome o servizio" aria-label="Cerca prenotazioni">
+      </div>
+      <div class="tablewrap"><table><thead><tr><th>Giorno</th><th>Persona</th><th>Servizio</th><th class="r">Prezzo</th><th>Stato</th><th>Azioni</th></tr></thead><tbody id="pren-rows"></tbody></table></div>
+    </div>
+
+    <!-- soci -->
+    <div data-tabpanel="soci" class="stack" hidden>
+      <div class="kpis" id="skpis"></div>
+      <div class="split">
+        <div class="stack">
+          <div class="toolbar">
+            <div class="chips" role="group" aria-label="Filtra soci" id="so-filter">
+              <button type="button" data-so="attivi" aria-pressed="true">Attivi</button>
+              <button type="button" data-so="rinnovo" aria-pressed="false">Quota da pagare</button>
+              <button type="button" data-so="cessati" aria-pressed="false">Cessati</button>
+              <button type="button" data-so="tutti" aria-pressed="false">Tutti</button>
+            </div>
+          </div>
+          <div class="row"><input type="search" id="so-q" placeholder="Cerca per nome, tessera, codice fiscale o telefono" aria-label="Cerca soci" style="flex:1 1 14rem"><button class="btn ghost sm" type="button" id="so-csv"><svg class="icon"><use href="#i-down"/></svg>Libro soci (CSV)</button></div>
+          <div class="stack" id="soci-list"></div>
+        </div>
+        <div id="socio-panel" class="panel stack"></div>
+      </div>
+      <details class="panel">
+        <summary style="cursor:pointer;font-weight:700">Quota associativa e numerazione tessere</summary>
+        <form id="scfg" class="stack" style="margin-top:1rem">
+          <div class="fgrid">
+            <label class="f">Quota annuale (€)<input id="sc-q" type="number" step="0.5" min="0"></label>
+            <label class="f">Ultimo numero di tessera assegnato<input id="sc-n" type="number" step="1" min="0"><span class="hint">Il prossimo socio riceverà il numero successivo</span></label>
+          </div>
+          <div><button class="btn" type="submit">Salva</button></div>
+        </form>
+      </details>
+    </div>
+
+    <!-- utenti -->
+    <div data-tabpanel="pers" class="split" hidden>
+      <div class="stack">
+        <input type="search" id="pers-q" placeholder="Cerca per nome, telefono o codice fiscale" aria-label="Cerca utenti">
+        <div class="stack" id="pers-list"></div>
+      </div>
+      <div id="pers-detail" class="panel stack"><p class="muted">Tocchi una persona per vedere le sue prenotazioni e fatturare.</p></div>
+    </div>
+
+    <!-- fatture -->
+    <div data-tabpanel="fatt" class="stack" hidden>
+      <div class="kpis" id="fkpis"></div>
+      <div class="toolbar">
+        <div class="chips" role="group" aria-label="Filtra fatture" id="f-filter">
+          <button type="button" data-fs="tutte" aria-pressed="true">Tutte</button>
+          <button type="button" data-fs="emessa" aria-pressed="false">Da incassare</button>
+          <button type="button" data-fs="pagata" aria-pressed="false">Pagate</button>
+        </div>
+        <div class="row"><button class="btn ghost sm" type="button" id="f-csv"><svg class="icon"><use href="#i-down"/></svg>Esporta per il commercialista (CSV)</button></div>
+      </div>
+      <div class="tablewrap"><table><thead><tr><th>Numero</th><th>Data</th><th>Intestata a</th><th class="r">Totale</th><th>Stato</th><th>Azioni</th></tr></thead><tbody id="fatt-rows"></tbody></table></div>
+      <details class="panel">
+        <summary style="cursor:pointer;font-weight:700">Dati dell'ente che emette le fatture</summary>
+        <form id="fcfg" class="stack" style="margin-top:1rem">
+          <div class="fgrid">
+            <label class="f full">Denominazione<input id="fc-den"></label>
+            <label class="f">Codice fiscale / P. IVA<input id="fc-cf"></label>
+            <label class="f">Indirizzo sede<input id="fc-ind"></label>
+            <label class="f full">Dicitura di esenzione IVA<input id="fc-es"></label>
+            <label class="f">Imposta di bollo oltre (€)<input id="fc-bs" type="number" step="0.01" min="0"></label>
+            <label class="f">Importo del bollo (€)<input id="fc-bi" type="number" step="0.01" min="0"></label>
+          </div>
+          <div><button class="btn" type="submit">Salva i dati</button></div>
+        </form>
+      </details>
+    </div>
+
+    <!-- bacheca -->
+    <div data-tabpanel="bach" class="stack" hidden>
+      <div id="bach-list" class="stack">
+        <div class="toolbar"><div><h2>Bacheca</h2><p class="muted small">Notizie ed eventi con testo, foto e video.</p></div><button class="btn big" type="button" id="bn-new"><svg class="icon"><use href="#i-pen"/></svg>Scrivi una nuova notizia</button></div>
+        <h3>Proposte dei soci</h3><div class="stack" id="prop-list"></div>
+        <h3>Bozze</h3><div class="stack" id="draft-list"></div>
+        <h3>Pubblicate</h3><div class="stack" id="pub-list"></div>
+      </div>
+      <div id="editor" class="stack" hidden></div>
+    </div>
+
+    <!-- servizi -->
+    <div data-tabpanel="serv" class="split" hidden>
+      <div class="stack"><div class="stack" id="serv-list"></div></div>
+      <form id="svc-form" class="panel stack">
+        <h2 id="sf-title">Nuovo servizio</h2>
+        <input type="hidden" id="sf-id">
+        <label class="f">Nome<input id="sf-nome" required maxlength="80"></label>
+        <label class="f">Descrizione<textarea id="sf-desc" maxlength="600" style="min-height:5rem"></textarea></label>
+        <div class="fgrid">
+          <label class="f">Prezzo soci (€)<input id="sf-ps" type="number" step="0.5" min="0" required></label>
+          <label class="f">Prezzo non soci (€)<input id="sf-pn" type="number" step="0.5" min="0" required></label>
+          <label class="f">Quando<input id="sf-quando" maxlength="80" placeholder="Es. martedì mattina"></label>
+          <label class="f">Ordine in elenco<input id="sf-ord" type="number" step="1"></label>
+        </div>
+        <label class="row" style="font-weight:700"><input id="sf-att" type="checkbox" checked style="width:1.4rem;min-height:1.4rem;accent-color:var(--accent)"> Prenotabile online</label>
+        <div class="row"><button class="btn" type="submit">Salva servizio</button><button class="btn ghost" type="button" id="sf-reset">Svuota</button></div>
+      </form>
+    </div>
+
+    <!-- info -->
+    <form data-tabpanel="info" id="info-form" class="panel stack" hidden>
+      <h2>Informazioni mostrate sul sito</h2>
+      <p class="muted">Quello che scrive qui compare subito su tutte le pagine.</p>
+      <div class="fgrid">
+        <label class="f">Telefono per prenotare<input id="if-tel" maxlength="40"></label>
+        <label class="f">Email<input id="if-email" maxlength="120"></label>
+        <label class="f full">Indirizzo della sede<input id="if-ind" maxlength="160"></label>
+        <label class="f full">Orari di apertura <span class="hint">Una riga per giorno</span><textarea id="if-orari" maxlength="600" style="min-height:5rem"></textarea></label>
+        <label class="f full">Frase principale della home<input id="if-slogan" maxlength="90"></label>
+        <label class="f full">Presentazione sotto la frase<textarea id="if-intro" maxlength="400" style="min-height:4.5rem"></textarea></label>
+        <label class="f full">Come diventare socio e quota annuale<textarea id="if-quota" maxlength="600" style="min-height:4.5rem"></textarea></label>
+      </div>
+      <div><button class="btn big" type="submit">Salva le informazioni</button></div>
+    </form>
+  </div>
+</section>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <div><h4>SMS Givolettese</h4><p>Società di Mutuo Soccorso<br><span data-bind="indirizzo">Givoletto (TO)</span></p></div>
+    <div><h4>Contatti</h4><p>Tel. <span class="num" data-bind="telefono">—</span><br><span data-bind="email"></span></p></div>
+    <div><h4>Mutuo soccorso</h4><ul><li><a href="http://www.fimiv.it" target="_blank" rel="noopener">FIMIV</a></li><li><a href="https://www.sms-sangilliese.org" target="_blank" rel="noopener">SOMS San Gillio</a></li><li><a href="http://www.fondazionemutuosoccorso.it" target="_blank" rel="noopener">Fondazione Centro Mutuo Soccorso</a></li></ul></div>
+  </div>
+</footer>
+
+<div id="modal" class="modal" hidden role="dialog" aria-modal="true"><div class="box" id="modal-box"></div></div>
+<div id="toast" class="toast" hidden role="status"></div>
+<div id="lightbox" class="lightbox" hidden role="dialog" aria-modal="true" aria-label="Foto ingrandita"></div>
+
+<script>
+(function(){
+"use strict";
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const eur=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR"}).format(Number(n)||0);
+const pad=n=>String(n).padStart(2,"0");
+const isoDay=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const parseDay=s=>{if(!s)return null;const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
+const fmtDay=(s,o={weekday:"long",day:"numeric",month:"long"})=>{const d=parseDay(s);return d?d.toLocaleDateString("it-IT",o):""};
+const today=()=>isoDay(new Date());
+const rid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const icon=n=>`<svg class="icon"><use href="#i-${n}"/></svg>`;
+const STATI={attesa:"In attesa",confermata:"Confermata",eseguita:"Eseguita",annullata:"Annullata"};
+const FASCE={mattina:"Mattina (8–12)",pomeriggio:"Pomeriggio (14–18)"};
+
+const S={db:null,user:null,uid:null,staff:false,canWrite:false,
+  sito:{},servizi:[],notizie:[],mine:null,mieProp:null,
+  pren:[],prop:[],fatture:[],fcfg:null,soci:[],scfg:null,bozze:[],art:null,soFilter:"attivi",selSocio:null,socioMode:"view",
+  page:"home",filter:"tutte",stFilter:"aperte",fFilter:"tutte",tab:"pren",selPers:null,
+  wiz:{step:1,svc:null,day:null,fascia:"mattina"}};
+
+const DEF_SITO={telefono:"Numero da inserire",email:"",indirizzo:"Givoletto (TO)",orari:"",slogan:"",intro:"",quota:""};
+const DEF_FCFG={denominazione:"Società di Mutuo Soccorso Givolettese",cf:"",indirizzo:"Givoletto (TO)",esenzione:"Operazione esente IVA ai sensi dell'art. 10, comma 1, n. 18 del D.P.R. 633/1972",bolloSoglia:77.47,bolloImporto:2,anno:new Date().getFullYear(),ultimo:0};
+
+/* ---------- testo grande ---------- */
+function setSize(n){document.documentElement.classList.remove("t1","t2");if(n>0)document.documentElement.classList.add("t"+n);
+  $$(".textsize button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.size==n)));
+  try{localStorage.setItem("sms-size",String(n))}catch(e){}}
+$$(".textsize button").forEach(b=>b.addEventListener("click",()=>setSize(+b.dataset.size)));
+try{const v=localStorage.getItem("sms-size");if(v)setSize(+v)}catch(e){}
+
+/* ---------- toast / modal ---------- */
+let tt;function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,3800)}
+function ask(html,ok="Conferma",danger=false){return new Promise(res=>{const m=$("#modal"),b=$("#modal-box");
+  b.innerHTML=`${html}<div class="row"><button class="btn ${danger?"danger":""}" data-a="ok">${esc(ok)}</button><button class="btn ghost" data-a="no">Torna indietro</button></div>`;
+  m.hidden=false;b.querySelector("[data-a=ok]").focus();
+  const done=v=>{m.hidden=true;res(v)};
+  b.querySelector("[data-a=ok]").onclick=()=>done(true);b.querySelector("[data-a=no]").onclick=()=>done(false);
+  m.onclick=e=>{if(e.target===m)done(false)};})}
+function formModal(html,ok){return new Promise(res=>{const m=$("#modal"),b=$("#modal-box");
+  b.innerHTML=`<form class="stack" id="mf">${html}<div class="row"><button class="btn" type="submit">${esc(ok)}</button><button class="btn ghost" type="button" data-a="no">Annulla</button></div></form>`;
+  m.hidden=false;const f=b.querySelector("#mf");const first=f.querySelector("input,select,textarea");first&&first.focus();
+  f.onsubmit=e=>{e.preventDefault();m.hidden=true;res(f)};b.querySelector("[data-a=no]").onclick=()=>{m.hidden=true;res(null)}})}
+
+/* ---------- navigazione ---------- */
+function go(p){if(!$(`[data-page="${p}"]`))p="home";if(p==="articolo"&&!S.art)p="notizie";S.page=p;
+  $$("[data-page]").forEach(s=>s.hidden=s.dataset.page!==p);
+  $$("nav.main button").forEach(b=>b.dataset.go===(p==="articolo"?"notizie":p)?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
+  renderPage();window.scrollTo({top:0,behavior:"auto"});
+  try{history.replaceState(null,"","#"+p)}catch(e){}}
+document.addEventListener("click",e=>{const g=e.target.closest("[data-go]");if(g){e.preventDefault();go(g.dataset.go)}
+  const c=e.target.closest("[data-copy]");if(c){const v=sito()[c.dataset.copy]||"";copy(v)}});
+function copy(v){if(!v)return;try{navigator.clipboard.writeText(v).then(()=>toast("Copiato: "+v),()=>toast(v))}catch(e){toast(v)}}
+
+const sito=()=>Object.assign({},DEF_SITO,S.sito);
+function bindSito(){const s=sito();
+  $$("[data-bind]").forEach(el=>{const k=el.dataset.bind;let v=s[k];
+    if(k==="orari"&&!v)v=el.closest(".callbox")?"":"Orari da inserire";
+    if(k==="slogan"&&!v)v="Ci aiutiamo a vicenda, qui a Givoletto.";
+    if(k==="intro"&&!v)v="Visite, prelievi, accompagnamenti e momenti insieme per i soci e le loro famiglie. Prenotare è semplice: bastano pochi tocchi oppure una telefonata.";
+    if(k==="quota"&&!v)v="Passi in sede durante gli orari di apertura con un documento d'identità e il codice fiscale.";
+    if(k==="email"&&!v)v=el.closest("footer")?"":"Email da inserire";
+    el.textContent=v||"—"});
+  $("#maplink").href="https://www.openstreetmap.org/search?query="+encodeURIComponent(s.indirizzo||"Givoletto");}
+
+/* ---------- foto e media ---------- */
+const PIX="data:image/gif;base64,R0lGODlhAQABAAAAACw=";
+const MEDIA={},mediaWait={};
+function getMedia(id){if(!id)return Promise.resolve(null);if(MEDIA[id])return Promise.resolve(MEDIA[id]);
+  if(!mediaWait[id])mediaWait[id]=(S.db?S.db.doc("media/"+id).get():Promise.reject(new Error("no db"))).then(s=>{const d=s.exists?s.data():null;if(d)MEDIA[id]=d;else delete mediaWait[id];return d}).catch(()=>{delete mediaWait[id];return null});
+  return mediaWait[id]}
+function hydrate(root=document){
+  $$("img[data-media]",root).forEach(img=>{const id=img.dataset.media;if(img.dataset.done===id)return;img.dataset.done=id;
+    getMedia(id).then(m=>{if(m&&m.data){img.src=m.data;img.classList.add("ok")}})});
+  $$("img[data-pfoto]",root).forEach(img=>{const k=img.dataset.pfoto;if(img.dataset.done===k||!S.db)return;img.dataset.done=k;const[u,p]=k.split("/");
+    S.db.doc(`proposte/${u}/foto/${p}`).get().then(s=>{if(s.exists&&s.data().data){img.src=s.data().data;img.classList.add("ok")}}).catch(()=>{})})}
+async function compressImage(file,maxDim=1600,maxBytes=235000){
+  if(!file||!/^image\//.test(file.type))throw new Error("tipo");
+  const url=URL.createObjectURL(file);
+  try{const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url});
+    const w=img.naturalWidth,h=img.naturalHeight;let scale=Math.min(1,maxDim/Math.max(w,h)),q=.82,data="";
+    for(let k=0;k<12;k++){const c=document.createElement("canvas");c.width=Math.max(1,Math.round(w*scale));c.height=Math.max(1,Math.round(h*scale));
+      const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);
+      data=c.toDataURL("image/jpeg",q);if(data.length<=maxBytes)return{data,w:c.width,h:c.height};if(q>.56)q-=.1;else scale*=.8}
+    throw new Error("troppo")}finally{URL.revokeObjectURL(url)}}
+async function uploadMedia(file){const r=await compressImage(file);
+  const ref=await S.db.collection("media").add({data:r.data,w:r.w,h:r.h,nome:String(file.name||"").slice(0,120),creato:new Date().toISOString()});
+  MEDIA[ref.id]={data:r.data,w:r.w,h:r.h};return ref.id}
+const imgErr=err=>err&&err.message==="tipo"?"Il file scelto non è una foto.":err&&err.code?errMsg(err):"Questa foto non si riesce ad aprire. Provi a salvarla come JPG e a caricarla di nuovo.";
+
+/* ---------- testo formattato (pulito) ---------- */
+function clean(html){const t=document.createElement("template");t.innerHTML=String(html||"");
+  const MAP={b:"strong",strong:"strong",i:"em",em:"em",u:"u",br:"br",a:"a"};
+  const walk=node=>{[...node.childNodes].forEach(n=>{
+    if(n.nodeType===3)return;if(n.nodeType!==1){n.remove();return}
+    const tag=n.tagName.toLowerCase();
+    if(["script","style","iframe","object","embed","img","svg","video","audio"].includes(tag)){n.remove();return}
+    walk(n);
+    if(tag==="div"||tag==="p"||tag==="li"){const f=document.createDocumentFragment();if(n.previousSibling)f.appendChild(document.createElement("br"));while(n.firstChild)f.appendChild(n.firstChild);n.replaceWith(f);return}
+    if(!MAP[tag]){n.replaceWith(...n.childNodes);return}
+    const el=document.createElement(MAP[tag]);
+    if(tag==="a"){const h=(n.getAttribute("href")||"").trim();if(!/^(https?:|mailto:|tel:)/i.test(h)){n.replaceWith(...n.childNodes);return}el.setAttribute("href",h);el.setAttribute("target","_blank");el.setAttribute("rel","noopener")}
+    while(n.firstChild)el.appendChild(n.firstChild);n.replaceWith(el)})};
+  walk(t.content);return t.innerHTML}
+const plainOf=h=>{const d=document.createElement("div");d.innerHTML=clean(h).replace(/<br>/g," ");return d.textContent||""};
+function vidInfo(url){url=String(url||"").trim();if(!/^https?:\/\/\S+\.\S+/i.test(url))return null;
+  const m=url.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{6,})/i);
+  if(m)return{src:"YouTube",url:"https://www.youtube.com/watch?v="+m[1]};
+  if(/vimeo\.com/i.test(url))return{src:"Vimeo",url};if(/facebook\.com|fb\.watch/i.test(url))return{src:"Facebook",url};
+  if(/drive\.google\.com/i.test(url))return{src:"Google Drive",url};return{src:"il sito del video",url}}
+
+/* ---------- blocchi: come appaiono ai visitatori ---------- */
+function blocksHTML(n,skipCover){const bl=Array.isArray(n.blocks)&&n.blocks.length?n.blocks:[{t:"p",html:esc(n.testo||"").replace(/\n/g,"<br>")}];
+  return bl.map(b=>{switch(b.t){
+    case"p":return `<p>${clean(b.html)}</p>`;
+    case"h":return b.level===3?`<h3>${esc(b.text)}</h3>`:`<h2>${esc(b.text)}</h2>`;
+    case"img":return b.media&&b.media!==skipCover?`<figure class="mfig size-${esc(b.size||"wide")}"><button type="button" class="zoom" data-zoom="${esc(b.media)}" aria-label="Ingrandisci la foto"><img class="mimg" src="${PIX}" data-media="${esc(b.media)}" alt="${esc(b.caption||"Foto")}"></button>${b.caption?`<figcaption>${esc(b.caption)}</figcaption>`:""}</figure>`:"";
+    case"gal":{const it=b.items||[];return it.length?`<figure class="gal">${it.map(id=>`<button type="button" class="zoom" data-zoom="${esc(id)}" data-group="${esc(it.join(","))}" aria-label="Ingrandisci la foto"><img class="mimg" src="${PIX}" data-media="${esc(id)}" alt="Foto della galleria"></button>`).join("")}${b.caption?`<figcaption>${esc(b.caption)}</figcaption>`:""}</figure>`:""}
+    case"video":{const v=vidInfo(b.url);return v?vcard(v,b.caption):""}
+    case"quote":return `<blockquote class="law" style="margin:0">${clean(b.html)}${b.cite?`<small>${esc(b.cite)}</small>`:""}</blockquote>`;
+    case"list":return `<ul class="blist">${(b.items||[]).map(i=>`<li>${clean(i)}</li>`).join("")}</ul>`;
+    case"btn":return b.url&&/^https?:/i.test(b.url)?`<p><a class="btn" href="${esc(b.url)}" target="_blank" rel="noopener">${esc(b.label||"Apri")}</a></p>`:"";
+    case"sep":return `<hr class="sep">`;default:return ""}}).join("")}
+const vcard=(v,cap)=>`<a class="vcard" href="${esc(v.url)}" target="_blank" rel="noopener"><span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span><span><b>${esc(cap||"Guarda il video")}</b><span>Tocchi per guardarlo su ${esc(v.src)}</span></span></a>`;
+
+/* ---------- notizie (pubblico) ---------- */
+function newsCard(n){const d=parseDay(n.data);
+  const box=d?`<div class="datebox" aria-hidden="true"><div class="m">${d.toLocaleDateString("it-IT",{month:"short"})}</div><div class="d">${d.getDate()}</div><div class="w">${d.toLocaleDateString("it-IT",{weekday:"short"})}</div></div>`:"";
+  const ex=n.estratto||n.testo||"";const long=Array.isArray(n.blocks)&&n.blocks.length>1||ex.length>220;
+  return `<article class="card ncard">${n.copertina?`<button type="button" class="zoom cov" data-read="${esc(n.id)}" aria-label="Leggi: ${esc(n.titolo)}"><img class="cover mimg" src="${PIX}" data-media="${esc(n.copertina)}" alt=""></button>`:""}<div class="news">${box}<div class="body"><div class="row"><span class="pill ${esc(n.categoria)}">${esc(cap(n.categoria||"notizia"))}</span>${d?`<span class="small muted">${esc(fmtDay(n.data,{weekday:"long",day:"numeric",month:"long",year:"numeric"}))}</span>`:""}</div><h3>${esc(n.titolo)}</h3>${n.luogo?`<p class="small muted">${icon("pin")} ${esc(n.luogo)}</p>`:""}<p>${esc(ex.length>220?ex.slice(0,220).replace(/\s\S*$/,"")+"…":ex)}</p>${long||n.copertina?`<div><button class="btn ghost sm" type="button" data-read="${esc(n.id)}">Leggi tutto ${icon("next")}</button></div>`:""}</div></div></article>`}
+const cap=s=>s?s[0].toUpperCase()+s.slice(1):"";
+function sortedNews(){const t=today();const arr=[...S.notizie];
+  const up=arr.filter(n=>n.data&&n.data>=t).sort((a,b)=>a.data.localeCompare(b.data));
+  const rest=arr.filter(n=>!(n.data&&n.data>=t)).sort((a,b)=>(b.creato||"").localeCompare(a.creato||""));
+  return [...up,...rest]}
+function renderHomeNews(){const list=sortedNews().slice(0,3);const el=$("#home-news");
+  el.innerHTML=list.length?list.map(newsCard).join(""):`<div class="empty">Non ci sono ancora appuntamenti in bacheca. Quando il personale li pubblica, li trova qui.</div>`;hydrate(el)}
+function renderNews(){const f=S.filter;const list=sortedNews().filter(n=>f==="tutte"||n.categoria===f);const el=$("#news-list");
+  el.innerHTML=list.length?`<div class="grid">${list.map(newsCard).join("")}</div>`:`<div class="empty">Nessuna notizia in questa sezione per ora.</div>`;hydrate(el);
+  renderMyProps()}
+$$("[data-filter]").forEach(b=>b.addEventListener("click",()=>{S.filter=b.dataset.filter;$$("[data-filter]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));renderNews()}));
+document.addEventListener("click",e=>{const r=e.target.closest("[data-read]");if(r){S.art=r.dataset.read;go("articolo");return}
+  const z=e.target.closest("[data-zoom]");if(z&&!z.closest("#editor"))openLight(z.dataset.zoom,z.dataset.group)});
+function renderArticle(){const el=$("#art");const n=S.notizie.find(x=>x.id===S.art);
+  if(!n){el.innerHTML=`<div class="stack"><button class="btn ghost sm" type="button" data-go="notizie" style="align-self:flex-start">${icon("back")} Tutte le notizie</button><div class="empty">${S.notizie.length?"Questa notizia non è più in bacheca.":"Caricamento della notizia…"}</div></div>`;return}
+  const firstImg=(n.blocks||[]).find(b=>b.t==="img");const coverIsFirst=firstImg&&firstImg.media===n.copertina;
+  el.innerHTML=`<article class="art"><button class="btn ghost sm" type="button" data-go="notizie" style="align-self:flex-start">${icon("back")} Tutte le notizie</button>
+    <div class="row"><span class="pill ${esc(n.categoria)}">${esc(cap(n.categoria||"notizia"))}</span>${n.data?`<span class="muted">${icon("cal")} ${esc(cap(fmtDay(n.data,{weekday:"long",day:"numeric",month:"long",year:"numeric"})))}</span>`:""}${n.luogo?`<span class="muted">${icon("pin")} ${esc(n.luogo)}</span>`:""}</div>
+    <h1>${esc(n.titolo)}</h1>
+    ${n.copertina?`<figure class="mfig size-wide"><button type="button" class="zoom" data-zoom="${esc(n.copertina)}" aria-label="Ingrandisci la foto"><img class="mimg" src="${PIX}" data-media="${esc(n.copertina)}" alt=""></button>${coverIsFirst&&firstImg.caption?`<figcaption>${esc(firstImg.caption)}</figcaption>`:""}</figure>`:""}
+    <div class="art-body">${blocksHTML(n,coverIsFirst?n.copertina:null)}</div>
+    ${n.autore?`<p class="small muted">Segnalata da ${esc(n.autore)}</p>`:""}
+    <div><button class="btn ghost" type="button" data-go="notizie">${icon("back")} Torna alle notizie</button></div></article>`;hydrate(el)}
+
+/* ---------- foto a tutto schermo ---------- */
+function openLight(id,group){const ids=group?group.split(","):[id];let i=Math.max(0,ids.indexOf(id));const lb=$("#lightbox");
+  const show=()=>{lb.innerHTML=`<div class="lb-top"><span class="num">${ids.length>1?`Foto ${i+1} di ${ids.length}`:""}</span><button type="button" class="btn" data-lb="x">Chiudi ✕</button></div><img class="mimg" src="${PIX}" data-media="${esc(ids[i])}" alt="Foto ingrandita">${ids.length>1?`<div class="lb-nav"><button type="button" class="btn" data-lb="p">${icon("back")} Precedente</button><button type="button" class="btn" data-lb="n">Successiva ${icon("next")}</button></div>`:""}`;hydrate(lb)};
+  show();lb.hidden=false;lb.querySelector("[data-lb=x]").focus();
+  lb.onclick=e=>{const a=e.target.closest("[data-lb]")?.dataset.lb;if(a==="x"||e.target===lb)lb.hidden=true;else if(a==="p"){i=(i-1+ids.length)%ids.length;show()}else if(a==="n"){i=(i+1)%ids.length;show()}}}
+document.addEventListener("keydown",e=>{const lb=$("#lightbox");if(lb.hidden)return;if(e.key==="Escape")lb.hidden=true;if(e.key==="ArrowRight")lb.querySelector("[data-lb=n]")?.click();if(e.key==="ArrowLeft")lb.querySelector("[data-lb=p]")?.click()});
+
+/* ---------- servizi ---------- */
+const activeSvc=()=>S.servizi.filter(s=>s.attivo!==false).sort((a,b)=>(a.ordine??99)-(b.ordine??99)||String(a.nome).localeCompare(b.nome));
+function svcCard(s,withBtn=true){return `<article class="card svc"><h3>${esc(s.nome)}</h3><p class="muted">${esc(s.descrizione||"")}</p>${s.quando?`<p class="small">${icon("clock")} ${esc(s.quando)}</p>`:""}<div class="prices"><div><b class="num">${eur(s.prezzoSocio)}</b><span>Soci</span></div><div><b class="num">${eur(s.prezzoNonSocio)}</b><span>Non soci</span></div></div>${withBtn?`<button class="btn" type="button" data-book="${esc(s.id)}">${icon("cal")}Prenota</button>`:""}</article>`}
+function renderSvc(){const l=activeSvc();
+  const empty=`<div class="empty">L'elenco dei servizi è in preparazione. Per informazioni ci chiami.</div>`;
+  $("#svc-list").innerHTML=l.length?l.map(s=>svcCard(s)).join(""):empty;
+  $("#home-svc").innerHTML=l.length?l.slice(0,3).map(s=>svcCard(s)).join(""):empty}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-book]");if(!b)return;S.wiz={step:2,svc:b.dataset.book,day:null,fascia:"mattina"};go("prenota")});
+
+/* ---------- prenotazione guidata ---------- */
+function bookDays(){const out=[];const d=new Date();d.setDate(d.getDate()+1);while(out.length<12){if(d.getDay()!==0)out.push(isoDay(d));d.setDate(d.getDate()+1)}return out}
+function renderWiz(){const w=S.wiz,el=$("#wiz");
+  $("#wiz-guest").hidden=S.canWrite;
+  if(!S.canWrite){el.innerHTML="";$("#mine-wrap").hidden=true;return}
+  const names=["Servizio","Giorno","I suoi dati","Conferma"];
+  const steps=`<ol class="wsteps" aria-label="Passaggi">${names.map((n,i)=>`<li class="${i+1===w.step?"on":i+1<w.step?"done":""}"${i+1===w.step?' aria-current="step"':""}><b>${i+1<w.step?"✓":i+1}</b>${n}</li>`).join("")}</ol>`;
+  const svc=S.servizi.find(s=>s.id===w.svc);let body="";
+  if(w.step===1){const l=activeSvc();
+    body=`<h2>Quale servizio le serve?</h2>${l.length?`<div class="opts">${l.map(s=>`<button type="button" class="opt" data-pick="${esc(s.id)}" aria-pressed="${w.svc===s.id}"><b>${esc(s.nome)}</b><span>${esc(s.quando||"")}${s.quando?" · ":""}soci ${eur(s.prezzoSocio)}</span></button>`).join("")}</div>`:`<div class="empty">Non ci sono servizi prenotabili online in questo momento. Ci chiami al ${esc(sito().telefono)}.</div>`}
+      <div class="wfoot"><span></span><button class="btn big" type="button" data-wnext ${w.svc?"":"disabled"}>Avanti ${icon("next")}</button></div>`}
+  else if(w.step===2){body=`<h2>Che giorno preferisce?</h2><p class="muted">Servizio scelto: <b>${esc(svc?svc.nome:"")}</b>. L'orario preciso glielo diciamo noi per telefono.</p>
+      <div class="days">${bookDays().map(d=>{const x=parseDay(d);return `<button type="button" class="opt" data-day="${d}" aria-pressed="${w.day===d}"><span>${x.toLocaleDateString("it-IT",{weekday:"long"})}</span><b>${x.getDate()}</b><span>${x.toLocaleDateString("it-IT",{month:"long"})}</span></button>`}).join("")}</div>
+      <div class="f"><b>Mattina o pomeriggio?</b><div class="choice">${Object.entries(FASCE).map(([k,v])=>`<label><input type="radio" name="w-fascia" value="${k}" ${w.fascia===k?"checked":""}> ${v}</label>`).join("")}</div></div>
+      <div class="wfoot"><button class="btn ghost big" type="button" data-wback>${icon("back")} Indietro</button><button class="btn big" type="button" data-wnext ${w.day?"":"disabled"}>Avanti ${icon("next")}</button></div>`}
+  else if(w.step===3){const p=S.mine||{};
+    body=`<h2>I suoi dati</h2><p class="muted">Servono per richiamarla e, se lo desidera, per la fattura.</p>
+      <form id="wform" class="stack"><div class="fgrid">
+      <label class="f">Nome<input id="w-nome" required autocomplete="given-name" value="${esc(w.nome??p.nome??"")}"></label>
+      <label class="f">Cognome<input id="w-cognome" required autocomplete="family-name" value="${esc(w.cognome??p.cognome??"")}"></label>
+      <label class="f">Telefono<input id="w-tel" required type="tel" inputmode="tel" autocomplete="tel" value="${esc(w.tel??p.telefono??"")}"></label>
+      <label class="f">Codice fiscale <span class="hint">Facoltativo, serve per la fattura</span><input id="w-cf" maxlength="16" style="text-transform:uppercase" value="${esc(w.cf??p.cf??"")}"></label>
+      <div class="f full"><b>È socio della SMS?</b><div class="choice">
+        <label><input type="radio" name="w-socio" value="si" ${(w.socio??p.socio)!==false?"checked":""}> Sì, sono socio</label>
+        <label><input type="radio" name="w-socio" value="no" ${(w.socio??p.socio)===false?"checked":""}> No</label></div></div>
+      <label class="f full">Note <span class="hint">Facoltativo: esigenze particolari, chi l'accompagna…</span><textarea id="w-note" maxlength="600" style="min-height:4.5rem">${esc(w.note||"")}</textarea></label>
+      </div><div class="wfoot"><button class="btn ghost big" type="button" data-wback>${icon("back")} Indietro</button><button class="btn big" type="submit">Avanti ${icon("next")}</button></div></form>`}
+  else if(w.step===4){const prezzo=w.socio?svc?.prezzoSocio:svc?.prezzoNonSocio;
+    body=`<h2>Controlli e confermi</h2><div class="panel"><dl class="summary">
+      <dt>Servizio</dt><dd>${esc(svc?.nome)}</dd><dt>Giorno</dt><dd>${esc(cap(fmtDay(w.day)))}</dd><dt>Fascia</dt><dd>${esc(FASCE[w.fascia])}</dd>
+      <dt>Nome</dt><dd>${esc(w.nome+" "+w.cognome)}</dd><dt>Telefono</dt><dd class="num">${esc(w.tel)}</dd><dt>Socio</dt><dd>${w.socio?"Sì":"No"}</dd>
+      <dt>Prezzo</dt><dd class="num">${eur(prezzo)}</dd>${w.note?`<dt>Note</dt><dd>${esc(w.note)}</dd>`:""}</dl></div>
+      <div class="wfoot"><button class="btn ghost big" type="button" data-wback>${icon("back")} Indietro</button><button class="btn big sun" type="button" id="w-send">${icon("check")} Conferma la prenotazione</button></div>`}
+  else if(w.step===5){body=`<div class="panel stack" style="border:2px solid var(--ok)"><div class="row"><span class="callicon" style="background:var(--ok);color:var(--surface)">${icon("check")}</span><h2>Richiesta inviata</h2></div>
+      <p style="font-size:1.1rem">La richiameremo al <b class="num">${esc(w.tel)}</b> per confermare l'orario. Trova la prenotazione qui sotto, in <b>Le mie prenotazioni</b>.</p>
+      <div class="row"><button class="btn" type="button" id="w-again">${icon("plus")} Prenota un altro servizio</button><button class="btn ghost" type="button" data-go="home">Torna alla home</button></div></div>`}
+  el.innerHTML=(w.step<5?steps:"")+`<div class="stack">${body}</div>`;
+  const f=$("#wform");if(f)f.addEventListener("submit",e=>{e.preventDefault();
+    Object.assign(w,{nome:$("#w-nome").value.trim(),cognome:$("#w-cognome").value.trim(),tel:$("#w-tel").value.trim(),cf:$("#w-cf").value.trim().toUpperCase(),socio:$('input[name="w-socio"]:checked').value==="si",note:$("#w-note").value.trim()});
+    w.step=4;renderWiz();scrollWiz()});
+  const s=$("#w-send");if(s)s.addEventListener("click",sendBooking);
+  const a=$("#w-again");if(a)a.addEventListener("click",()=>{S.wiz={step:1,svc:null,day:null,fascia:"mattina"};renderWiz();scrollWiz()});
+  renderMine()}
+function scrollWiz(){$("#wiz").scrollIntoView({behavior:"smooth",block:"start"})}
+$("#wiz").addEventListener("click",e=>{const w=S.wiz;
+  const p=e.target.closest("[data-pick]");if(p){w.svc=p.dataset.pick;renderWiz();return}
+  const d=e.target.closest("[data-day]");if(d){const fr=$('input[name="w-fascia"]:checked');if(fr)w.fascia=fr.value;w.day=d.dataset.day;renderWiz();return}
+  if(e.target.closest("[data-wnext]")){const fr=$('input[name="w-fascia"]:checked');if(fr)w.fascia=fr.value;w.step++;renderWiz();scrollWiz();return}
+  if(e.target.closest("[data-wback]")){w.step--;renderWiz();scrollWiz()}});
+$("#wiz").addEventListener("change",e=>{if(e.target.name==="w-fascia")S.wiz.fascia=e.target.value});
+
+async function sendBooking(){const w=S.wiz,svc=S.servizi.find(s=>s.id===w.svc);if(!svc||!S.db||!S.uid)return;
+  const btn=$("#w-send");btn.disabled=true;btn.textContent="Invio in corso…";
+  const id=rid("r");const req={id,servizioId:svc.id,servizio:svc.nome,prezzo:Number(w.socio?svc.prezzoSocio:svc.prezzoNonSocio)||0,giorno:w.day,fascia:w.fascia,note:w.note||"",stato:"attesa",creato:new Date().toISOString(),origine:"online"};
+  const data={nome:w.nome,cognome:w.cognome,telefono:w.tel,cf:w.cf,socio:w.socio,aggiornato:new Date().toISOString(),richieste:{[id]:req}};
+  try{const ref=S.db.doc("prenotazioni/"+S.uid);
+    if(S.mine)await ref.update(data);else await ref.set(data);
+    w.step=5;renderWiz();scrollWiz()}
+  catch(err){btn.disabled=false;btn.innerHTML=icon("check")+" Conferma la prenotazione";
+    toast(err&&err.code==="permission_denied"?"Da qui non è possibile prenotare: ci chiami al "+sito().telefono:"Invio non riuscito. Controlli la connessione e riprovi.")}}
+
+function reqList(p){return Object.values((p&&p.richieste)||{}).sort((a,b)=>(a.giorno||"").localeCompare(b.giorno||""))}
+function renderMine(){const wrap=$("#mine-wrap");const l=reqList(S.mine).filter(r=>r.giorno>=today()||r.stato==="attesa"||r.stato==="confermata").reverse();
+  if(!S.canWrite||!S.mine){wrap.hidden=true;return}wrap.hidden=false;
+  $("#mine").innerHTML=l.length?l.map(r=>`<div class="item"><div><b>${esc(r.servizio)}</b><div class="muted small">${esc(cap(fmtDay(r.giorno)))} · ${esc(FASCE[r.fascia]||"")}${r.orario?` · ore ${esc(r.orario)}`:""}</div></div><div class="row"><span class="pill ${esc(r.stato)}">${esc(STATI[r.stato]||r.stato)}</span>${r.stato==="attesa"?`<button class="btn danger sm" type="button" data-cancel="${esc(r.id)}">Annulla</button>`:""}</div></div>`).join(""):`<div class="empty">Nessuna prenotazione in corso.</div>`}
+$("#mine").addEventListener("click",async e=>{const b=e.target.closest("[data-cancel]");if(!b)return;
+  if(!await ask(`<h3>Annullare questa prenotazione?</h3><p class="muted">Potrà sempre prenotarne una nuova.</p>`,"Sì, annulla",true))return;
+  try{await S.db.doc("prenotazioni/"+S.uid).update({richieste:{[b.dataset.cancel]:{stato:"annullata",annullatoDa:"utente"}}});toast("Prenotazione annullata")}catch(err){toast("Non è stato possibile annullare. Ci chiami.")}});
+
+/* ---------- proposte soci ---------- */
+$("#pr-foto").addEventListener("change",()=>{const f=$("#pr-foto").files[0];const pv=$("#pr-prev");
+  if(!f){pv.hidden=true;return}const u=URL.createObjectURL(f);pv.innerHTML=`<img src="${u}" alt="Foto scelta"><button type="button" class="btn ghost sm" id="pr-foto-x">Togli la foto</button>`;pv.hidden=false;
+  $("#pr-foto-x").onclick=()=>{$("#pr-foto").value="";pv.hidden=true;URL.revokeObjectURL(u)}});
+$("#prop-form").addEventListener("submit",async e=>{e.preventDefault();if(!S.db||!S.uid)return;const btn=e.submitter||$("#prop-form button[type=submit]");btn.disabled=true;
+  const id=rid("p");const file=$("#pr-foto").files[0];
+  try{let foto=false;
+    if(file){const r=await compressImage(file,1400,200000);await S.db.doc(`proposte/${S.uid}/foto/${id}`).set({data:r.data,w:r.w,h:r.h});foto=true}
+    const it={id,titolo:$("#pr-titolo").value.trim(),categoria:$('input[name="pr-cat"]:checked').value,data:$("#pr-data").value||"",luogo:$("#pr-luogo").value.trim(),testo:$("#pr-testo").value.trim(),video:$("#pr-video").value.trim(),foto,stato:"attesa",creato:new Date().toISOString()};
+    const body={nome:$("#pr-nome").value.trim(),items:{[id]:it}};
+    const ref=S.db.doc("proposte/"+S.uid);if(S.mieProp)await ref.update(body);else await ref.set(body);
+    ["#pr-titolo","#pr-data","#pr-luogo","#pr-testo","#pr-video","#pr-foto"].forEach(s=>$(s).value="");$("#pr-prev").hidden=true;toast("Grazie! La proposta è arrivata al personale.")}
+  catch(err){toast(err&&!err.code?imgErr(err):"Invio non riuscito. Riprovi o porti la proposta in sede.")}
+  finally{btn.disabled=false}});
+function renderMyProps(){$("#prop-form").hidden=!S.canWrite;$("#prop-guest").hidden=S.canWrite;
+  if(S.mieProp&&S.mieProp.nome&&!$("#pr-nome").value)$("#pr-nome").value=S.mieProp.nome;
+  const l=Object.values((S.mieProp&&S.mieProp.items)||{}).sort((a,b)=>b.creato.localeCompare(a.creato));
+  const lab={attesa:"In revisione",pubblicata:"Pubblicata",rifiutata:"Non pubblicata"};
+  $("#myprops").innerHTML=l.length?`<h3>Le sue proposte</h3>`+l.map(p=>`<div class="item"><div><b>${esc(p.titolo)}</b><div class="small muted">Inviata il ${new Date(p.creato).toLocaleDateString("it-IT")}${p.foto?" · con foto":""}</div></div><span class="pill ${esc(p.stato)}">${esc(lab[p.stato]||p.stato)}</span></div>`).join(""):""}
+
+/* =============== STAFF =============== */
+function allReq(){const out=[];for(const p of S.pren){for(const r of reqList(p))out.push({...r,pid:p.id,p})}return out}
+const pname=p=>((p.nome||"")+" "+(p.cognome||"")).trim()||"Senza nome";
+$$("[data-tab]").forEach(b=>b.addEventListener("click",()=>{S.tab=b.dataset.tab;$$("[data-tab]").forEach(x=>x.setAttribute("aria-selected",String(x===b)));$$("[data-tabpanel]").forEach(p=>p.hidden=p.dataset.tabpanel!==S.tab);renderStaff()}));
+$$("[data-st]").forEach(b=>b.addEventListener("click",()=>{S.stFilter=b.dataset.st;$$("[data-st]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));renderPren()}));
+$$("[data-fs]").forEach(b=>b.addEventListener("click",()=>{S.fFilter=b.dataset.fs;$$("[data-fs]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));renderFatt()}));
+$("#st-q").addEventListener("input",()=>renderPren());$("#pers-q").addEventListener("input",()=>renderPers());
+
+function renderStaff(){if(!S.staff)return;
+  const all=allReq();const att=all.filter(r=>r.stato==="attesa").length;const c=$("#c-pren");c.hidden=!att;c.textContent=att;
+  const np=pendingProps().length;const cp=$("#c-prop");cp.hidden=!np;cp.textContent=np;
+  ({soci:renderSoci,pren:renderPren,pers:renderPers,fatt:renderFatt,bach:renderBach,serv:renderServAdmin,info:fillInfo})[S.tab]()}
+
+function renderPren(){const all=allReq(),t=today(),m=t.slice(0,7);
+  const fatMese=S.fatture.filter(f=>f.stato!=="annullata"&&(f.data||"").startsWith(m)).reduce((a,f)=>a+(+f.totale||0),0);
+  const daInc=S.fatture.filter(f=>f.stato==="emessa").reduce((a,f)=>a+(+f.totale||0),0);
+  $("#kpis").innerHTML=[["Da confermare",all.filter(r=>r.stato==="attesa").length],["Appuntamenti oggi",all.filter(r=>r.giorno===t&&r.stato!=="annullata").length],["Eseguite da fatturare",all.filter(r=>r.stato==="eseguita"&&!r.fatturaId).length],["Fatturato del mese",eur(fatMese)],["Da incassare",eur(daInc)]].map(([a,b])=>`<div class="kpi"><span>${a}</span><b>${b}</b></div>`).join("");
+  const q=$("#st-q").value.trim().toLowerCase();const f=S.stFilter;
+  let l=all.filter(r=>f==="tutte"?true:f==="aperte"?(r.stato==="attesa"||r.stato==="confermata"):f==="dafatt"?(r.stato==="eseguita"&&!r.fatturaId):r.stato===f);
+  if(q)l=l.filter(r=>(pname(r.p)+" "+r.servizio+" "+(r.p.telefono||"")).toLowerCase().includes(q));
+  l.sort((a,b)=>(a.giorno||"").localeCompare(b.giorno||""));
+  $("#pren-rows").innerHTML=l.length?l.map(r=>`<tr><td class="num"><b>${esc(fmtDay(r.giorno,{weekday:"short",day:"numeric",month:"short"}))}</b><div class="small muted">${esc(r.orario?"ore "+r.orario:(r.fascia||""))}</div></td>
+    <td><b>${esc(pname(r.p))}</b><div class="small muted num">${esc(r.p.telefono||"")}</div>${r.p.socio===false?`<span class="small muted">non socio</span>`:""}</td>
+    <td>${esc(r.servizio)}${r.note?`<div class="small muted">${esc(r.note)}</div>`:""}${r.origine==="telefono"?`<div class="small muted">${icon("phone")} telefonica</div>`:""}</td>
+    <td class="r num">${eur(r.prezzo)}</td>
+    <td><span class="pill ${r.fatturaId?"fatturata":esc(r.stato)}">${r.fatturaId?"Fatturata "+esc(r.fatturaNum||""):esc(STATI[r.stato]||r.stato)}</span></td>
+    <td><div class="acts">${actions(r)}</div></td></tr>`).join(""):`<tr><td colspan="6"><div class="empty" style="border:0">Nessuna prenotazione in questo elenco.</div></td></tr>`}
+function actions(r){const k=`data-pid="${esc(r.pid)}" data-rid="${esc(r.id)}"`;const a=[];
+  if(r.stato==="attesa")a.push(`<button class="btn sm" ${k} data-act="conferma">Conferma</button>`);
+  if(r.stato==="attesa"||r.stato==="confermata")a.push(`<button class="btn sm ghost" ${k} data-act="eseguita">Eseguita</button>`,`<button class="btn sm danger" ${k} data-act="annulla">Annulla</button>`);
+  if(r.stato==="eseguita"&&!r.fatturaId)a.push(`<button class="btn sm sun" ${k} data-act="fattura">${icon("euro")}Fattura</button>`);
+  if(r.stato==="annullata")a.push(`<button class="btn sm ghost" ${k} data-act="riapri">Ripristina</button>`);
+  return a.join("")}
+document.addEventListener("click",async e=>{const b=e.target.closest("[data-act]");if(!b||!S.staff)return;
+  const pid=b.dataset.pid,id=b.dataset.rid,act=b.dataset.act;const ref=S.db.doc("prenotazioni/"+pid);
+  try{
+    if(act==="conferma"){const f=await formModal(`<h3>Conferma prenotazione</h3><label class="f">Orario concordato <span class="hint">Facoltativo</span><input id="m-ora" type="time"></label>`,"Conferma");if(!f)return;
+      await ref.update({richieste:{[id]:{stato:"confermata",orario:f.querySelector("#m-ora").value||""}}});toast("Prenotazione confermata")}
+    else if(act==="eseguita"){await ref.update({richieste:{[id]:{stato:"eseguita",eseguitaIl:new Date().toISOString()}}});toast("Segnata come eseguita")}
+    else if(act==="annulla"){if(!await ask("<h3>Annullare la prenotazione?</h3>","Annulla prenotazione",true))return;await ref.update({richieste:{[id]:{stato:"annullata",annullatoDa:"staff"}}});toast("Prenotazione annullata")}
+    else if(act==="riapri"){await ref.update({richieste:{[id]:{stato:"attesa"}}});toast("Prenotazione ripristinata")}
+    else if(act==="fattura"){await creaFattura(pid,[id])}
+  }catch(err){toast(errMsg(err))}});
+const errMsg=err=>err&&err.code==="permission_denied"?"Non ha i permessi per questa modifica.":"Operazione non riuscita: riprovi tra poco.";
+
+/* utenti */
+function renderPers(){const q=$("#pers-q").value.trim().toLowerCase();
+  let l=S.pren.map(p=>{const rs=reqList(p);const ff=S.fatture.filter(f=>f.pid===p.id&&f.stato!=="annullata");
+    return {p,n:rs.length,daf:rs.filter(r=>r.stato==="eseguita"&&!r.fatturaId).length,tot:ff.reduce((a,f)=>a+(+f.totale||0),0),aperto:ff.filter(f=>f.stato==="emessa").reduce((a,f)=>a+(+f.totale||0),0)}});
+  if(q)l=l.filter(x=>(pname(x.p)+" "+(x.p.telefono||"")+" "+(x.p.cf||"")).toLowerCase().includes(q));
+  l.sort((a,b)=>pname(a.p).localeCompare(pname(b.p)));
+  $("#pers-list").innerHTML=l.length?l.map(x=>`<button type="button" class="card person" data-pers="${esc(x.p.id)}" aria-pressed="${S.selPers===x.p.id}"><div class="row" style="justify-content:space-between;width:100%"><b>${esc(pname(x.p))}</b>${x.p.socio===false?`<span class="pill emessa">Non socio</span>`:`<span class="pill eseguita">Socio</span>`}</div><span class="small muted num">${esc(x.p.telefono||"")}${x.p.cf?" · "+esc(x.p.cf):""}</span><span class="small num">${x.n} prenotazioni · fatturato ${eur(x.tot)}${x.aperto?` · <b style="color:var(--warn)">da incassare ${eur(x.aperto)}</b>`:""}${x.daf?` · <b>${x.daf} da fatturare</b>`:""}</span></button>`).join(""):`<div class="empty">Ancora nessuno ha prenotato. Le persone compaiono qui alla prima prenotazione, online o telefonica.</div>`;
+  renderPersDetail()}
+$("#pers-list").addEventListener("click",e=>{const b=e.target.closest("[data-pers]");if(!b)return;S.selPers=b.dataset.pers;renderPers()});
+function renderPersDetail(){const el=$("#pers-detail");const p=S.pren.find(x=>x.id===S.selPers);
+  if(!p){el.innerHTML=`<p class="muted">Tocchi una persona per vedere le sue prenotazioni e fatturare.</p>`;return}
+  const rs=reqList(p).reverse();const daf=rs.filter(r=>r.stato==="eseguita"&&!r.fatturaId);const ff=S.fatture.filter(f=>f.pid===p.id).sort((a,b)=>(b.numeroCompleto||"").localeCompare(a.numeroCompleto||""));
+  el.innerHTML=`<div class="row" style="justify-content:space-between"><h2>${esc(pname(p))}</h2><button class="btn ghost sm" type="button" id="pd-edit">Modifica dati</button></div>
+    <dl class="summary"><dt>Telefono</dt><dd class="num">${esc(p.telefono||"—")}</dd><dt>Cod. fiscale</dt><dd>${esc(p.cf||"—")}</dd><dt>Indirizzo</dt><dd>${esc(p.indirizzo||"—")}</dd><dt>Socio</dt><dd>${p.socioId?`Tessera n. ${esc(p.tessera)} <button class="btn ghost sm" type="button" id="pd-socio">Scheda socio</button>`:p.socio===false?"No":`Sì (dichiarato) <button class="btn ghost sm" type="button" id="pd-reg">Registra nel libro soci</button>`}</dd></dl>
+    ${daf.length?`<button class="btn sun" type="button" id="pd-fatt">${icon("euro")} Fattura ${daf.length} prestazion${daf.length>1?"i":"e"} eseguit${daf.length>1?"e":"a"} · ${eur(daf.reduce((a,r)=>a+(+r.prezzo||0),0))}</button>`:""}
+    <h3>Prenotazioni</h3><div class="mine">${rs.length?rs.map(r=>`<div class="item"><div><b>${esc(r.servizio)}</b><div class="small muted">${esc(fmtDay(r.giorno,{day:"numeric",month:"short",year:"numeric"}))} · ${eur(r.prezzo)}</div></div><span class="pill ${r.fatturaId?"fatturata":esc(r.stato)}">${r.fatturaId?"Fatturata":esc(STATI[r.stato]||r.stato)}</span></div>`).join(""):`<p class="muted">Nessuna.</p>`}</div>
+    <h3>Fatture</h3><div class="mine">${ff.length?ff.map(f=>`<div class="item"><div><b class="num">N. ${esc(f.numeroCompleto)}</b><div class="small muted">${esc(fmtDay(f.data,{day:"numeric",month:"short",year:"numeric"}))} · ${eur(f.totale)}</div></div><span class="pill ${esc(f.stato)}">${esc(cap(f.stato==="emessa"?"da incassare":f.stato))}</span></div>`).join(""):`<p class="muted">Nessuna.</p>`}</div>`;
+  const ps=$("#pd-socio");if(ps)ps.onclick=()=>{S.selSocio=p.socioId;S.socioMode="view";selectTab("soci");renderStaff()};
+  const pg=$("#pd-reg");if(pg)pg.onclick=()=>{S.socioMode="new";S.selSocio=null;selectTab("soci");renderSoci(true);
+    const set=(i,v)=>{const el=$(i);if(el&&v)el.value=v};set("#so-nome",p.nome);set("#so-cognome",p.cognome);set("#so-cf",p.cf);set("#so-tel",p.telefono);set("#so-ind",p.indirizzo);$("#so-link").value=p.id};
+  const fb=$("#pd-fatt");if(fb)fb.onclick=()=>creaFattura(p.id,daf.map(r=>r.id)).catch(err=>toast(errMsg(err)));
+  $("#pd-edit").onclick=async()=>{const f=await formModal(`<h3>Dati di ${esc(pname(p))}</h3><div class="fgrid"><label class="f">Nome<input id="e-n" value="${esc(p.nome||"")}"></label><label class="f">Cognome<input id="e-c" value="${esc(p.cognome||"")}"></label><label class="f">Telefono<input id="e-t" value="${esc(p.telefono||"")}"></label><label class="f">Codice fiscale<input id="e-cf" value="${esc(p.cf||"")}"></label><label class="f full">Indirizzo (per fattura)<input id="e-i" value="${esc(p.indirizzo||"")}"></label><label class="row full" style="font-weight:700"><input id="e-s" type="checkbox" ${p.socio===false?"":"checked"} style="width:1.4rem;min-height:1.4rem"> Socio</label></div>`,"Salva");
+    if(!f)return;try{await S.db.doc("prenotazioni/"+p.id).update({nome:f.querySelector("#e-n").value.trim(),cognome:f.querySelector("#e-c").value.trim(),telefono:f.querySelector("#e-t").value.trim(),cf:f.querySelector("#e-cf").value.trim().toUpperCase(),indirizzo:f.querySelector("#e-i").value.trim(),socio:f.querySelector("#e-s").checked});toast("Dati salvati")}catch(err){toast(errMsg(err))}}}
+
+/* prenotazione telefonica */
+$("#btn-newtel").addEventListener("click",async()=>{if(!S.staff)return;const l=activeSvc();
+  if(!l.length){toast("Prima aggiunga almeno un servizio in “Servizi e prezzi”.");return}
+  const people=[...S.pren].sort((a,b)=>pname(a).localeCompare(pname(b)));
+  const f=await formModal(`<h3>Prenotazione telefonica</h3>
+    <label class="f">Persona<select id="t-p"><option value="">Nuova persona…</option><optgroup label="Hanno già prenotato">${people.map(p=>`<option value="${esc(p.id)}">${esc(pname(p))} · ${esc(p.telefono||"")}</option>`).join("")}</optgroup><optgroup label="Soci senza prenotazioni">${S.soci.filter(x=>attivo(x)&&!x.prenId).sort((a,b)=>sname(a).localeCompare(sname(b))).map(x=>`<option value="socio:${esc(x.id)}">${esc(sname(x))} · tessera ${esc(x.tessera)}</option>`).join("")}</optgroup></select></label>
+    <div class="fgrid" id="t-new"><label class="f">Nome<input id="t-n"></label><label class="f">Cognome<input id="t-c"></label><label class="f">Telefono<input id="t-t" type="tel"></label><label class="row" style="font-weight:700"><input id="t-s" type="checkbox" checked style="width:1.4rem;min-height:1.4rem"> Socio</label></div>
+    <label class="f">Servizio<select id="t-svc" required>${l.map(s=>`<option value="${esc(s.id)}">${esc(s.nome)}</option>`).join("")}</select></label>
+    <div class="fgrid"><label class="f">Giorno<input id="t-d" type="date" required value="${bookDays()[0]}"></label><label class="f">Orario<input id="t-o" type="time"></label></div>
+    <label class="f">Note<input id="t-note"></label>`,"Salva prenotazione");
+  if(!f)return;const g=s=>f.querySelector(s);const svc=l.find(s=>s.id===g("#t-svc").value);let pid=g("#t-p").value;
+  const soc=pid.startsWith("socio:")?S.soci.find(x=>x.id===pid.slice(6)):null;
+  const existing=S.pren.find(p=>p.id===pid);const socio=soc?true:existing?existing.socio!==false:g("#t-s").checked;
+  if(!existing&&!soc&&!g("#t-n").value.trim()){toast("Scriva almeno il nome della persona.");return}
+  const id=rid("r");const ora=g("#t-o").value;const req={id,servizioId:svc.id,servizio:svc.nome,prezzo:Number(socio?svc.prezzoSocio:svc.prezzoNonSocio)||0,giorno:g("#t-d").value,fascia:ora&&ora>="13:00"?"pomeriggio":"mattina",orario:ora,note:g("#t-note").value.trim(),stato:"confermata",creato:new Date().toISOString(),origine:"telefono"};
+  try{if(existing)await S.db.doc("prenotazioni/"+pid).update({richieste:{[id]:req}});
+    else if(soc){pid="soc-"+soc.id;await S.db.doc("prenotazioni/"+pid).set({nome:soc.nome,cognome:soc.cognome,telefono:soc.telefono||"",cf:soc.cf||"",indirizzo:[soc.indirizzo,[soc.cap,soc.comune].filter(Boolean).join(" ")].filter(Boolean).join(", "),socio:true,socioId:soc.id,tessera:soc.tessera,richieste:{[id]:req},aggiornato:new Date().toISOString()});
+      await S.db.doc("soci/"+soc.id).update({prenId:pid})}
+    else{pid=rid("tel-");await S.db.doc("prenotazioni/"+pid).set({nome:g("#t-n").value.trim(),cognome:g("#t-c").value.trim(),telefono:g("#t-t").value.trim(),socio,cf:"",richieste:{[id]:req},aggiornato:new Date().toISOString()})}
+    toast("Prenotazione telefonica salvata")}catch(err){toast(errMsg(err))}});
+
+/* ---------- fatturazione ---------- */
+const fcfg=()=>Object.assign({},DEF_FCFG,S.fcfg||{});
+async function creaFattura(pid,ids){const p=S.pren.find(x=>x.id===pid);if(!p)return;const cfg=fcfg();
+  const righe=ids.map(i=>p.richieste[i]).filter(Boolean).map(r=>({rid:r.id,descrizione:r.servizio+" del "+fmtDay(r.giorno,{day:"2-digit",month:"2-digit",year:"numeric"}),importo:+r.prezzo||0}));
+  const imponibile=righe.reduce((a,r)=>a+r.importo,0);const bollo=imponibile>(+cfg.bolloSoglia||77.47)?(+cfg.bolloImporto||2):0;
+  const f=await formModal(`<h3>Nuova fattura per ${esc(pname(p))}</h3>
+    <div class="mine">${righe.map(r=>`<div class="item"><span>${esc(r.descrizione)}</span><b class="num">${eur(r.importo)}</b></div>`).join("")}${bollo?`<div class="item"><span>Imposta di bollo</span><b class="num">${eur(bollo)}</b></div>`:""}<div class="item"><b>Totale</b><b class="num">${eur(imponibile+bollo)}</b></div></div>
+    <label class="f">Codice fiscale del cliente<input id="fx-cf" value="${esc(p.cf||"")}" style="text-transform:uppercase"></label>
+    <label class="f">Indirizzo del cliente<input id="fx-ind" value="${esc(p.indirizzo||"")}"></label>
+    <div class="f"><b>Pagamento</b><div class="choice"><label><input type="radio" name="fx-pag" value="emessa" checked> Da incassare</label><label><input type="radio" name="fx-pag" value="contanti"> Pagata in contanti</label><label><input type="radio" name="fx-pag" value="pos"> Pagata con carta</label></div></div>`,"Emetti fattura");
+  if(!f)return;const cf=f.querySelector("#fx-cf").value.trim().toUpperCase(),ind=f.querySelector("#fx-ind").value.trim(),pag=f.querySelector('input[name="fx-pag"]:checked').value;
+  const lockRef=S.db.doc("impostazioni/fatture");const holder=S.uid||"staff";
+  const lk=await lockRef.acquire({holder,ttlMs:8000});if(!lk.acquired){toast("Un collega sta emettendo una fattura: riprovi tra qualche secondo.");return}
+  const snap=await lockRef.get();const cur=Object.assign({},DEF_FCFG,snap.exists?snap.data():{});const anno=new Date().getFullYear();
+  const num=(+cur.anno===anno?(+cur.ultimo||0):0)+1;const numeroCompleto=num+"/"+anno;const fid="F"+anno+"-"+String(num).padStart(4,"0");
+  const rest={...cur,anno,ultimo:num};delete rest.holder;
+  if(snap.exists)await lockRef.update({anno,ultimo:num});else await lockRef.set(rest);
+  const doc={numero:num,anno,numeroCompleto,data:today(),pid,cliente:{nome:pname(p),cf,indirizzo:ind,telefono:p.telefono||"",socio:p.socio!==false},righe,imponibile,bollo,totale:imponibile+bollo,esenzione:cfg.esenzione,
+    emittente:{denominazione:cfg.denominazione,cf:cfg.cf,indirizzo:cfg.indirizzo},stato:pag==="emessa"?"emessa":"pagata",metodo:pag==="emessa"?"":pag,pagataIl:pag==="emessa"?"":today(),creata:new Date().toISOString()};
+  await S.db.doc("fatture/"+fid).set(doc);
+  const upd={};righe.forEach(r=>upd[r.rid]={fatturaId:fid,fatturaNum:numeroCompleto});
+  await S.db.doc("prenotazioni/"+pid).update({richieste:upd,...(cf?{cf}:{}),...(ind?{indirizzo:ind}:{})});
+  toast("Fattura n. "+numeroCompleto+" emessa")}
+
+function renderFatt(){const all=[...S.fatture].sort((a,b)=>(b.anno-a.anno)||(b.numero-a.numero));const y=new Date().getFullYear();
+  const valid=all.filter(f=>f.stato!=="annullata");
+  $("#fkpis").innerHTML=[["Fatture "+y,valid.filter(f=>f.anno===y).length],["Fatturato "+y,eur(valid.filter(f=>f.anno===y).reduce((a,f)=>a+(+f.totale||0),0))],["Incassato",eur(valid.filter(f=>f.stato==="pagata").reduce((a,f)=>a+(+f.totale||0),0))],["Da incassare",eur(valid.filter(f=>f.stato==="emessa").reduce((a,f)=>a+(+f.totale||0),0))]].map(([a,b])=>`<div class="kpi"><span>${a}</span><b>${b}</b></div>`).join("");
+  const l=all.filter(f=>S.fFilter==="tutte"||f.stato===S.fFilter);
+  $("#fatt-rows").innerHTML=l.length?l.map(f=>`<tr><td class="num"><b>${esc(f.numeroCompleto)}</b></td><td class="num">${esc(fmtDay(f.data,{day:"2-digit",month:"2-digit",year:"numeric"}))}</td><td>${esc(f.cliente?.nome)}<div class="small muted">${esc(f.cliente?.cf||"CF mancante")}</div></td><td class="r num"><b>${eur(f.totale)}</b>${f.bollo?`<div class="small muted">bollo ${eur(f.bollo)}</div>`:""}</td>
+    <td><span class="pill ${esc(f.stato)}">${f.stato==="emessa"?"Da incassare":f.stato==="pagata"?"Pagata"+(f.metodo?" ("+esc(f.metodo)+")":""):"Annullata"}</span></td>
+    <td><div class="acts">${f.stato==="emessa"?`<button class="btn sm" data-fa="paga" data-fid="${esc(f.id)}">Segna pagata</button>`:""}<button class="btn sm ghost" data-fa="scarica" data-fid="${esc(f.id)}">${icon("down")}Scarica</button>${f.stato!=="annullata"?`<button class="btn sm danger" data-fa="annulla" data-fid="${esc(f.id)}">Annulla</button>`:""}</div></td></tr>`).join(""):`<tr><td colspan="6"><div class="empty" style="border:0">Nessuna fattura. Si emettono dalle prenotazioni segnate come eseguite.</div></td></tr>`;
+  fillFcfg()}
+$("#fatt-rows").addEventListener("click",async e=>{const b=e.target.closest("[data-fa]");if(!b)return;const f=S.fatture.find(x=>x.id===b.dataset.fid);if(!f)return;const ref=S.db.doc("fatture/"+f.id);
+  try{if(b.dataset.fa==="paga"){const m=await formModal(`<h3>Fattura n. ${esc(f.numeroCompleto)} pagata</h3><div class="choice"><label><input type="radio" name="pm" value="contanti" checked> Contanti</label><label><input type="radio" name="pm" value="pos"> Carta</label><label><input type="radio" name="pm" value="bonifico"> Bonifico</label></div>`,"Segna pagata");if(!m)return;
+      await ref.update({stato:"pagata",metodo:m.querySelector('input[name="pm"]:checked').value,pagataIl:today()});toast("Fattura segnata come pagata")}
+    else if(b.dataset.fa==="annulla"){if(!await ask(`<h3>Annullare la fattura n. ${esc(f.numeroCompleto)}?</h3><p class="muted">Il numero resta occupato. Se la fattura è già stata trasmessa, va emessa anche una nota di credito dal gestionale.</p>`,"Annulla fattura",true))return;
+      await ref.update({stato:"annullata"});const upd={};(f.righe||[]).forEach(r=>{if(r.rid)upd[r.rid]={fatturaId:"",fatturaNum:""}});
+      if(Object.keys(upd).length)await S.db.doc("prenotazioni/"+f.pid).update({richieste:upd});toast("Fattura annullata: le prestazioni tornano da fatturare")}
+    else if(b.dataset.fa==="scarica")await saveFile("Fattura-"+f.numeroCompleto.replace("/","-")+".html",invoiceHTML(f),"text/html")}
+  catch(err){toast(errMsg(err))}});
+function invoiceHTML(f){const e=f.emittente||{},c=f.cliente||{};
+  return `<!doctype html><html lang="it"><head><meta charset="utf-8"><title>Fattura ${esc(f.numeroCompleto)}</title><style>body{font-family:Verdana,sans-serif;color:#16232A;max-width:760px;margin:40px auto;padding:0 24px;font-size:14px}h1{font-family:Georgia,serif;color:#1F5F4A}table{width:100%;border-collapse:collapse;margin:24px 0}td,th{padding:8px;border-bottom:1px solid #CFD9D3;text-align:left}td.r,th.r{text-align:right}.cols{display:flex;justify-content:space-between;gap:24px}.tot td{font-weight:bold;font-size:16px}.note{color:#45565E;font-size:12px}</style></head><body>
+  <div class="cols"><div><h1>${esc(e.denominazione)}</h1><div>${esc(e.indirizzo)}</div><div>C.F./P.IVA ${esc(e.cf||"—")}</div></div><div style="text-align:right"><h2>Fattura n. ${esc(f.numeroCompleto)}</h2><div>Data ${esc(fmtDay(f.data,{day:"2-digit",month:"2-digit",year:"numeric"}))}</div></div></div>
+  <h3>Intestata a</h3><div>${esc(c.nome)}</div><div>${esc(c.indirizzo||"")}</div><div>C.F. ${esc(c.cf||"—")}</div>
+  <table><thead><tr><th>Descrizione</th><th class="r">Importo</th></tr></thead><tbody>${(f.righe||[]).map(r=>`<tr><td>${esc(r.descrizione)}</td><td class="r">${eur(r.importo)}</td></tr>`).join("")}
+  <tr><td>Totale prestazioni (esente IVA)</td><td class="r">${eur(f.imponibile)}</td></tr>${f.bollo?`<tr><td>Imposta di bollo</td><td class="r">${eur(f.bollo)}</td></tr>`:""}<tr class="tot"><td>Totale da pagare</td><td class="r">${eur(f.totale)}</td></tr></tbody></table>
+  <p class="note">${esc(f.esenzione)}</p>${f.stato==="pagata"?`<p><b>Pagata</b> il ${esc(fmtDay(f.pagataIl,{day:"2-digit",month:"2-digit",year:"numeric"}))}${f.metodo?" ("+esc(f.metodo)+")":""}</p>`:""}${f.stato==="annullata"?`<p><b>FATTURA ANNULLATA</b></p>`:""}</body></html>`}
+$("#f-csv").addEventListener("click",async()=>{const rows=[["Numero","Data","Cliente","Codice fiscale","Imponibile esente","Bollo","Totale","Stato","Metodo","Data pagamento"]];
+  [...S.fatture].sort((a,b)=>(a.anno-b.anno)||(a.numero-b.numero)).forEach(f=>rows.push([f.numeroCompleto,f.data,f.cliente?.nome,f.cliente?.cf,(+f.imponibile).toFixed(2).replace(".",","),(+f.bollo||0).toFixed(2).replace(".",","),(+f.totale).toFixed(2).replace(".",","),f.stato,f.metodo||"",f.pagataIl||""]));
+  const csv="﻿"+rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(";")).join("\r\n");
+  await saveFile("fatture-sms-givolettese-"+today()+".csv",csv,"text/csv")});
+async function saveFile(name,text,type){try{const dl=await window.claude?.use?.("downloads");if(!dl){toast("Lo scaricamento non è disponibile in questa vista.");return}
+  await dl.save({filename:name,data:new Blob([text],{type:type+";charset=utf-8"})})}catch(err){if(err&&err.code!=="cancelled"&&err.code!=="declined")toast("Scaricamento non riuscito.")}}
+let fcfgDirty=false;$("#fcfg").addEventListener("input",()=>fcfgDirty=true);
+function fillFcfg(){if(fcfgDirty)return;const c=fcfg();$("#fc-den").value=c.denominazione;$("#fc-cf").value=c.cf;$("#fc-ind").value=c.indirizzo;$("#fc-es").value=c.esenzione;$("#fc-bs").value=c.bolloSoglia;$("#fc-bi").value=c.bolloImporto}
+$("#fcfg").addEventListener("submit",async e=>{e.preventDefault();const body={denominazione:$("#fc-den").value.trim(),cf:$("#fc-cf").value.trim(),indirizzo:$("#fc-ind").value.trim(),esenzione:$("#fc-es").value.trim(),bolloSoglia:+$("#fc-bs").value||0,bolloImporto:+$("#fc-bi").value||0};
+  try{const ref=S.db.doc("impostazioni/fatture");if(S.fcfg)await ref.update(body);else await ref.set({...DEF_FCFG,...body});fcfgDirty=false;toast("Dati dell'ente salvati")}catch(err){toast(errMsg(err))}});
+
+/* ---------- bacheca staff ---------- */
+function pendingProps(){const out=[];for(const d of S.prop)for(const it of Object.values(d.items||{}))if(it.stato==="attesa")out.push({...it,uid:d.id,autore:d.nome});return out.sort((a,b)=>a.creato.localeCompare(b.creato))}
+function renderBach(){const pp=pendingProps();
+  $("#prop-list").innerHTML=pp.length?pp.map(p=>`<div class="card stack">${p.foto?`<img class="pthumb mimg" src="${PIX}" data-pfoto="${esc(p.uid)}/${esc(p.id)}" alt="Foto allegata">`:""}<div class="row"><span class="pill ${esc(p.categoria)}">${esc(cap(p.categoria))}</span><span class="small muted">da ${esc(p.autore||"socio")} · ${new Date(p.creato).toLocaleDateString("it-IT")}</span></div><h3>${esc(p.titolo)}</h3>${p.data?`<p class="small">${esc(cap(fmtDay(p.data)))}${p.luogo?" · "+esc(p.luogo):""}</p>`:""}<p style="white-space:pre-line">${esc(p.testo)}</p>${p.video?`<p class="small">Video: ${esc(p.video)}</p>`:""}<div class="row"><button class="btn sm" type="button" data-pa="ok" data-uid="${esc(p.uid)}" data-pid="${esc(p.id)}">${icon("check")}Pubblica così</button><button class="btn sm ghost" type="button" data-pa="edit" data-uid="${esc(p.uid)}" data-pid="${esc(p.id)}">${icon("pen")}Apri nell'editor</button><button class="btn sm danger" type="button" data-pa="no" data-uid="${esc(p.uid)}" data-pid="${esc(p.id)}">Non pubblicare</button></div></div>`).join(""):`<div class="empty">Nessuna proposta da controllare.</div>`;
+  const row=(n,col)=>`<div class="card row" style="justify-content:space-between">${n.copertina?`<img class="lthumb mimg" src="${PIX}" data-media="${esc(n.copertina)}" alt="">`:""}<div style="min-width:0;flex:1 1 12rem"><span class="pill ${esc(n.categoria)}">${esc(cap(n.categoria))}</span> <b>${esc(n.titolo||"Senza titolo")}</b><div class="small muted">${n.data?esc(fmtDay(n.data,{day:"numeric",month:"long",year:"numeric"})):"senza data"}${n.aggiornato?" · modificata il "+new Date(n.aggiornato).toLocaleDateString("it-IT"):""}</div></div><div class="row"><button class="btn sm" type="button" data-na="edit" data-col="${col}" data-nid="${esc(n.id)}">${icon("pen")}Modifica</button><button class="btn sm danger" type="button" data-na="del" data-col="${col}" data-nid="${esc(n.id)}">Elimina</button></div></div>`;
+  const dr=[...S.bozze].sort((a,b)=>(b.aggiornato||"").localeCompare(a.aggiornato||""));
+  $("#draft-list").innerHTML=dr.length?dr.map(n=>row(n,"bozze")).join(""):`<div class="empty">Nessuna bozza.</div>`;
+  const pub=sortedNews();
+  $("#pub-list").innerHTML=pub.length?pub.map(n=>row(n,"notizie")).join(""):`<div class="empty">Nessuna notizia pubblicata.</div>`;
+  hydrate($("#bach-list"))}
+async function propPhotoToMedia(p){if(!p.foto)return"";const s=await S.db.doc(`proposte/${p.uid}/foto/${p.id}`).get();if(!s.exists)return"";const d=s.data();
+  const ref=await S.db.collection("media").add({data:d.data,w:d.w||0,h:d.h||0,nome:"foto proposta",creato:new Date().toISOString()});MEDIA[ref.id]={data:d.data};return ref.id}
+function propBlocks(p,media){const b=[];if(media)b.push({t:"img",media,caption:"",size:"wide"});
+  String(p.testo||"").split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean).forEach(x=>b.push({t:"p",html:esc(x).replace(/\n/g,"<br>")}));
+  if(p.video&&vidInfo(p.video))b.push({t:"video",url:p.video,caption:"Guarda il video"});return b}
+$("#prop-list").addEventListener("click",async e=>{const b=e.target.closest("[data-pa]");if(!b)return;const p=pendingProps().find(x=>x.id===b.dataset.pid&&x.uid===b.dataset.uid);if(!p)return;
+  try{if(b.dataset.pa==="ok"){b.disabled=true;const media=await propPhotoToMedia(p);const blocks=propBlocks(p,media);
+      await S.db.collection("notizie").add({titolo:p.titolo,categoria:p.categoria,data:p.data||"",luogo:p.luogo||"",copertina:media,blocks,estratto:plainOf(p.testo).slice(0,260),testo:p.testo,autore:p.autore||"",creato:new Date().toISOString(),aggiornato:new Date().toISOString()});
+      await S.db.doc("proposte/"+p.uid).update({items:{[p.id]:{stato:"pubblicata"}}});toast("Proposta pubblicata in bacheca")}
+    else if(b.dataset.pa==="edit"){b.disabled=true;const media=await propPhotoToMedia(p);openEditor(newModel({titolo:p.titolo,categoria:p.categoria,data:p.data,luogo:p.luogo,autore:p.autore,copertina:media,blocks:propBlocks(p,media),fromProp:p.uid+"|"+p.id}))}
+    else{await S.db.doc("proposte/"+p.uid).update({items:{[p.id]:{stato:"rifiutata"}}});toast("Proposta archiviata")}}catch(err){b.disabled=false;toast(errMsg(err))}});
+$("#bach-list").addEventListener("click",async e=>{if(e.target.closest("#bn-new")){openEditor(newModel({}));return}
+  const b=e.target.closest("[data-na]");if(!b)return;const col=b.dataset.col;const n=(col==="bozze"?S.bozze:S.notizie).find(x=>x.id===b.dataset.nid);if(!n)return;
+  if(b.dataset.na==="edit"){openEditor(newModel({...n,col}));return}
+  if(!await ask(`<h3>Eliminare “${esc(n.titolo||"Senza titolo")}”?</h3><p class="muted">${col==="bozze"?"La bozza verrà cancellata.":"Sparirà dalla bacheca per tutti."}</p>`,"Elimina",true))return;
+  try{await S.db.doc(col+"/"+n.id).delete();toast(col==="bozze"?"Bozza eliminata":"Notizia eliminata")}catch(err){toast(errMsg(err))}});
+
+/* ---------- editor a blocchi ---------- */
+const BT={p:["Paragrafo","para","Testo normale"],h:["Titoletto","title","Per dividere in parti"],img:["Foto","image","Una foto grande"],gal:["Galleria","gallery","Tante foto insieme"],video:["Video","video","Link YouTube o Facebook"],quote:["Citazione","quote","Frase in evidenza"],list:["Elenco","list","Punti uno sotto l'altro"],btn:["Pulsante","link","Link a un modulo o sito"],sep:["Separatore","sep","Una linea di stacco"]};
+let E=null;
+function newModel(o){const bl=Array.isArray(o.blocks)&&o.blocks.length?o.blocks:(o.testo?[{t:"p",html:esc(o.testo).replace(/\n/g,"<br>")}]:[{t:"p",html:""}]);
+  return{id:o.id||"",col:o.col||"",titolo:o.titolo||"",categoria:o.categoria||"evento",data:o.data||"",luogo:o.luogo||"",copertina:o.copertina||"",autore:o.autore||"",creato:o.creato||"",fromProp:o.fromProp||"",
+    blocks:bl.map(b=>({...b,items:b.items?[...b.items]:b.items,k:rid("b")})),dirty:false,preview:false}}
+function openEditor(m){E=m;$("#bach-list").hidden=true;const ed=$("#editor");ed.hidden=false;renderEditor();ed.scrollIntoView({behavior:"smooth",block:"start"});if(!E.titolo)setTimeout(()=>$("#ed-titolo")?.focus(),50)}
+async function closeEditor(force){if(!force&&E&&E.dirty&&!await ask("<h3>Uscire senza salvare?</h3><p class='muted'>Le modifiche non salvate andranno perse.</p>","Esci senza salvare",true))return;
+  E=null;$("#editor").hidden=true;$("#editor").innerHTML="";$("#bach-list").hidden=false;renderBach()}
+const hhmm=()=>new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"});
+function edActions(){const pub=E.col==="notizie";
+  return `<span class="small muted" data-status>${E.dirty?"Modifiche non salvate":E.saved?esc(E.saved):pub?"Pubblicata":E.col==="bozze"?"Bozza":"Nuova notizia"}</span>
+    <button class="btn ghost" type="button" data-ed="preview">${icon("eye")}${E.preview?"Torna a modificare":"Anteprima"}</button>
+    ${pub?"":`<button class="btn ghost" type="button" data-ed="draft">Salva bozza</button>`}
+    <button class="btn sun" type="button" data-ed="publish">${icon("check")}${pub?"Aggiorna la notizia":"Pubblica"}</button>`}
+function markDirty(){if(!E)return;E.dirty=true;$$("#editor [data-status]").forEach(s=>s.textContent="Modifiche non salvate")}
+function renderEditor(){const ed=$("#editor");
+  ed.innerHTML=`<div class="ed-top"><button class="btn ghost" type="button" data-ed="back">${icon("back")} Torna alla bacheca</button><div class="row">${edActions()}</div></div>
+  <div class="ed-layout">
+    <div class="ed-canvas" id="ed-canvas"></div>
+    <aside class="ed-side stack">
+      <div class="panel stack"><h3>Tipo e data</h3>
+        <div class="choice">${["evento","avviso","notizia"].map(c=>`<label><input type="radio" name="ed-cat" value="${c}" ${E.categoria===c?"checked":""}> ${cap(c)}</label>`).join("")}</div>
+        <label class="f">Giorno <span class="hint">Per gli eventi</span><input id="ed-data" type="date" value="${esc(E.data)}"></label>
+        <label class="f">Luogo<input id="ed-luogo" maxlength="120" value="${esc(E.luogo)}" placeholder="Es. Salone SMS"></label>
+      </div>
+      <div class="panel stack"><h3>Foto in evidenza</h3><div id="ed-cover"></div><p class="small muted">Compare nella bacheca e in cima alla notizia.</p></div>
+      <div class="panel stack small"><h3>Come si usa</h3><ul class="blist">
+        <li>Ogni pezzo della notizia è un <b>blocco</b>: testo, foto, video…</li>
+        <li>Tocchi il pulsante <b>+</b> per aggiungere un blocco in quel punto.</li>
+        <li>Toccando un blocco compaiono i comandi per spostarlo su o giù, duplicarlo o eliminarlo.</li>
+        <li>Nel testo, <b>Invio</b> crea un nuovo paragrafo.</li>
+        <li>Le foto si riducono da sole: può caricarle direttamente dal telefono.</li></ul></div>
+    </aside>
+  </div>
+  <div class="ed-top">${E.fromProp?`<span class="small muted">Proposta di ${esc(E.autore||"un socio")}</span>`:"<span></span>"}<div class="row">${edActions()}</div></div>`;
+  renderCanvas();renderCover()}
+function renderCanvas(focusKey,atEnd){const c=$("#ed-canvas");
+  if(E.preview){const d=toDoc();d.id="anteprima";c.innerHTML=`<div class="notice small"><svg class="icon"><use href="#i-eye"/></svg><div>Anteprima: così vedranno la notizia i visitatori.</div></div><article class="art" style="margin-top:1rem"><div class="row"><span class="pill ${esc(d.categoria)}">${esc(cap(d.categoria))}</span>${d.data?`<span class="muted">${esc(cap(fmtDay(d.data,{weekday:"long",day:"numeric",month:"long",year:"numeric"})))}</span>`:""}${d.luogo?`<span class="muted">${icon("pin")} ${esc(d.luogo)}</span>`:""}</div><h1>${esc(d.titolo||"Senza titolo")}</h1>${d.copertina?`<figure class="mfig"><img class="mimg" src="${PIX}" data-media="${esc(d.copertina)}" alt=""></figure>`:""}<div class="art-body">${blocksHTML(d,(d.blocks.find(b=>b.t==="img")||{}).media===d.copertina?d.copertina:null)}</div></article>`;hydrate(c);return}
+  c.innerHTML=`<textarea class="ed-title" id="ed-titolo" rows="1" maxlength="140" placeholder="Scriva qui il titolo" aria-label="Titolo">${esc(E.titolo)}</textarea><div id="ed-blocks"></div>`;
+  growTitle();renderBlocks(focusKey,atEnd)}
+function growTitle(){const t=$("#ed-titolo");if(t){t.style.height="auto";t.style.height=t.scrollHeight+"px"}}
+function insHTML(i,last){return `<div class="ins${last?" last":""}"><button type="button" data-ins="${i}" aria-label="Aggiungi un blocco qui">${icon("plus")}${last?"Aggiungi un blocco":""}</button></div>`}
+function renderBlocks(focusKey,atEnd){const w=$("#ed-blocks");if(!w)return;
+  w.innerHTML=insHTML(0)+E.blocks.map((b,i)=>blockEditHTML(b,i)+insHTML(i+1,i===E.blocks.length-1)).join("")+(E.blocks.length?"":insHTML(0,true));
+  E.blocks.forEach(b=>{const el=w.querySelector(`[data-k="${b.k}"] [data-rich]`);if(!el)return;
+    el.innerHTML=b.t==="list"?(b.items&&b.items.length?b.items:[""]).map(x=>`<li>${clean(x)}</li>`).join(""):clean(b.html||"")});
+  hydrate(w);
+  if(focusKey){const el=w.querySelector(`[data-k="${focusKey}"] [data-rich], [data-k="${focusKey}"] input:not([type=file]), [data-k="${focusKey}"] .upl`);
+    if(el){el.focus();if(el.isContentEditable)placeCaret(el,atEnd)}}}
+function placeCaret(el,end){try{const r=document.createRange();r.selectNodeContents(el);r.collapse(!end);const s=getSelection();s.removeAllRanges();s.addRange(r)}catch(e){}}
+const upl=(attr,label,multi)=>`<label class="btn upl" tabindex="0">${icon("image")}${label}<input type="file" accept="image/*" ${attr} ${multi?"multiple":""} hidden></label>`;
+function blockEditHTML(b,i){const T=BT[b.t]||["Blocco","para"];const rich=["p","quote","list"].includes(b.t);
+  const bar=`<div class="blk-bar" role="toolbar" aria-label="Comandi del blocco ${T[0]}"><span class="blk-name">${icon(T[1])}${T[0]}</span>
+    ${rich?`<button type="button" data-fmt="bold" title="Grassetto" aria-label="Grassetto"><b>G</b></button><button type="button" data-fmt="italic" title="Corsivo" aria-label="Corsivo"><i style="font-family:Georgia,serif">C</i></button><button type="button" data-fmt="link" title="Inserisci un collegamento" aria-label="Collegamento">${icon("link")}</button>`:""}
+    ${b.t==="h"?`<button type="button" data-hl="2" aria-pressed="${b.level!==3}">Grande</button><button type="button" data-hl="3" aria-pressed="${b.level===3}">Piccolo</button>`:""}
+    ${b.t==="img"&&b.media?`<button type="button" data-sz="small" aria-pressed="${b.size==="small"}">Piccola</button><button type="button" data-sz="medium" aria-pressed="${b.size==="medium"}">Media</button><button type="button" data-sz="wide" aria-pressed="${!b.size||b.size==="wide"}">Larga</button>`:""}
+    <span class="sp"></span>
+    <button type="button" data-bo="up" title="Sposta su" aria-label="Sposta su" ${i===0?"disabled":""}>${icon("up")}</button><button type="button" data-bo="down" title="Sposta giù" aria-label="Sposta giù" ${i===E.blocks.length-1?"disabled":""}>${icon("down2")}</button><button type="button" data-bo="dup" title="Duplica" aria-label="Duplica">${icon("copy")}</button><button type="button" data-bo="del" title="Elimina il blocco" aria-label="Elimina il blocco" class="del">${icon("trash")}</button></div>`;
+  let body="";
+  switch(b.t){
+    case"p":body=`<div class="rich" data-rich contenteditable="true" role="textbox" aria-multiline="true" aria-label="Paragrafo" data-ph="Scriva qui il testo…"></div>`;break;
+    case"h":body=`<input class="ed-h lvl${b.level===3?3:2}" data-field="text" value="${esc(b.text||"")}" placeholder="Titoletto di sezione" aria-label="Titoletto">`;break;
+    case"quote":body=`<div class="rich qrich" data-rich contenteditable="true" role="textbox" aria-label="Citazione" data-ph="Scriva la frase da mettere in evidenza…"></div><input data-field="cite" value="${esc(b.cite||"")}" placeholder="Chi l'ha detta (facoltativo)" class="ed-cap">`;break;
+    case"list":body=`<ul class="rich blist" data-rich contenteditable="true" role="textbox" aria-label="Elenco puntato"></ul><p class="small muted">Premere Invio per un nuovo punto.</p>`;break;
+    case"img":body=b.media?`<figure class="mfig size-${esc(b.size||"wide")}"><img class="mimg" src="${PIX}" data-media="${esc(b.media)}" alt=""></figure><input class="ed-cap" data-field="caption" value="${esc(b.caption||"")}" placeholder="Didascalia: scriva cosa mostra la foto (facoltativa)"><div class="row">${upl("data-upl","Sostituisci la foto")}<button type="button" class="btn ghost sm" data-cover="${esc(b.media)}">${E.copertina===b.media?"✓ È la foto in evidenza":"Usa come foto in evidenza"}</button></div>`
+      :`<div class="drop" data-drop="img">${icon("image")}<b>Trascini qui una foto</b><span>oppure</span>${upl("data-upl","Scegli una foto")}<span class="small">Dal computer o dalla galleria del telefono</span></div>`;break;
+    case"gal":{const it=b.items||[];body=`${it.length?`<div class="gthumbs">${it.map((id,j)=>`<div><img class="mimg" src="${PIX}" data-media="${esc(id)}" alt=""><button type="button" data-grm="${j}" aria-label="Togli questa foto">✕</button></div>`).join("")}</div>`:""}<div class="drop" data-drop="gal">${icon("gallery")}<b>${it.length?"Aggiunga altre foto":"Trascini qui le foto"}</b>${upl("data-galupl",it.length?"Aggiungi foto":"Scegli le foto",true)}<span class="small">Può sceglierne tante insieme</span></div>${it.length?`<input class="ed-cap" data-field="caption" value="${esc(b.caption||"")}" placeholder="Didascalia della galleria (facoltativa)">`:""}`;break}
+    case"video":{const v=vidInfo(b.url);body=`<label class="f">Link del video<input data-field="url" value="${esc(b.url||"")}" inputmode="url" placeholder="Incolli qui il link (YouTube, Facebook, Vimeo…)"></label><input class="ed-cap" data-field="caption" value="${esc(b.caption||"")}" placeholder="Titolo del video, es. “La festa dei nonni 2026”"><div class="vprev">${v?vcard(v,b.caption):`<p class="small muted">Il video va prima caricato su YouTube o Facebook: qui basta incollare il link. I visitatori lo apriranno con un tocco.</p>`}</div>`;break}
+    case"btn":body=`<div class="fgrid"><label class="f">Scritta sul pulsante<input data-field="label" value="${esc(b.label||"")}" placeholder="Es. Scarica il modulo"></label><label class="f">Indirizzo a cui porta<input data-field="url" value="${esc(b.url||"")}" inputmode="url" placeholder="https://…"></label></div>`;break;
+    case"sep":body=`<hr class="sep">`;break}
+  return `<div class="blk" data-k="${b.k}" data-t="${b.t}">${bar}${body}</div>`}
+function renderCover(){const el=$("#ed-cover");if(!el)return;const imgs=E.blocks.filter(b=>b.t==="img"&&b.media).map(b=>b.media).concat(...E.blocks.filter(b=>b.t==="gal").map(b=>b.items||[]));
+  el.innerHTML=E.copertina?`<img class="mimg covprev" src="${PIX}" data-media="${esc(E.copertina)}" alt="Foto in evidenza"><div class="row">${upl("data-coverupl","Cambia")}<button type="button" class="btn ghost sm" data-cover="">Togli</button></div>`
+    :`<div class="drop" data-drop="cover">${upl("data-coverupl","Scegli la foto in evidenza")}${imgs.length?`<button type="button" class="btn ghost sm" data-cover="${esc(imgs[0])}">Usa la prima foto della notizia</button>`:""}</div>`;hydrate(el)}
+const blkOf=el=>{const d=el.closest("[data-k]");return d?E.blocks.find(b=>b.k===d.dataset.k):null};
+function syncRich(el){const b=blkOf(el);if(!b)return;if(b.t==="list")b.items=[...el.querySelectorAll("li")].map(li=>li.innerHTML);else b.html=el.innerHTML;markDirty()}
+function addBlock(t,at){const b={t,k:rid("b")};if(t==="p"||t==="quote")b.html="";if(t==="h")b.level=2,b.text="";if(t==="list")b.items=[""];if(t==="gal")b.items=[];if(t==="img")b.size="wide";
+  E.blocks.splice(at,0,b);markDirty();renderBlocks(b.k);renderCover();return b}
+async function doUpload(files,b,mode){files=[...files].filter(f=>f);if(!files.length)return;
+  toast(files.length>1?`Carico ${files.length} foto…`:"Carico la foto…");
+  const blkEl=$(`[data-k="${b?b.k:""}"]`);blkEl&&blkEl.classList.add("busy");
+  let ok=0;for(const f of files){try{const id=await uploadMedia(f);ok++;
+      if(mode==="img"){b.media=id;if(!E.copertina)E.copertina=id}
+      else if(mode==="gal"){b.items=[...(b.items||[]),id];if(!E.copertina)E.copertina=id}
+      else if(mode==="cover")E.copertina=id}
+    catch(err){toast(imgErr(err))}}
+  if(!E)return;markDirty();renderBlocks(b&&b.k);renderCover();if(ok)toast(ok>1?`${ok} foto caricate`:"Foto caricata")}
+function toDoc(){const keep=b=>{switch(b.t){case"p":case"quote":return plainOf(b.html).trim();case"h":return String(b.text||"").trim();case"img":return b.media;case"gal":return (b.items||[]).length;case"video":return vidInfo(b.url);case"list":return b.items.length;case"btn":return b.label&&/^https?:\/\//i.test(b.url||"");default:return true}};
+  const blocks=E.blocks.map(({k,...b})=>{b={...b};if(b.t==="p"||b.t==="quote")b.html=clean(b.html);if(b.t==="list")b.items=(b.items||[]).map(clean).filter(x=>plainOf(x).trim());if(b.t==="h")b.text=String(b.text||"").trim();return b}).filter(keep);
+  const est=blocks.filter(b=>b.t==="p"||b.t==="quote"||b.t==="list").map(b=>b.t==="list"?b.items.map(plainOf).join(", "):plainOf(b.html)).join(" ").replace(/\s+/g," ").trim();
+  const first=(blocks.find(b=>b.t==="img")||{}).media||((blocks.find(b=>b.t==="gal")||{}).items||[])[0]||"";
+  return{titolo:E.titolo.trim(),categoria:E.categoria,data:E.data||"",luogo:E.luogo.trim(),copertina:E.copertina||first,blocks,estratto:est.slice(0,260),testo:est.slice(0,3000),autore:E.autore||"",creato:E.creato||new Date().toISOString(),aggiornato:new Date().toISOString()}}
+async function saveEd(mode){if(!E.titolo.trim()){toast("Scriva prima il titolo della notizia.");if(E.preview){E.preview=false;renderEditor()}$("#ed-titolo")?.focus();return}
+  const d=toDoc();if(!d.blocks.length&&mode==="publish"){toast("La notizia è vuota: aggiunga almeno un testo o una foto.");return}
+  if(JSON.stringify(d).length>240000){toast("La notizia è troppo lunga: la divida in due notizie.");return}
+  $$("#editor [data-ed=publish],#editor [data-ed=draft]").forEach(x=>x.disabled=true);
+  try{if(mode==="draft"){const id=E.col==="bozze"?E.id:(E.id||rid("n"));await S.db.doc("bozze/"+id).set(d);E.id=id;E.col="bozze";E.creato=d.creato;E.dirty=false;E.saved="Bozza salvata alle "+hhmm();renderEditorTop();toast("Bozza salvata")}
+    else{const id=E.id||rid("n");await S.db.doc("notizie/"+id).set(d);if(E.col==="bozze")await S.db.doc("bozze/"+E.id).delete();
+      if(E.fromProp){const[u,p]=E.fromProp.split("|");await S.db.doc("proposte/"+u).update({items:{[p]:{stato:"pubblicata"}}})}
+      toast(E.col==="notizie"?"Notizia aggiornata":"Notizia pubblicata in bacheca");E.dirty=false;closeEditor(true)}}
+  catch(err){toast(errMsg(err))}finally{$$("#editor [data-ed=publish],#editor [data-ed=draft]").forEach(x=>x.disabled=false)}}
+function renderEditorTop(){$$("#editor .ed-top .row").forEach(r=>r.innerHTML=edActions())}
+
+/* eventi dell'editor */
+const edEl=$("#editor");
+edEl.addEventListener("input",e=>{if(!E)return;const t=e.target;
+  if(t.id==="ed-titolo"){E.titolo=t.value;growTitle();markDirty();return}
+  if(t.id==="ed-data"){E.data=t.value;markDirty();return}if(t.id==="ed-luogo"){E.luogo=t.value;markDirty();return}
+  if(t.name==="ed-cat"){E.categoria=t.value;markDirty();return}
+  if(t.matches("[data-rich]")){syncRich(t);return}
+  if(t.matches("[data-field]")){const b=blkOf(t);if(!b)return;b[t.dataset.field]=t.value;markDirty();
+    if(b.t==="video"){const v=vidInfo(b.url);t.closest(".blk").querySelector(".vprev").innerHTML=v?vcard(v,b.caption):`<p class="small muted">${b.url?"Questo non sembra un link valido: deve iniziare con https://":"Il video va prima caricato su YouTube o Facebook: qui basta incollare il link."}</p>`}}});
+edEl.addEventListener("change",e=>{if(!E)return;const t=e.target;if(t.name==="ed-cat"){E.categoria=t.value;markDirty()}
+  if(t.type!=="file"||!t.files.length)return;const files=[...t.files];t.value="";
+  if(t.hasAttribute("data-upl"))doUpload(files.slice(0,1),blkOf(t),"img");
+  else if(t.hasAttribute("data-galupl"))doUpload(files,blkOf(t),"gal");
+  else if(t.hasAttribute("data-coverupl"))doUpload(files.slice(0,1),null,"cover")});
+edEl.addEventListener("keydown",e=>{if(!E)return;const t=e.target;
+  if(t.matches("label.upl")&&(e.key==="Enter"||e.key===" ")){e.preventDefault();t.querySelector("input").click();return}
+  if(t.id==="ed-titolo"&&e.key==="Enter"){e.preventDefault();const f=E.blocks[0];if(f&&f.t==="p"){renderBlocks(f.k,false)}else addBlock("p",0);return}
+  if(!t.matches("[data-rich]"))return;const b=blkOf(t);if(!b)return;const i=E.blocks.indexOf(b);
+  if(b.t==="p"&&e.key==="Enter"&&!e.shiftKey){e.preventDefault();const sel=getSelection();if(!sel.rangeCount)return;
+    const r=sel.getRangeAt(0);r.deleteContents();const after=document.createRange();after.selectNodeContents(t);after.setStart(r.endContainer,r.endOffset);
+    const tmp=document.createElement("div");tmp.appendChild(after.extractContents());b.html=t.innerHTML;
+    const nb={t:"p",html:plainOf(tmp.innerHTML).trim()?tmp.innerHTML:"",k:rid("b")};E.blocks.splice(i+1,0,nb);markDirty();renderBlocks(nb.k,false);return}
+  if(e.key==="Backspace"&&(b.t==="p"||b.t==="quote")&&!t.textContent.length&&E.blocks.length>1){e.preventDefault();E.blocks.splice(i,1);markDirty();
+    const prev=E.blocks[Math.max(0,i-1)];renderBlocks(prev.k,true);renderCover()}});
+edEl.addEventListener("mousedown",e=>{if(e.target.closest("[data-fmt]"))e.preventDefault()});
+edEl.addEventListener("click",async e=>{if(!E)return;const t=e.target;
+  const ed=t.closest("[data-ed]");if(ed){const a=ed.dataset.ed;
+    if(a==="back")closeEditor();else if(a==="preview"){E.preview=!E.preview;renderEditor()}else if(a==="draft")saveEd("draft");else if(a==="publish")saveEd("publish");return}
+  if(t.closest("[data-ed-close-pal]")){$$(".palette",edEl).forEach(p=>p.remove());return}
+  const ins=t.closest("[data-ins]");if(ins){const open=ins.parentElement.nextElementSibling;$$(".palette",edEl).forEach(p=>p.remove());if(open&&open.classList.contains("palette"))return;
+    const at=+ins.dataset.ins;const pal=document.createElement("div");pal.className="palette";pal.setAttribute("role","menu");
+    pal.innerHTML=`<div class="pal-head"><b>Che cosa vuole aggiungere?</b><button type="button" class="btn ghost sm" data-ed-close-pal>Chiudi</button></div>`+Object.entries(BT).map(([k,v])=>`<button type="button" role="menuitem" data-add="${k}" data-at="${at}">${icon(v[1])}<b>${v[0]}</b><span>${v[2]}</span></button>`).join("");
+    ins.parentElement.after(pal);pal.querySelector("[data-add]").focus();return}
+  const add=t.closest("[data-add]");if(add){addBlock(add.dataset.add,+add.dataset.at);return}
+  const b=blkOf(t);
+  const cov=t.closest("[data-cover]");if(cov){E.copertina=cov.dataset.cover;markDirty();renderCover();if(b)renderBlocks();return}
+  if(!b)return;const i=E.blocks.indexOf(b);
+  const bo=t.closest("[data-bo]");if(bo){const a=bo.dataset.bo;
+    if(a==="up"&&i>0){E.blocks.splice(i-1,0,E.blocks.splice(i,1)[0])}
+    else if(a==="down"&&i<E.blocks.length-1){E.blocks.splice(i+1,0,E.blocks.splice(i,1)[0])}
+    else if(a==="dup"){const c=JSON.parse(JSON.stringify(b));c.k=rid("b");E.blocks.splice(i+1,0,c)}
+    else if(a==="del"){const filled=(b.t==="p"||b.t==="quote")?plainOf(b.html).trim():b.t==="sep"?false:true;
+      if(filled&&!await ask(`<h3>Eliminare questo blocco (${BT[b.t][0]})?</h3>`,"Elimina blocco",true))return;E.blocks.splice(i,1);
+      if(!E.blocks.length)E.blocks.push({t:"p",html:"",k:rid("b")})}
+    markDirty();renderBlocks();renderCover();const moved=$(`[data-k="${b.k}"] [data-bo="${bo.dataset.bo}"]`);if(moved&&!moved.disabled)moved.focus();return}
+  const hl=t.closest("[data-hl]");if(hl){b.level=+hl.dataset.hl;markDirty();renderBlocks(b.k);return}
+  const sz=t.closest("[data-sz]");if(sz){b.size=sz.dataset.sz;markDirty();renderBlocks();return}
+  const grm=t.closest("[data-grm]");if(grm){const id=b.items[+grm.dataset.grm];b.items.splice(+grm.dataset.grm,1);if(E.copertina===id)E.copertina="";markDirty();renderBlocks();renderCover();return}
+  const fm=t.closest("[data-fmt]");if(fm){const rich=t.closest(".blk").querySelector("[data-rich]");
+    if(fm.dataset.fmt==="link"){const sel=getSelection();const range=sel.rangeCount&&rich.contains(sel.anchorNode)?sel.getRangeAt(0).cloneRange():null;
+      if(!range||range.collapsed){toast("Prima selezioni le parole da trasformare in collegamento.");return}
+      const f=await formModal(`<h3>Inserisci un collegamento</h3><label class="f">Indirizzo<input id="lk-u" inputmode="url" placeholder="https://…" required></label>`,"Inserisci");if(!f)return;
+      let u=f.querySelector("#lk-u").value.trim();if(!/^(https?:|mailto:|tel:)/i.test(u))u="https://"+u;
+      rich.focus();sel.removeAllRanges();sel.addRange(range);document.execCommand("createLink",false,u)}
+    else{if(!rich.contains(getSelection().anchorNode))rich.focus();document.execCommand(fm.dataset.fmt)}
+    syncRich(rich)}});
+["dragover","dragenter"].forEach(ev=>edEl.addEventListener(ev,e=>{const d=e.target.closest("[data-drop]");if(!d)return;e.preventDefault();d.classList.add("over")}));
+edEl.addEventListener("dragleave",e=>{const d=e.target.closest("[data-drop]");if(d)d.classList.remove("over")});
+edEl.addEventListener("drop",e=>{const d=e.target.closest("[data-drop]");if(!d)return;e.preventDefault();d.classList.remove("over");const files=[...(e.dataTransfer?.files||[])];if(!files.length)return;
+  const m=d.dataset.drop;doUpload(m==="gal"?files:files.slice(0,1),blkOf(d),m)});
+edEl.addEventListener("paste",e=>{const t=e.target;if(!t.matches||!t.matches("[data-rich]"))return;e.preventDefault();
+  const txt=(e.clipboardData||window.clipboardData).getData("text/plain");document.execCommand("insertText",false,txt)});
+
+/* ---------- servizi staff ---------- */
+function renderServAdmin(){const l=[...S.servizi].sort((a,b)=>(a.ordine??99)-(b.ordine??99));
+  $("#serv-list").innerHTML=l.length?l.map(s=>`<div class="card stack"><div class="row" style="justify-content:space-between"><h3>${esc(s.nome)}</h3>${s.attivo===false?`<span class="pill annullata">Non prenotabile</span>`:`<span class="pill eseguita">Prenotabile</span>`}</div><p class="small muted">${esc(s.descrizione||"")}</p><p class="num">Soci <b>${eur(s.prezzoSocio)}</b> · Non soci <b>${eur(s.prezzoNonSocio)}</b>${s.quando?" · "+esc(s.quando):""}</p><div class="row"><button class="btn sm ghost" data-sa="edit" data-sid="${esc(s.id)}">Modifica</button><button class="btn sm danger" data-sa="del" data-sid="${esc(s.id)}">Elimina</button></div></div>`).join(""):`<div class="empty">Nessun servizio. Aggiunga il primo con il modulo qui accanto.</div>`}
+function fillSvc(s){$("#sf-id").value=s.id||"";$("#sf-nome").value=s.nome||"";$("#sf-desc").value=s.descrizione||"";$("#sf-ps").value=s.prezzoSocio??"";$("#sf-pn").value=s.prezzoNonSocio??"";$("#sf-quando").value=s.quando||"";$("#sf-ord").value=s.ordine??"";$("#sf-att").checked=s.attivo!==false;$("#sf-title").textContent=s.id?"Modifica servizio":"Nuovo servizio"}
+$("#sf-reset").addEventListener("click",()=>fillSvc({}));
+$("#serv-list").addEventListener("click",async e=>{const b=e.target.closest("[data-sa]");if(!b)return;const s=S.servizi.find(x=>x.id===b.dataset.sid);if(!s)return;
+  if(b.dataset.sa==="edit"){fillSvc(s);$("#svc-form").scrollIntoView({behavior:"smooth"});return}
+  if(!await ask(`<h3>Eliminare “${esc(s.nome)}”?</h3><p class="muted">Le prenotazioni già fatte restano. Per sospenderlo senza perderlo, tolga invece la spunta “Prenotabile online”.</p>`,"Elimina",true))return;
+  try{await S.db.doc("servizi/"+s.id).delete();toast("Servizio eliminato")}catch(err){toast(errMsg(err))}});
+$("#svc-form").addEventListener("submit",async e=>{e.preventDefault();const id=$("#sf-id").value;
+  const body={nome:$("#sf-nome").value.trim(),descrizione:$("#sf-desc").value.trim(),prezzoSocio:+$("#sf-ps").value||0,prezzoNonSocio:+$("#sf-pn").value||0,quando:$("#sf-quando").value.trim(),ordine:$("#sf-ord").value===""?99:+$("#sf-ord").value,attivo:$("#sf-att").checked};
+  try{if(id)await S.db.doc("servizi/"+id).update(body);else await S.db.collection("servizi").add(body);fillSvc({});toast("Servizio salvato")}catch(err){toast(errMsg(err))}});
+
+/* ---------- soci ---------- */
+const ANNO=new Date().getFullYear();
+const TIPI={ordinario:"Ordinario",familiare:"Familiare",sostenitore:"Sostenitore",onorario:"Onorario"};
+const sname=x=>((x.cognome||"")+" "+(x.nome||"")).trim()||"Senza nome";
+const scfg=()=>Object.assign({quota:20,ultimo:0},S.scfg||{});
+const quotaOk=x=>!!(x.quote&&x.quote[ANNO]);
+const attivo=x=>x.stato!=="cessato";
+function selectTab(t){S.tab=t;$$("[data-tab]").forEach(x=>x.setAttribute("aria-selected",String(x.dataset.tab===t)));$$("[data-tabpanel]").forEach(p=>p.hidden=p.dataset.tabpanel!==t)}
+$$("[data-so]").forEach(b=>b.addEventListener("click",()=>{S.soFilter=b.dataset.so;$$("[data-so]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));renderSoci()}));
+$("#so-q").addEventListener("input",()=>renderSoci());
+$("#btn-newsocio").addEventListener("click",()=>{if(S.page!=="staff")go("staff");selectTab("soci");S.socioMode="new";S.selSocio=null;renderSoci(true);$("#socio-panel").scrollIntoView({behavior:"smooth",block:"start"})});
+function renderSoci(force){const all=S.soci;const att=all.filter(attivo);
+  $("#skpis").innerHTML=[["Soci attivi",att.length],["In regola "+ANNO,att.filter(quotaOk).length],["Quota "+ANNO+" da pagare",att.filter(x=>!quotaOk(x)).length],["Iscritti nel "+ANNO,all.filter(x=>(x.dataIscrizione||"").startsWith(String(ANNO))).length]].map(([a,b])=>`<div class="kpi"><span>${a}</span><b>${b}</b></div>`).join("");
+  const q=$("#so-q").value.trim().toLowerCase();const f=S.soFilter;
+  let l=all.filter(x=>f==="tutti"?true:f==="cessati"?!attivo(x):f==="rinnovo"?(attivo(x)&&!quotaOk(x)):attivo(x));
+  if(q)l=l.filter(x=>(sname(x)+" "+x.tessera+" "+(x.cf||"")+" "+(x.telefono||"")).toLowerCase().includes(q));
+  l.sort((a,b)=>sname(a).localeCompare(sname(b)));
+  $("#soci-list").innerHTML=l.length?l.map(x=>`<button type="button" class="card person" data-socio="${esc(x.id)}" aria-pressed="${S.selSocio===x.id}"><div class="row" style="justify-content:space-between;width:100%"><b>${esc(sname(x))}</b><span class="small muted num">Tessera n. ${esc(x.tessera)}</span></div><span class="small muted num">${esc(x.telefono||"")}${x.cf?" · "+esc(x.cf):""}</span><span class="row">${!attivo(x)?`<span class="pill annullata">Cessato</span>`:quotaOk(x)?`<span class="pill eseguita">Quota ${ANNO} pagata</span>`:`<span class="pill attesa">Quota ${ANNO} da pagare</span>`}<span class="small muted">${esc(TIPI[x.tipo]||"Ordinario")}</span></span></button>`).join(""):`<div class="empty">${all.length?"Nessun socio in questo elenco.":"Il libro soci è vuoto. Registri il primo socio con il pulsante “Nuovo socio”."}</div>`;
+  if(force||S.socioMode==="view")renderSocioPanel();fillScfg()}
+$("#soci-list").addEventListener("click",e=>{const b=e.target.closest("[data-socio]");if(!b)return;
+  if(S.socioMode!=="view"){ask("<h3>Uscire senza salvare?</h3><p class='muted'>I dati scritti nel modulo andranno persi.</p>","Esci senza salvare",true).then(ok=>{if(ok){S.socioMode="view";S.selSocio=b.dataset.socio;renderSoci(true)}});return}
+  S.selSocio=b.dataset.socio;renderSoci(true);if(innerWidth<960)$("#socio-panel").scrollIntoView({behavior:"smooth"})});
+
+function renderSocioPanel(){const el=$("#socio-panel");
+  if(S.socioMode==="new"||S.socioMode==="edit"){el.innerHTML=socioForm(S.socioMode==="edit"?S.soci.find(x=>x.id===S.selSocio):null);bindSocioForm();return}
+  const x=S.soci.find(y=>y.id===S.selSocio);
+  if(!x){el.innerHTML=`<h2>Libro soci</h2><p class="muted">Tocchi un socio nell'elenco per vedere la sua scheda, registrare la quota o modificare i dati.</p><div><button class="btn big" type="button" data-sx="new">${icon("plus")} Registra un nuovo socio</button></div>`;return}
+  const anni=Object.keys(x.quote||{}).sort().reverse();const pr=S.pren.find(p=>p.id===x.prenId);
+  el.innerHTML=`<div class="tessera"><small>Società di Mutuo Soccorso Givolettese · Tessera socio</small><span class="n">N. ${esc(x.tessera)}</span><b>${esc((x.nome||"")+" "+(x.cognome||""))}</b><small>Iscritto dal ${esc(fmtDay(x.dataIscrizione,{day:"2-digit",month:"2-digit",year:"numeric"}))} · ${esc(TIPI[x.tipo]||"Ordinario")}</small></div>
+    ${!attivo(x)?`<div class="notice"><svg class="icon"><use href="#i-info"/></svg><div><b>Socio cessato</b> dal ${esc(fmtDay(x.cessatoIl,{day:"2-digit",month:"2-digit",year:"numeric"}))}${x.motivoCessazione?" · "+esc(x.motivoCessazione):""}</div></div>`:""}
+    <div class="row">${attivo(x)&&!quotaOk(x)?`<button class="btn sun" type="button" data-sx="quota">${icon("euro")} Registra quota ${ANNO}</button>`:""}<button class="btn ghost sm" type="button" data-sx="edit">Modifica dati</button>${attivo(x)?`<button class="btn danger sm" type="button" data-sx="cessa">Cessa iscrizione</button>`:`<button class="btn ghost sm" type="button" data-sx="riattiva">Riattiva</button>`}</div>
+    <dl class="summary"><dt>Codice fiscale</dt><dd>${esc(x.cf||"—")}</dd><dt>Nato/a</dt><dd>${esc([x.luogoNascita,fmtDay(x.dataNascita,{day:"2-digit",month:"2-digit",year:"numeric"})].filter(Boolean).join(", ")||"—")}</dd><dt>Indirizzo</dt><dd>${esc([x.indirizzo,[x.cap,x.comune].filter(Boolean).join(" ")].filter(Boolean).join(", ")||"—")}</dd><dt>Telefono</dt><dd class="num">${esc(x.telefono||"—")}</dd><dt>Email</dt><dd>${esc(x.email||"—")}</dd><dt>Privacy</dt><dd>${x.privacy?"Consenso firmato il "+esc(fmtDay(x.privacyIl||x.dataIscrizione,{day:"2-digit",month:"2-digit",year:"numeric"})):"Manca il consenso"}</dd>${x.note?`<dt>Note</dt><dd>${esc(x.note)}</dd>`:""}</dl>
+    <h3>Prenotazioni e fatture</h3>${pr?`<p>Collegato all'utente <b>${esc(pname(pr))}</b>: ${reqList(pr).length} prenotazioni. <button class="btn ghost sm" type="button" data-sx="vediutente">Apri scheda utente</button></p>`:`<p class="muted">Non ha ancora prenotazioni. Le prenotazioni telefoniche fatte per questo socio si collegano da sole.</p>`}
+    <h3>Quote pagate</h3><div class="mine">${anni.length?anni.map(a=>{const qq=x.quote[a];return `<div class="item"><div><b class="num">${esc(a)}</b><div class="small muted num">${eur(qq.importo)} · ${esc(fmtDay(qq.data,{day:"2-digit",month:"2-digit",year:"numeric"}))}${qq.metodo?" · "+esc(qq.metodo):""}</div></div><button class="btn ghost sm" type="button" data-sx="ricevuta" data-anno="${esc(a)}">${icon("down")} Ricevuta</button></div>`}).join(""):`<p class="muted">Nessuna quota registrata.</p>`}</div>`}
+
+function socioForm(x){x=x||{};const nuovo=!x.id;const c=scfg();
+  const linked=new Set(S.soci.map(y=>y.prenId).filter(Boolean));
+  const cand=S.pren.filter(p=>!linked.has(p.id)||p.id===x.prenId).sort((a,b)=>pname(a).localeCompare(pname(b)));
+  return `<form id="socio-form" class="stack" autocomplete="off"><div class="row" style="justify-content:space-between"><h2>${nuovo?"Nuovo socio":"Modifica socio n. "+esc(x.tessera)}</h2>${nuovo?`<span class="small muted num">Riceverà la tessera n. ${(+c.ultimo||0)+1}</span>`:""}</div>
+  <fieldset><legend>Dati anagrafici</legend><div class="fgrid">
+    <label class="f">Nome<input id="so-nome" required maxlength="60" value="${esc(x.nome||"")}"></label>
+    <label class="f">Cognome<input id="so-cognome" required maxlength="60" value="${esc(x.cognome||"")}"></label>
+    <label class="f">Codice fiscale<input id="so-cf" maxlength="16" style="text-transform:uppercase" value="${esc(x.cf||"")}"><span class="hint" id="so-cf-hint">16 caratteri</span></label>
+    <label class="f">Data di nascita<input id="so-dn" type="date" value="${esc(x.dataNascita||"")}"></label>
+    <label class="f full">Luogo di nascita<input id="so-ln" maxlength="80" value="${esc(x.luogoNascita||"")}"></label>
+  </div></fieldset>
+  <fieldset><legend>Residenza e contatti</legend><div class="fgrid">
+    <label class="f full">Indirizzo<input id="so-ind" maxlength="120" value="${esc(x.indirizzo||"")}" placeholder="Via e numero civico"></label>
+    <label class="f">CAP<input id="so-cap" maxlength="5" inputmode="numeric" value="${esc(x.cap||"10040")}"></label>
+    <label class="f">Comune<input id="so-com" maxlength="60" value="${esc(x.comune||"Givoletto")}"></label>
+    <label class="f">Telefono<input id="so-tel" type="tel" maxlength="30" value="${esc(x.telefono||"")}"></label>
+    <label class="f">Email <span class="hint">Facoltativa</span><input id="so-mail" type="email" maxlength="120" value="${esc(x.email||"")}"></label>
+  </div></fieldset>
+  <fieldset><legend>Iscrizione</legend><div class="fgrid">
+    <label class="f">Data di iscrizione<input id="so-di" type="date" required value="${esc(x.dataIscrizione||today())}"></label>
+    <label class="f">Tipo di socio<select id="so-tipo">${Object.entries(TIPI).map(([k,v])=>`<option value="${k}" ${(x.tipo||"ordinario")===k?"selected":""}>${v}</option>`).join("")}</select></label>
+    <label class="f full">Collega a chi ha già prenotato <span class="hint">Così prenotazioni e fatture finiscono nella sua scheda</span><select id="so-link"><option value="">Nessun collegamento</option>${cand.map(p=>`<option value="${esc(p.id)}" ${x.prenId===p.id?"selected":""}>${esc(pname(p))} · ${esc(p.telefono||"")}</option>`).join("")}</select></label>
+    ${nuovo?`<div class="f full"><b>Quota ${ANNO} (${eur(c.quota)})</b><div class="choice"><label><input type="radio" name="so-q" value="no" checked> Non ancora pagata</label><label><input type="radio" name="so-q" value="contanti"> Pagata in contanti</label><label><input type="radio" name="so-q" value="pos"> Pagata con carta</label><label><input type="radio" name="so-q" value="bonifico"> Bonifico</label></div></div>`:""}
+    <label class="row full" style="font-weight:700;align-items:flex-start"><input id="so-priv" type="checkbox" ${x.privacy?"checked":""} style="width:1.4rem;min-height:1.4rem;accent-color:var(--accent);margin-top:.2rem"> Ha firmato il modulo di consenso al trattamento dei dati personali</label>
+    <label class="f full">Note<textarea id="so-note" maxlength="600" style="min-height:4rem">${esc(x.note||"")}</textarea></label>
+  </div></fieldset>
+  <div class="row"><button class="btn big" type="submit">${icon("check")} ${nuovo?"Registra il socio":"Salva le modifiche"}</button><button class="btn ghost" type="button" data-sx="annullaform">Annulla</button></div></form>`}
+const cfOk=v=>/^[A-Z]{6}[0-9LMNPQRSTUV]{2}[A-EHLMPR-T][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$/.test(v);
+function bindSocioForm(){const f=$("#socio-form");const cf=$("#so-cf"),h=$("#so-cf-hint");
+  cf.addEventListener("input",()=>{const v=cf.value.trim().toUpperCase();h.textContent=!v?"16 caratteri":cfOk(v)?"Codice fiscale corretto":v.length<16?`Mancano ${16-v.length} caratteri`:"Controlli il codice: non sembra corretto";h.style.color=v&&!cfOk(v)&&v.length>=16?"var(--bad)":v&&cfOk(v)?"var(--ok)":""});
+  const autoLink=()=>{const sel=$("#so-link");if(sel.value)return;const t=$("#so-tel").value.replace(/\D/g,""),c=cf.value.trim().toUpperCase();
+    const m=S.pren.find(p=>[...sel.options].some(o=>o.value===p.id)&&((c&&p.cf===c)||(t.length>5&&(p.telefono||"").replace(/\D/g,"")===t)));if(m){sel.value=m.id;toast("Trovato tra chi ha prenotato: "+pname(m)+". L'ho collegato.")}};
+  $("#so-tel").addEventListener("change",autoLink);cf.addEventListener("change",autoLink);
+  f.addEventListener("submit",e=>{e.preventDefault();saveSocio().catch(err=>toast(errMsg(err)))})}
+
+async function saveSocio(){const g=id=>$(id).value.trim();const edit=S.socioMode==="edit"?S.soci.find(x=>x.id===S.selSocio):null;
+  const body={nome:g("#so-nome"),cognome:g("#so-cognome"),cf:g("#so-cf").toUpperCase(),dataNascita:g("#so-dn"),luogoNascita:g("#so-ln"),indirizzo:g("#so-ind"),cap:g("#so-cap"),comune:g("#so-com"),telefono:g("#so-tel"),email:g("#so-mail"),dataIscrizione:g("#so-di"),tipo:$("#so-tipo").value,prenId:$("#so-link").value,privacy:$("#so-priv").checked,note:g("#so-note")};
+  if(body.cf&&!cfOk(body.cf)&&!await ask("<h3>Il codice fiscale non sembra corretto</h3><p class='muted'>Vuole salvare lo stesso?</p>","Salva lo stesso"))return;
+  const dup=body.cf&&S.soci.find(x=>x.cf===body.cf&&x.id!==(edit&&edit.id));if(dup){toast("Esiste già il socio n. "+dup.tessera+" con questo codice fiscale.");return}
+  if(!body.privacy&&!await ask("<h3>Manca il consenso privacy</h3><p class='muted'>Può registrare il socio e farlo firmare dopo. Lo segnaliamo nella scheda.</p>","Registra comunque"))return;
+  if(body.privacy&&!(edit&&edit.privacy))body.privacyIl=today();
+  let id,tessera;
+  if(edit){id=edit.id;tessera=edit.tessera;await S.db.doc("soci/"+id).update(body);
+    if(edit.prenId&&edit.prenId!==body.prenId)await S.db.doc("prenotazioni/"+edit.prenId).update({socioId:"",tessera:""})}
+  else{const lock=S.db.doc("impostazioni/soci");const lk=await lock.acquire({holder:S.uid||"staff",ttlMs:8000});
+    if(!lk.acquired){toast("Un collega sta registrando un socio: riprovi tra qualche secondo.");return}
+    const snap=await lock.get();const cur=Object.assign({quota:20,ultimo:0},snap.exists?snap.data():{});tessera=(+cur.ultimo||0)+1;
+    if(snap.exists)await lock.update({ultimo:tessera});else await lock.set({quota:cur.quota,ultimo:tessera});
+    id="T"+String(tessera).padStart(5,"0");const pag=$('input[name="so-q"]:checked').value;
+    const quote=pag==="no"?{}:{[ANNO]:{importo:+scfg().quota||0,data:today(),metodo:pag}};
+    await S.db.doc("soci/"+id).set({...body,tessera,stato:"attivo",quote,creato:new Date().toISOString()})}
+  if(body.prenId)await S.db.doc("prenotazioni/"+body.prenId).update({socio:true,socioId:id,tessera,nome:body.nome,cognome:body.cognome,...(body.cf?{cf:body.cf}:{}),...(body.indirizzo?{indirizzo:[body.indirizzo,[body.cap,body.comune].filter(Boolean).join(" ")].filter(Boolean).join(", ")}:{})});
+  S.socioMode="view";S.selSocio=id;toast(edit?"Dati del socio salvati":"Socio registrato: tessera n. "+tessera);renderSoci(true)}
+
+$("#socio-panel").addEventListener("click",async e=>{const b=e.target.closest("[data-sx]");if(!b)return;const a=b.dataset.sx;const x=S.soci.find(y=>y.id===S.selSocio);
+  try{
+  if(a==="new"){S.socioMode="new";S.selSocio=null;renderSoci(true)}
+  else if(a==="annullaform"){S.socioMode="view";renderSoci(true)}
+  else if(a==="edit"){S.socioMode="edit";renderSoci(true)}
+  else if(a==="quota"&&x){const m=await formModal(`<h3>Quota ${ANNO} di ${esc(sname(x))}</h3><label class="f">Importo (€)<input id="q-imp" type="number" step="0.5" min="0" value="${esc(scfg().quota)}"></label><div class="choice"><label><input type="radio" name="q-m" value="contanti" checked> Contanti</label><label><input type="radio" name="q-m" value="pos"> Carta</label><label><input type="radio" name="q-m" value="bonifico"> Bonifico</label></div>`,"Registra pagamento");if(!m)return;
+    await S.db.doc("soci/"+x.id).update({quote:{[ANNO]:{importo:+m.querySelector("#q-imp").value||0,data:today(),metodo:m.querySelector('input[name="q-m"]:checked').value}}});toast("Quota "+ANNO+" registrata")}
+  else if(a==="cessa"&&x){const m=await formModal(`<h3>Cessare l'iscrizione di ${esc(sname(x))}?</h3><label class="f">Motivo<select id="c-m"><option>Dimissioni</option><option>Decesso</option><option>Mancato pagamento della quota</option><option>Esclusione</option><option>Trasferimento</option></select></label><label class="f">Dal giorno<input id="c-d" type="date" value="${today()}"></label>`,"Cessa iscrizione");if(!m)return;
+    await S.db.doc("soci/"+x.id).update({stato:"cessato",motivoCessazione:m.querySelector("#c-m").value,cessatoIl:m.querySelector("#c-d").value});
+    if(x.prenId)await S.db.doc("prenotazioni/"+x.prenId).update({socio:false});toast("Iscrizione cessata. Il numero di tessera resta nel libro soci.")}
+  else if(a==="riattiva"&&x){await S.db.doc("soci/"+x.id).update({stato:"attivo",motivoCessazione:"",cessatoIl:""});if(x.prenId)await S.db.doc("prenotazioni/"+x.prenId).update({socio:true});toast("Socio riattivato")}
+  else if(a==="vediutente"&&x){S.selPers=x.prenId;selectTab("pers");renderStaff()}
+  else if(a==="ricevuta"&&x){const an=b.dataset.anno,qq=x.quote[an];const c=fcfg();
+    await saveFile(`Ricevuta-quota-${an}-tessera-${x.tessera}.html`,`<!doctype html><html lang="it"><head><meta charset="utf-8"><title>Ricevuta quota ${esc(an)}</title><style>body{font-family:Verdana,sans-serif;color:#1A1D2B;max-width:640px;margin:40px auto;padding:0 24px}h1{font-family:Georgia,serif;color:#7A1E2C;margin-bottom:0}.band{height:8px;background:linear-gradient(90deg,#7A1E2C 0 50%,#1F3F7A 50% 100%);margin:16px 0 24px}.amt{font-size:28px;font-weight:bold}</style></head><body><h1>${esc(c.denominazione)}</h1><div>${esc(c.indirizzo)} · C.F. ${esc(c.cf||"—")}</div><div class="band"></div><h2>Ricevuta quota associativa ${esc(an)}</h2><p>Si dichiara di aver ricevuto da <b>${esc((x.nome||"")+" "+(x.cognome||""))}</b>${x.cf?", C.F. "+esc(x.cf):""}, socio con tessera n. <b>${esc(x.tessera)}</b>, la somma di</p><p class="amt">${eur(qq.importo)}</p><p>a titolo di quota associativa per l'anno ${esc(an)}, versata il ${esc(fmtDay(qq.data,{day:"2-digit",month:"2-digit",year:"numeric"}))}${qq.metodo?" ("+esc(qq.metodo)+")":""}.</p><p style="color:#4E5468;font-size:12px">Quota associativa non soggetta a IVA (art. 4 D.P.R. 633/1972).</p><p style="margin-top:48px">Firma ______________________</p></body></html>`,"text/html")}
+  }catch(err){toast(errMsg(err))}});
+$("#so-csv").addEventListener("click",async()=>{const rows=[["Tessera","Cognome","Nome","Codice fiscale","Data nascita","Luogo nascita","Indirizzo","CAP","Comune","Telefono","Email","Data iscrizione","Tipo","Stato","Cessato il","Motivo","Quota "+ANNO,"Privacy"]];
+  [...S.soci].sort((a,b)=>a.tessera-b.tessera).forEach(x=>rows.push([x.tessera,x.cognome,x.nome,x.cf,x.dataNascita,x.luogoNascita,x.indirizzo,x.cap,x.comune,x.telefono,x.email,x.dataIscrizione,TIPI[x.tipo]||"",x.stato,x.cessatoIl||"",x.motivoCessazione||"",quotaOk(x)?"pagata":"da pagare",x.privacy?"sì":"no"]));
+  await saveFile("libro-soci-"+today()+".csv","﻿"+rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(";")).join("\r\n"),"text/csv")});
+let scfgDirty=false;$("#scfg").addEventListener("input",()=>scfgDirty=true);
+function fillScfg(){if(scfgDirty)return;const c=scfg();$("#sc-q").value=c.quota;$("#sc-n").value=c.ultimo}
+$("#scfg").addEventListener("submit",async e=>{e.preventDefault();const body={quota:+$("#sc-q").value||0,ultimo:Math.max(0,parseInt($("#sc-n").value,10)||0)};
+  try{const ref=S.db.doc("impostazioni/soci");if(S.scfg)await ref.update(body);else await ref.set(body);scfgDirty=false;toast("Impostazioni soci salvate")}catch(err){toast(errMsg(err))}});
+
+/* ---------- info sito ---------- */
+let infoDirty=false;$("#info-form").addEventListener("input",()=>infoDirty=true);
+const INFO=[["if-tel","telefono"],["if-email","email"],["if-ind","indirizzo"],["if-orari","orari"],["if-slogan","slogan"],["if-intro","intro"],["if-quota","quota"]];
+function fillInfo(){if(infoDirty)return;INFO.forEach(([i,k])=>$("#"+i).value=S.sito[k]||"")}
+$("#info-form").addEventListener("submit",async e=>{e.preventDefault();const body={};INFO.forEach(([i,k])=>body[k]=$("#"+i).value.trim());
+  try{const ref=S.db.doc("impostazioni/sito");const ex=await ref.get();if(ex.exists)await ref.update(body);else await ref.set(body);infoDirty=false;toast("Informazioni salvate: il sito è aggiornato")}catch(err){toast(errMsg(err))}});
+
+/* ---------- render ---------- */
+function renderPage(){bindSito();
+  if(S.page==="home"){renderHomeNews();renderSvc()}
+  else if(S.page==="servizi")renderSvc();
+  else if(S.page==="prenota"){if(!(S.wiz.step===3&&$("#wform")))renderWiz()}
+  else if(S.page==="notizie")renderNews();
+  else if(S.page==="articolo")renderArticle();
+  else if(S.page==="staff"){$("#staff-lock").hidden=S.staff;$("#staff").hidden=!S.staff;renderStaff()}}
+
+/* ---------- avvio ---------- */
+const startHash=(location.hash||"").replace("#","");go(startHash||"home");
+(async function boot(){
+  let db=null,user=null;
+  try{[db,user]=await Promise.all([window.claude?.use?.("db"),window.claude?.use?.("user")])}catch(e){}
+  S.db=db;S.user=user;
+  if(!db){$("#staff-lock-why").textContent="Da questa vista non è possibile accedere ai dati del sito.";renderPage();return}
+  try{S.uid=user?await user.id():null}catch(e){}
+  try{S.staff=user?await user.canEdit():false}catch(e){}
+  let cw=null;try{cw=user?await user.can("data.write"):null}catch(e){}
+  S.canWrite=!!S.uid&&cw!==false;
+  $("#staff-lock-why").textContent=S.staff?"":"Il suo accesso attuale non comprende la gestione. Chieda al responsabile di renderla Editor.";
+  const live=(ref,fn)=>ref.onSnapshot(fn,err=>console.warn(err));
+  const col=snap=>snap.docs.map(d=>({id:d.id,...d.data()}));
+  live(db.doc("impostazioni/sito"),s=>{S.sito=s.exists?s.data():{};renderPage()});
+  live(db.collection("servizi"),s=>{S.servizi=col(s);renderPage()});
+  live(db.collection("notizie"),s=>{S.notizie=col(s);renderPage()});
+  if(S.uid){
+    live(db.doc("prenotazioni/"+S.uid),s=>{S.mine=s.exists?{id:s.id,...s.data()}:null;if(S.page==="prenota")renderMine()});
+    live(db.doc("proposte/"+S.uid),s=>{S.mieProp=s.exists?s.data():null;if(S.page==="notizie")renderMyProps()});}
+  if(S.staff){
+    live(db.collection("prenotazioni"),s=>{S.pren=col(s);if(S.page==="staff")renderStaff()});
+    live(db.collection("proposte"),s=>{S.prop=col(s);if(S.page==="staff")renderStaff()});
+    live(db.collection("fatture"),s=>{S.fatture=col(s);if(S.page==="staff")renderStaff()});
+    live(db.collection("bozze"),s=>{S.bozze=col(s);if(S.page==="staff"&&S.tab==="bach")renderBach()});
+    live(db.collection("soci"),s=>{S.soci=col(s);if(S.page==="staff")renderStaff()});
+    live(db.doc("impostazioni/soci"),s=>{S.scfg=s.exists?s.data():null;if(S.page==="staff"&&S.tab==="soci")fillScfg()});
+    live(db.doc("impostazioni/fatture"),s=>{S.fcfg=s.exists?s.data():null;if(S.page==="staff"&&S.tab==="fatt")fillFcfg()});}
+  renderPage()})();
+})();
+</script>
