@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bordeaux: #7a1e2c;
+  --color-blu: #1f3f7a;
+  --color-paper: #fffdf9;
+  --color-ink: #1b1b1f;
+  --font-sans: "Atkinson Hyperlegible", ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  font-size: 19px;
+}
+html[data-text-size="l"] {
+  font-size: 22px;
+}
+html[data-text-size="xl"] {
+  font-size: 25px;
+}
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  line-height: 1.55;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-blu);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* BlockNote sizes text in px: follow the A/A+/A++ choice and keep 44px+ targets in the editor UI. */
+.bn-container .bn-editor,
+.bn-container .bn-block-content {
+  font-size: 1rem;
+}
+.bn-container .bn-toolbar button,
+.bn-container .bn-suggestion-menu-item,
+.bn-container .bn-menu-item {
+  min-height: 44px;
+  min-width: 44px;
+}
+.bn-container .bn-editor {
+  min-height: 12rem;
+}
