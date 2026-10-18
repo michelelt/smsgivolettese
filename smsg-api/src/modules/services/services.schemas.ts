@@ -6,22 +6,17 @@ export const StaffService = z
     name: z.string(),
     description: z.string().nullable(),
     scheduleNote: z.string().nullable(),
-    priceCents: z.number().int(),
     active: z.boolean(),
-    requiresTransport: z.boolean(),
     sortOrder: z.number().int(),
   })
   .openapi('StaffService');
 export type StaffService = z.infer<typeof StaffService>;
 
-const cents = z.number().int().min(0).max(10_000_000);
 const base = {
   name: z.string().trim().min(1).max(120),
   description: z.string().trim().max(1000).nullable().optional(),
   scheduleNote: z.string().trim().max(200).nullable().optional(),
-  priceCents: cents,
   active: z.boolean().optional(),
-  requiresTransport: z.boolean().optional(),
   sortOrder: z.number().int().min(0).max(9999).optional(),
 };
 export const ServiceCreate = z.strictObject(base).openapi('ServiceCreate');

@@ -9,7 +9,6 @@ import { mediaRoutes } from './modules/media/media.routes.js';
 import { postsRoutes } from './modules/posts/posts.routes.js';
 import { proposalsRoutes } from './modules/proposals/proposals.routes.js';
 import { publicRoutes } from './modules/public/public.routes.js';
-import { bookingsRoutes } from './modules/bookings/bookings.routes.js';
 import { invoicesRoutes } from './modules/invoices/invoices.routes.js';
 import { membersRoutes } from './modules/members/members.routes.js';
 import { servicesRoutes } from './modules/services/services.routes.js';
@@ -57,7 +56,6 @@ app.use(async (c, next) => {
 app.route('/', healthRoutes);
 app.route('/', meRoutes);
 app.route('/', publicRoutes);
-app.route('/', bookingsRoutes);
 app.route('/', membersRoutes);
 app.route('/', invoicesRoutes);
 app.route('/', servicesRoutes);
@@ -83,7 +81,7 @@ app.openAPIRegistry.registerComponent('securitySchemes', 'bearerAuth', {
 
 app.doc('/openapi.json', {
   openapi: '3.1.0',
-  info: { title: 'SMS Givolettese API', version: '3.1.0' },
+  info: { title: 'SMS Givolettese API', version: '4.0.0' },
 });
 
 const body = (code: string, message: string, details?: unknown) => ({

@@ -128,7 +128,6 @@ export const meRoutes = new OpenAPIHono<AuthEnv>({ defaultHook })
     return c.body(null, 204);
   })
   .openapi(completeTransport, async (c) => {
-    const b = c.req.valid('json');
-    await service.completeTransport(ctxOf(c), c.req.valid('param').id, b.km, b.driverNotes);
+    await service.completeTransport(ctxOf(c), c.req.valid('param').id, c.req.valid('json'));
     return c.body(null, 204);
   });

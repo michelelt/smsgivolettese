@@ -87,7 +87,7 @@ const PG_RAISE: Record<string, [ErrorStatus, string]> = {
   VEHICLE_NOT_SUITABLE: [409, 'Il mezzo non è adatto al trasporto richiesto'],
   DRIVER_HAS_FUTURE_TRANSPORTS: [409, 'Il volontario ha trasporti futuri assegnati'],
   LAST_SUPER_ADMIN: [409, 'Deve restare almeno un super amministratore attivo'],
-  BOOKINGS_NOT_INVOICEABLE: [409, 'Alcune prenotazioni non sono fatturabili'],
+  TRANSPORT_NOT_INVOICEABLE: [409, 'Il trasporto non è fatturabile (non svolto o già fatturato)'],
   INVOICE_NOT_VOIDABLE: [409, 'La fattura non può essere annullata'],
   INVOICE_IMMUTABLE: [409, 'La fattura emessa non è modificabile'],
   AUDIT_IMMUTABLE: [409, 'Il registro attività non è modificabile'],
@@ -126,6 +126,8 @@ export function fromPostgres(err: { code?: string; constraint_name?: string; mes
           "Indica la data dell'evento prima di pubblicare",
           'EVENT_DATE_REQUIRED',
         );
+      if (err.constraint_name === 'transports_time_chk')
+        return new ValidationError("Indica l'ora di partenza da casa o l'ora dell'appuntamento");
       return new ValidationError('Dati non validi');
     case '23503':
       return new ValidationError('Dati non validi');

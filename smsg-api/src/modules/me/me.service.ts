@@ -91,5 +91,11 @@ export async function respondTransport(ctx: Ctx, id: string, accept: boolean) {
   if (!accept) await notifyRefusal(ctx, item);
 }
 
-export const completeTransport = (ctx: Ctx, id: string, km: number, notes?: string | null) =>
-  asUser(ctx, (tx) => repo.completeTransport(tx, id, km, notes ?? null)).then(() => undefined);
+export const completeTransport = (
+  ctx: Ctx,
+  id: string,
+  o: { odometerStart: number; odometerEnd: number; driverNotes?: string | null },
+) =>
+  asUser(ctx, (tx) =>
+    repo.completeTransport(tx, id, o.odometerStart, o.odometerEnd, o.driverNotes ?? null),
+  ).then(() => undefined);

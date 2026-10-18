@@ -27,8 +27,8 @@ export const issue = (ctx: Ctx, input: z.infer<typeof InvoiceIssue>) =>
       : null;
     const address = input.customerAddress || null;
     const id = await repo.issue(tx, {
-      memberId: input.memberId,
-      bookingIds: input.bookingIds,
+      transportId: input.transportId,
+      amountCents: input.amountCents,
       taxCode,
       address,
       method: input.paymentMethod ?? null,

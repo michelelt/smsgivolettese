@@ -30,7 +30,7 @@ describe('PostgREST exposes nothing (ADR-003)', () => {
       const headers = profile ? { ...h, 'Accept-Profile': profile, 'Content-Profile': profile } : h;
       for (const [path, method] of [
         ['rpc/submit_public_booking', 'POST'],
-        ['services?select=price_cents', 'GET'],
+        ['services?select=created_at', 'GET'],
         ['services', 'GET'],
         ['services', 'POST'],
         ['profiles', 'GET'],

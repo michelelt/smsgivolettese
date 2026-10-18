@@ -9,7 +9,8 @@ export const get = async (tx: Tx, year: number) =>
              o.vat_exemption_text as "vatExemptionText",
              o.stamp_duty_threshold_cents as "stampDutyThresholdCents",
              o.stamp_duty_amount_cents as "stampDutyAmountCents",
-             o.membership_fee_cents as "membershipFeeCents", o.video_max_mb as "videoMaxMb",
+             o.membership_fee_cents as "membershipFeeCents", o.km_rate_cents as "kmRateCents",
+             o.video_max_mb as "videoMaxMb",
              o.last_card_number as "lastCardNumber",
              json_build_object('year', ${year}::int,
                'lastNumber', coalesce((select last_number from public.invoice_counters where year = ${year}), 0)
@@ -23,7 +24,8 @@ export const update = (tx: Tx, s: z.infer<typeof OrgSettingsInput>) =>
        address = ${s.address}, vat_exemption_text = ${s.vatExemptionText},
        stamp_duty_threshold_cents = ${s.stampDutyThresholdCents},
        stamp_duty_amount_cents = ${s.stampDutyAmountCents},
-       membership_fee_cents = ${s.membershipFeeCents}, video_max_mb = ${s.videoMaxMb},
+       membership_fee_cents = ${s.membershipFeeCents}, km_rate_cents = ${s.kmRateCents},
+       video_max_mb = ${s.videoMaxMb},
        updated_at = now()`;
 
 export async function setCounters(tx: Tx, c: CountersInput) {

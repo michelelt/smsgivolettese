@@ -136,12 +136,16 @@ async function release(ctx: Ctx, id: string, run: (tx: Tx) => Promise<unknown[]>
 export const unassign = (ctx: Ctx, id: string) => release(ctx, id, (tx) => repo.unassign(tx, id));
 export const cancel = (ctx: Ctx, id: string) => release(ctx, id, (tx) => repo.cancel(tx, id));
 
-export const complete = (ctx: Ctx, id: string, km: number, notes: string | null | undefined) =>
+export const complete = (
+  ctx: Ctx,
+  id: string,
+  o: { odometerStart: number; odometerEnd: number; driverNotes?: string | null },
+) =>
   asUser(ctx, async (tx) => {
     await transition(
       tx,
       id,
-      () => repo.complete(tx, id, km, notes ?? null),
+      () => repo.complete(tx, id, o.odometerStart, o.odometerEnd, o.driverNotes ?? null),
       () => new Conflict('Il trasporto non può essere completato', 'TRANSPORT_NOT_COMPLETABLE'),
     );
     return (await repo.byId(tx, id))!;
@@ -178,14 +182,17 @@ type CsvRow = Awaited<ReturnType<typeof repo.csvRows>>[number];
 export const TRANSPORT_CSV_HEADER = [
   'Data',
   'Partenza',
-  'Assistito',
+  'Socio',
   'Da',
   'A',
   'Autista',
   'Targa',
+  'Km partenza',
+  'Km arrivo',
   'Km',
   'Carrozzina',
-  'Accompagnatore',
+  'Ausili',
+  'Accompagnatori',
   'Note autista',
 ];
 export const transportsCsv = (rows: CsvRow[]) =>
@@ -199,9 +206,12 @@ export const transportsCsv = (rows: CsvRow[]) =>
       r.toAddress,
       r.driverName,
       r.vehiclePlate,
-      r.km == null ? '' : String(r.km).replace('.', ','),
+      r.odometerStart,
+      r.odometerEnd,
+      r.km,
       r.wheelchair ? 'Sì' : 'No',
-      r.companion ? 'Sì' : 'No',
+      r.mobilityAids ? 'Sì' : 'No',
+      r.companions,
       r.driverNotes,
     ]),
   );

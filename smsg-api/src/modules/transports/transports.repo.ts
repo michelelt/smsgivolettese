@@ -5,15 +5,16 @@ const R = 'Europe/Rome';
 
 export const select = (tx: Tx) => tx`
   select t.id, t.member_id as "memberId", c.first_name || ' ' || c.last_name as "memberName",
-    c.phone as "memberPhone", t.travel_date::text as "travelDate",
+    coalesce(t.contact_phone, c.phone) as "contactPhone", t.travel_date::text as "travelDate",
     to_char(t.departure_at at time zone ${R}, 'HH24:MI') as "departureTime",
     to_char(t.appointment_at at time zone ${R}, 'HH24:MI') as "appointmentTime",
     to_char(t.return_at at time zone ${R}, 'HH24:MI') as "returnTime",
-    t.from_address as "fromAddress", t.to_address as "toAddress", t.requested_by as "requestedBy",
-    t.reason, t.wheelchair, t.companion, t.notes, t.status,
+    t.from_address as "fromAddress", t.to_address as "toAddress",
+    t.wheelchair, t.mobility_aids as "mobilityAids", t.companions, t.notes, t.status,
     t.driver_volunteer_id as "driverId", dp.first_name || ' ' || dp.last_name as "driverName",
     t.vehicle_id as "vehicleId", v.plate as "vehiclePlate",
-    t.km::float8 as km, t.driver_notes as "driverNotes", t.booking_id as "bookingId"
+    t.odometer_start as "odometerStart", t.odometer_end as "odometerEnd", t.km,
+    t.driver_notes as "driverNotes", t.invoice_id as "invoiceId"
   from public.transports t
   join public.members c on c.id = t.member_id
   left join public.profiles dp on dp.id = t.driver_volunteer_id
@@ -42,10 +43,10 @@ type Fields = {
   returnTime?: string | null;
   fromAddress?: string | null;
   toAddress?: string | null;
-  requestedBy?: string | null;
-  reason?: string | null;
+  contactPhone?: string | null;
   wheelchair?: boolean;
-  companion?: boolean;
+  mobilityAids?: boolean;
+  companions?: number;
   notes?: string | null;
 };
 
@@ -53,11 +54,11 @@ export const insert = async (tx: Tx, memberId: string, f: Fields, by: string) =>
   (
     await tx<{ id: string }[]>`
       insert into public.transports (member_id, travel_date, departure_at, appointment_at, return_at,
-        from_address, to_address, requested_by, reason, wheelchair, companion, notes, created_by)
+        from_address, to_address, contact_phone, wheelchair, mobility_aids, companions, notes, created_by)
       values (${memberId}, ${f.travelDate}, ${at(tx, f.travelDate, f.departureTime)},
         ${at(tx, f.travelDate, f.appointmentTime)}, ${at(tx, f.travelDate, f.returnTime)},
-        ${f.fromAddress ?? null}, ${f.toAddress ?? null}, ${f.requestedBy ?? null}, ${f.reason ?? null},
-        ${f.wheelchair ?? false}, ${f.companion ?? false}, ${f.notes ?? null}, ${by})
+        ${f.fromAddress ?? null}, ${f.toAddress ?? null}, ${f.contactPhone ?? null},
+        ${f.wheelchair ?? false}, ${f.mobilityAids ?? false}, ${f.companions ?? 0}, ${f.notes ?? null}, ${by})
       returning id`
   )[0]!.id;
 
@@ -79,11 +80,11 @@ export const patch = async (tx: Tx, id: string, p: Partial<Fields>) => {
         return_at = ${time('return_at', p.returnTime)},
         from_address = ${txt('from_address', p.fromAddress)},
         to_address = ${txt('to_address', p.toAddress)},
-        requested_by = ${txt('requested_by', p.requestedBy)},
-        reason = ${txt('reason', p.reason)},
+        contact_phone = ${txt('contact_phone', p.contactPhone)},
         notes = ${txt('notes', p.notes)},
         wheelchair = coalesce(${p.wheelchair ?? null}::boolean, wheelchair),
-        companion = coalesce(${p.companion ?? null}::boolean, companion),
+        mobility_aids = coalesce(${p.mobilityAids ?? null}::boolean, mobility_aids),
+        companions = coalesce(${p.companions ?? null}::smallint, companions),
         updated_at = now()
       where id = ${id} and status in ('richiesto', 'assegnato', 'confermato') returning id`
   ).length;
@@ -108,18 +109,11 @@ export const unassign = (tx: Tx, id: string) =>
 export const cancel = (tx: Tx, id: string) =>
   tx`update public.transports set status = 'annullato', updated_at = now()
      where id = ${id} and status in ('richiesto', 'assegnato', 'confermato') returning id`;
-export const complete = (tx: Tx, id: string, km: number, notes: string | null) =>
-  tx`update public.transports set status = 'svolto', km = ${km}, driver_notes = ${notes}, completed_at = now()
+export const complete = (tx: Tx, id: string, start: number, end: number, notes: string | null) =>
+  tx`update public.transports set status = 'svolto', odometer_start = ${start}, odometer_end = ${end},
+       driver_notes = ${notes}, completed_at = now()
      where id = ${id} and status in ('assegnato', 'confermato')
        and travel_date <= (now() at time zone ${R})::date returning id`;
-
-/** Driver of a live transport linked to a booking (booking cancel notifies them). */
-export const driverOfBooking = async (tx: Tx, bookingId: string) =>
-  (
-    await tx<{ id: string; driverId: string }[]>`
-      select id, driver_volunteer_id as "driverId" from public.transports
-      where booking_id = ${bookingId} and status in ('assegnato', 'confermato')`
-  )[0];
 
 /** ADR-015 busy period as timestamptz text, null when departure is unknown. */
 export const busyPeriod = async (tx: Tx, id: string) =>
@@ -141,9 +135,12 @@ export const csvRows = (tx: Tx, month: string) => tx<
     toAddress: string | null;
     driverName: string | null;
     vehiclePlate: string | null;
+    odometerStart: number | null;
+    odometerEnd: number | null;
     km: number | null;
     wheelchair: boolean;
-    companion: boolean;
+    mobilityAids: boolean;
+    companions: number;
     driverNotes: string | null;
   }[]
 >`
@@ -151,7 +148,8 @@ export const csvRows = (tx: Tx, month: string) => tx<
     to_char(t.departure_at at time zone ${R}, 'HH24:MI') as "departureTime",
     c.first_name || ' ' || c.last_name as "memberName", t.from_address as "fromAddress",
     t.to_address as "toAddress", dp.first_name || ' ' || dp.last_name as "driverName",
-    v.plate as "vehiclePlate", t.km::float8 as km, t.wheelchair, t.companion, t.driver_notes as "driverNotes"
+    v.plate as "vehiclePlate", t.odometer_start as "odometerStart", t.odometer_end as "odometerEnd",
+    t.km, t.wheelchair, t.mobility_aids as "mobilityAids", t.companions, t.driver_notes as "driverNotes"
   from public.transports t
   join public.members c on c.id = t.member_id
   left join public.profiles dp on dp.id = t.driver_volunteer_id

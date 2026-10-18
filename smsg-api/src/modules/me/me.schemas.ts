@@ -1,4 +1,5 @@
 import { z } from '@hono/zod-openapi';
+import { odometerFields, odometerMsg, odometerOk } from '../transports/transports.schemas.js';
 import { Absence, AvailabilityRule } from '../volunteers/volunteers.schemas.js';
 
 export const Me = z
@@ -54,13 +55,16 @@ export const MyTransport = z
     fromAddress: z.string().nullable(),
     toAddress: z.string().nullable(),
     wheelchair: z.boolean(),
-    companion: z.boolean(),
+    mobilityAids: z.boolean(),
+    companions: z.number().int(),
     status: z.enum(['assegnato', 'confermato', 'svolto']),
-    km: z.number().nullable(),
+    odometerStart: z.number().int().nullable(),
+    odometerEnd: z.number().int().nullable(),
+    km: z.number().int().nullable(),
     driverNotes: z.string().nullable(),
     memberFirstName: z.string(),
     memberLastName: z.string(),
-    memberPhone: z.string().nullable(),
+    contactPhone: z.string().nullable(),
     vehiclePlate: z.string().nullable(),
     vehicleModel: z.string().nullable(),
   })
@@ -73,8 +77,6 @@ export const MyCommitments = z
 
 export const Respond = z.strictObject({ accept: z.boolean() }).openapi('Respond');
 export const MyTransportComplete = z
-  .strictObject({
-    km: z.number().min(0).max(9999.9),
-    driverNotes: z.string().trim().max(500).nullable().optional(),
-  })
+  .strictObject(odometerFields)
+  .refine(odometerOk, odometerMsg)
   .openapi('MyTransportComplete');

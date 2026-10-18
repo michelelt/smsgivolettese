@@ -1,6 +1,5 @@
 import { z } from '@hono/zod-openapi';
 import { PageQuery, pageOf } from '../../lib/pagination.js';
-import { Booking } from '../bookings/bookings.schemas.js';
 import { Transport } from '../transports/transports.schemas.js';
 import { Invoice, PaymentMethod } from '../invoices/invoices.schemas.js';
 
@@ -55,7 +54,6 @@ export type Fee = z.infer<typeof Fee>;
 
 export const MemberDetail = Member.extend({
   fees: z.array(Fee),
-  bookings: z.array(Booking),
   transports: z.array(Transport),
   invoices: z.array(Invoice),
 }).openapi('MemberDetail');

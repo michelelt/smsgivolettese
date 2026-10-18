@@ -37,12 +37,13 @@ describe('volunteer_transports_v keeps svolto rows 30 days', () => {
     await rolledBack(async (tx) => {
       await fixtures(tx);
       const mk = (id: string, days: number) =>
-        tx.unsafe(`insert into transports (id, member_id, travel_date, departure_at, from_address, to_address, km, driver_volunteer_id, status)
-        values ('${id}','f7000000-0000-4000-8000-000000000001', current_date - ${days}, now() - interval '${days} days', 'a', 'b', 1, '${ID.vol}', 'svolto')`);
-      await mk('fc000000-0000-4000-8000-0000000000a1', 5);
+        tx.unsafe(`insert into transports (id, member_id, travel_date, departure_at, from_address, to_address, odometer_start, odometer_end, driver_volunteer_id, status)
+        values ('${id}','f7000000-0000-4000-8000-000000000001', current_date - ${days}, now() - interval '${days} days', 'a', 'b', 0, 1, '${ID.vol}', 'svolto')`);
+      await mk('fc000000-0000-4000-8000-0000000000a1', 8);
       await mk('fc000000-0000-4000-8000-0000000000a2', 31);
       await actAs(tx, 'volontario');
-      const rows = await tx`select id from volunteer_transports_v where status = 'svolto'`;
+      const rows =
+        await tx`select id from volunteer_transports_v where status = 'svolto' and id::text like 'fc000000-0000-4000-8000-0000000000a%'`;
       expect(rows.map((r) => r.id)).toEqual(['fc000000-0000-4000-8000-0000000000a1']);
     });
   });

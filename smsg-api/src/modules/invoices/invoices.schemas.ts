@@ -37,7 +37,7 @@ export const InvoiceDetail = Invoice.extend({
       position: z.number().int(),
       description: z.string(),
       amountCents: z.number().int(),
-      bookingId: z.uuid().nullable(),
+      transportId: z.uuid().nullable(),
     }),
   ),
 }).openapi('InvoiceDetail');
@@ -62,8 +62,8 @@ export const InvoiceKpis = z
 
 export const InvoiceIssue = z
   .strictObject({
-    memberId: z.uuid(),
-    bookingIds: z.array(z.uuid()).min(1).max(100),
+    transportId: z.uuid(),
+    amountCents: z.number().int().min(0).max(10_000_000),
     customerTaxCode: z.string().trim().max(40).nullable().optional(),
     taxCodeConfirmed: z.boolean().optional(),
     customerAddress: z.string().trim().max(200).nullable().optional(),

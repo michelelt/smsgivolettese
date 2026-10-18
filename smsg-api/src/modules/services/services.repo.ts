@@ -6,15 +6,12 @@ const COLS = {
   name: 'name',
   description: 'description',
   scheduleNote: 'schedule_note',
-  priceCents: 'price_cents',
   active: 'active',
-  requiresTransport: 'requires_transport',
   sortOrder: 'sort_order',
 };
 
 const out = (tx: Tx) => tx`id, name, description, schedule_note as "scheduleNote",
-  price_cents as "priceCents",
-  active, requires_transport as "requiresTransport", sort_order as "sortOrder"`;
+  active, sort_order as "sortOrder"`;
 
 export const list = (tx: Tx) =>
   tx<StaffService[]>`select ${out(tx)} from public.services order by sort_order, name`;

@@ -15,10 +15,9 @@ const asStaff = async (tx: Tx) => {
   await actAs(tx, 'staff');
 };
 const SEED_STAFF = 'a0000000-0000-4000-8000-000000000002'; // seed.sql staff user (FK targets must be committed)
-const BOOKING = 'fb000000-0000-4000-8000-000000000001';
-const CLIENT = 'f7000000-0000-4000-8000-000000000001';
-const issue = (ids = `'${BOOKING}'`, pay = 'null') =>
-  `select * from issue_invoice('${CLIENT}', array[${ids}]::uuid[], null, null, ${pay})`;
+const TRANSPORT = 'fc000000-0000-4000-8000-000000000003'; // fixture: svolto, km 42
+const issue = (amount: number | string = 300, pay = 'null', id = TRANSPORT) =>
+  `select * from issue_invoice('${id}', ${amount}, null, null, ${pay})`;
 
 describe('overlapping commitments (23P01)', () => {
   it('rejects a second overlapping shift assignment', async () => {
@@ -178,7 +177,7 @@ describe('uniqueness', () => {
         await err(
           tx,
           `insert into invoices (year, number, issued_on, member_id, customer_name, issuer_name, vat_exemption_text, subtotal_cents, stamp_duty_cents, total_cents, status)
-        values (2020, 1, current_date, '${CLIENT}', 'c', 'i', 'v', 1, 0, 1, 'emessa')`,
+        values (2020, 1, current_date, 'f7000000-0000-4000-8000-000000000001', 'c', 'i', 'v', 1, 0, 1, 'emessa')`,
         ),
       ).toMatch(/^23505/);
       expect(
@@ -209,37 +208,38 @@ describe('invoice numbering', () => {
         status: 'emessa',
       });
       const lines = await tx`select description from invoice_lines where invoice_id = ${inv!.id}`;
-      expect(lines[0]!.description).toMatch(/^S-active del \d\d\/\d\d\/\d{4}$/);
-      expect((await tx`select invoice_id from bookings where id = ${BOOKING}`)[0]!.invoice_id).toBe(
-        inv!.id,
-      );
+      expect(lines).toHaveLength(1);
+      expect(lines[0]!.description).toMatch(/^Trasporto del \d\d\/\d\d\/\d{4} \(42 km\)$/);
+      expect(
+        (await tx`select invoice_id from transports where id = ${TRANSPORT}`)[0]!.invoice_id,
+      ).toBe(inv!.id);
     });
   });
   it('applies stamp duty strictly above the threshold and marks paid', async () => {
     await rolledBack(async (tx) => {
       await world(tx);
-      await tx.unsafe(`update bookings set price_applied_cents = 7747 where id = '${BOOKING}'`);
       await actAs(tx, 'staff');
-      const [a] = await tx.unsafe(issue());
+      const [a] = await tx.unsafe(issue(7747));
       expect(a).toMatchObject({ stamp_duty_cents: 0, total_cents: 7747 });
       await tx.unsafe('reset role');
-      await tx.unsafe(
-        `update bookings set price_applied_cents = 7748, invoice_id = null where id = '${BOOKING}'`,
-      );
+      await tx.unsafe(`update transports set invoice_id = null where id = '${TRANSPORT}'`);
       await actAs(tx, 'staff');
-      const [b] = await tx.unsafe(issue(`'${BOOKING}'`, "'pos'"));
+      const [b] = await tx.unsafe(issue(7748, "'pos'"));
       expect(b).toMatchObject({ stamp_duty_cents: 200, total_cents: 7948, status: 'pagata' });
     });
   });
-  it('rejects non-invoiceable bookings and lower roles', async () => {
+  it('rejects non-invoiceable transports, bad amounts and lower roles', async () => {
     await rolledBack(async (tx) => {
       await asStaff(tx);
-      expect(await err(tx, issue(`'${BOOKING}','${BOOKING.replace(/1$/, '9')}'`))).toMatch(
-        /BOOKINGS_NOT_INVOICEABLE/,
+      const open = 'fc000000-0000-4000-8000-000000000002'; // richiesto
+      expect(await err(tx, issue(300, 'null', open))).toMatch(/TRANSPORT_NOT_INVOICEABLE/);
+      expect(await err(tx, issue(300, 'null', 'fc000000-0000-4000-8000-0000000000ff'))).toMatch(
+        /TRANSPORT_NOT_INVOICEABLE/,
       );
-      expect(await err(tx, issue(''))).toMatch(/BOOKINGS_NOT_INVOICEABLE/);
+      expect(await err(tx, issue(-1))).toMatch(/^23514/);
+      expect(await err(tx, issue('null'))).toMatch(/^23502|^23514/);
       await tx.unsafe(issue());
-      expect(await err(tx, issue())).toMatch(/BOOKINGS_NOT_INVOICEABLE/);
+      expect(await err(tx, issue())).toMatch(/TRANSPORT_NOT_INVOICEABLE/);
     });
     await rolledBack(async (tx) => {
       await world(tx);
@@ -247,14 +247,14 @@ describe('invoice numbering', () => {
       expect(await err(tx, issue())).toMatch(/^42501/);
     });
   });
-  it('void keeps the number, frees the booking and the next number moves on; invoices are immutable', async () => {
+  it('void keeps the number, frees the transport and the next number moves on; invoices are immutable', async () => {
     await rolledBack(async (tx) => {
       await asStaff(tx);
       const [inv] = await tx.unsafe(issue());
       const [v] = await tx`select * from void_invoice(${inv!.id}, 'errore')`;
       expect(v).toMatchObject({ status: 'annullata', number: inv!.number, year: inv!.year });
       expect(
-        (await tx`select invoice_id from bookings where id = ${BOOKING}`)[0]!.invoice_id,
+        (await tx`select invoice_id from transports where id = ${TRANSPORT}`)[0]!.invoice_id,
       ).toBeNull();
       expect(await err(tx, `select void_invoice('${inv!.id}', 'again')`)).toMatch(
         /INVOICE_NOT_VOIDABLE/,
@@ -295,10 +295,10 @@ describe('concurrent numbering (10 parallel calls, committed then cleaned up)', 
     const tag = `conc-${Date.now()}`;
     const [c] =
       await sql`insert into members (card_number, first_name, last_name, joined_on) values ((select coalesce(max(card_number), 0) + 1 from members), 'Conc', ${tag}, current_date) returning id`;
-    const [svc] = await sql`select id from services where active limit 1`;
     const bks =
-      await sql`insert into bookings (member_id, service_id, day, slot, price_applied_cents, origin, status)
-      select ${c!.id}, ${svc!.id}, current_date, 'mattina', 100, 'telefono', 'eseguita' from generate_series(1, 10) returning id`;
+      await sql`insert into transports (member_id, travel_date, departure_at, from_address, to_address, status, odometer_start, odometer_end, driver_volunteer_id)
+      select ${c!.id}, current_date - 10 - g, (current_date - 10 - g) + time '08:00', 'a', 'b', 'svolto', 0, 10,
+        'a0000000-0000-4000-8000-000000000003' from generate_series(1, 10) g returning id`;
     const before = (
       await sql`select coalesce((select last_number from invoice_counters where year = extract(year from now() at time zone 'Europe/Rome')), -1) as n`
     )[0]!.n as number;
@@ -309,7 +309,7 @@ describe('concurrent numbering (10 parallel calls, committed then cleaned up)', 
           sql.begin(async (tx) => {
             await actAs(tx, 'staff', SEED_STAFF);
             const [i] = await tx.unsafe(
-              `select number from issue_invoice('${c!.id}', array['${b.id}']::uuid[], null, null, null)`,
+              `select number from issue_invoice('${b.id}', 100, null, null, null)`,
             );
             return i!.number as number;
           }),
@@ -328,12 +328,12 @@ describe('concurrent numbering (10 parallel calls, committed then cleaned up)', 
           'alter table invoice_lines disable trigger user; alter table invoices disable trigger user',
         );
         await tx`delete from invoice_lines where invoice_id in (select id from invoices where member_id = ${c!.id})`;
-        await tx`update bookings set invoice_id = null where member_id = ${c!.id}`;
+        await tx`update transports set invoice_id = null where member_id = ${c!.id}`;
         await tx`delete from invoices where member_id = ${c!.id}`;
         await tx.unsafe(
           'alter table invoice_lines enable trigger user; alter table invoices enable trigger user',
         );
-        await tx`delete from bookings where member_id = ${c!.id}`;
+        await tx`delete from transports where member_id = ${c!.id}`;
         await tx`delete from members where id = ${c!.id}`;
         if (before === -1)
           await tx`delete from invoice_counters where year = extract(year from now() at time zone 'Europe/Rome')`;
@@ -517,40 +517,20 @@ describe('last super admin', () => {
 });
 
 describe('public functions', () => {
-  it('anon cannot read price columns or call the dropped booking function', async () => {
+  it('anon cannot read non-public service columns or call the dropped booking function', async () => {
     await rolledBack(async (tx) => {
       await world(tx);
       await actAs(tx, 'anon');
-      expect(await err(tx, 'select price_cents from services')).toMatch(/^42501/);
+      expect(await err(tx, 'select active, notes from services')).toMatch(/^42/);
       expect(await err(tx, 'select * from services')).toMatch(/^42501/);
       expect(await err(tx, 'select id, name, schedule_note from services')).toBe('OK');
       expect(await err(tx, 'select submit_public_booking()')).toMatch(/^42883/);
     });
   });
-  describe('bookings_create_transport', () => {
-    const ins = (svc: string) =>
-      `insert into bookings (member_id, service_id, day, slot, price_applied_cents, origin) values ('${CLIENT}', '${svc}', current_date + 1, 'mattina', 0, 'telefono') returning id`;
-    it('staff booking for a transport service creates exactly one richiesto transport', async () => {
-      await rolledBack(async (tx) => {
-        await world(tx);
-        await tx`update services set requires_transport = true where id = 'fa000000-0000-4000-8000-000000000001'`;
-        await actAs(tx, 'staff');
-        const [r] = await tx.unsafe(ins('fa000000-0000-4000-8000-000000000001'));
-        const t =
-          await tx`select status, member_id, driver_volunteer_id, travel_date = current_date + 1 as d from transports where booking_id = ${r!.id}`;
-        expect(t).toEqual([
-          { status: 'richiesto', member_id: CLIENT, driver_volunteer_id: null, d: true },
-        ]);
-      });
-    });
-    it('non-transport service creates none', async () => {
-      await rolledBack(async (tx) => {
-        await world(tx);
-        await actAs(tx, 'staff');
-        const [r] = await tx.unsafe(ins('fa000000-0000-4000-8000-000000000001'));
-        expect(await tx`select 1 from transports where booking_id = ${r!.id}`).toEqual([]);
-      });
-    });
+  it('bookings and their enums are gone', async () => {
+    expect(
+      await sql`select to_regclass('public.bookings') as t, to_regtype('public.booking_status') as e`,
+    ).toEqual([{ t: null, e: null }]);
   });
   it('anon proposal submission works; direct insert is denied', async () => {
     await rolledBack(async (tx) => {
@@ -612,13 +592,13 @@ describe('volunteer functions', () => {
       expect(
         await err(
           tx,
-          `select complete_transport('fc000000-0000-4000-8000-000000000001', 12.5, 'ok')`,
+          `select complete_transport('fc000000-0000-4000-8000-000000000001', 100, 112, 'ok')`,
         ),
       ).toBe('OK');
       expect(
         await err(
           tx,
-          `select complete_transport('fc000000-0000-4000-8000-000000000001', 12.5, 'ok')`,
+          `select complete_transport('fc000000-0000-4000-8000-000000000001', 100, 112, 'ok')`,
         ),
       ).toMatch(/TRANSPORT_NOT_COMPLETABLE/);
       expect(await err(tx, `select update_my_profile('0123456')`)).toBe('OK');
@@ -631,9 +611,9 @@ describe('volunteer functions', () => {
       expect((await tx`select phone from profiles where id = ${ID.vol}`)[0]!.phone).toBe('0123456');
       expect(
         (
-          await tx`select status, km from transports where id = 'fc000000-0000-4000-8000-000000000001'`
+          await tx`select status, km, odometer_start from transports where id = 'fc000000-0000-4000-8000-000000000001'`
         )[0],
-      ).toMatchObject({ status: 'svolto' });
+      ).toMatchObject({ status: 'svolto', km: 12, odometer_start: 100 });
     });
   });
   it('another volunteer cannot respond to a transport; rejecting clears driver', async () => {
@@ -688,7 +668,7 @@ describe('volunteer functions', () => {
       expect(await err(tx, call(true))).toMatch(/TRANSPORT_INVALID_TRANSITION/);
       expect(await err(tx, call(false))).toMatch(/TRANSPORT_INVALID_TRANSITION/);
       await reset(tx);
-      await tx.unsafe(`update transports set travel_date = (now() at time zone 'Europe/Rome')::date, status = 'svolto', km = 1, completed_at = now()
+      await tx.unsafe(`update transports set travel_date = (now() at time zone 'Europe/Rome')::date, status = 'svolto', odometer_start = 1, odometer_end = 2, completed_at = now()
         where id = 'fc000000-0000-4000-8000-000000000001'`);
       await actAs(tx, 'volontario');
       expect(await err(tx, call(true))).toMatch(/TRANSPORT_INVALID_TRANSITION/);
@@ -726,36 +706,32 @@ describe('members only (ADR-060)', () => {
     tx.unsafe(
       `update members set status = 'cessato', ended_on = current_date where id = '${MEMBER}'`,
     );
-  const newBooking = `insert into bookings (member_id, service_id, day, slot, price_applied_cents, origin)
-    values ('${MEMBER}', 'fa000000-0000-4000-8000-000000000001', current_date + 1, 'mattina', 0, 'telefono')`;
-
-  it('rejects new bookings and transports for a cessato member', async () => {
+  it('rejects new transports for a cessato member', async () => {
     await rolledBack(async (tx) => {
       await world(tx);
       await end(tx);
       await actAs(tx, 'staff');
-      expect(await err(tx, newBooking)).toMatch(/MEMBER_NOT_ACTIVE/);
       expect(
         await err(
           tx,
-          `insert into transports (member_id, travel_date) values ('${MEMBER}', current_date)`,
+          `insert into transports (member_id, travel_date, appointment_at) values ('${MEMBER}', current_date, now())`,
         ),
       ).toMatch(/MEMBER_NOT_ACTIVE/);
     });
   });
-  it('never moves a booking to another member', async () => {
+  it('never moves a transport to another member', async () => {
     await rolledBack(async (tx) => {
       await world(tx);
       await actAs(tx, 'staff');
       expect(
         await err(
           tx,
-          `update bookings set member_id = gen_random_uuid() where member_id = '${MEMBER}'`,
+          `update transports set member_id = gen_random_uuid() where member_id = '${MEMBER}'`,
         ),
       ).toMatch(/MEMBER_IMMUTABLE/);
     });
   });
-  it('still invoices an existing booking of a member ended later', async () => {
+  it('still invoices an existing transport of a member ended later', async () => {
     await rolledBack(async (tx) => {
       await world(tx);
       await end(tx);
@@ -772,7 +748,7 @@ describe('members only (ADR-060)', () => {
       );
       await actAs(tx, 'staff');
       const [inv] = await tx.unsafe(
-        `select * from issue_invoice('${MEMBER}', array['${BOOKING}']::uuid[], 'RSSMRA80A01H501U', null, null)`,
+        `select * from issue_invoice('${TRANSPORT}', 300, 'RSSMRA80A01H501U', null, null)`,
       );
       expect(inv).toMatchObject({
         customer_name: 'M Member',
@@ -784,16 +760,13 @@ describe('members only (ADR-060)', () => {
       expect(m).toEqual({ tax_code: 'RSSMRA80A01H501U', address: 'Via Esempio 1' });
     });
   });
-  it('raises MEMBER_NOT_FOUND and denies lower roles', async () => {
+  it('raises TRANSPORT_NOT_INVOICEABLE for unknown transport and denies lower roles', async () => {
     await rolledBack(async (tx) => {
       await world(tx);
       await actAs(tx, 'staff');
       expect(
-        await err(
-          tx,
-          `select * from issue_invoice(gen_random_uuid(), array['${BOOKING}']::uuid[], null, null, null)`,
-        ),
-      ).toMatch(/MEMBER_NOT_FOUND/);
+        await err(tx, `select * from issue_invoice(gen_random_uuid(), 300, null, null, null)`),
+      ).toMatch(/TRANSPORT_NOT_INVOICEABLE/);
     });
     for (const role of ['anon', 'volontario'] as const)
       await rolledBack(async (tx) => {
@@ -802,7 +775,7 @@ describe('members only (ADR-060)', () => {
         expect(await err(tx, issue())).toMatch(/^42501/);
       });
   });
-  it('volunteer view exposes only member name and phone', async () => {
+  it('volunteer view exposes only member name and contact phone (transport phone wins)', async () => {
     await rolledBack(async (tx) => {
       await world(tx);
       await tx.unsafe(
@@ -815,18 +788,79 @@ describe('members only (ADR-060)', () => {
           .map((c) => c.column_name)
           .filter((n) => n.startsWith('member_'))
           .sort(),
-      ).toEqual(['member_first_name', 'member_last_name', 'member_phone']);
+      ).toEqual(['member_first_name', 'member_last_name']);
+      await tx.unsafe(
+        `update transports set contact_phone = '3330000010' where id = 'fc000000-0000-4000-8000-000000000003'`,
+      );
       await actAs(tx, 'volontario', ID.vol);
-      const [r] =
-        await tx`select member_first_name, member_last_name, member_phone from volunteer_transports_v`;
-      expect(r).toEqual({
-        member_first_name: 'M',
-        member_last_name: 'Member',
-        member_phone: '3330000009',
-      });
+      const r = await tx`select id, contact_phone from volunteer_transports_v order by travel_date`;
+      expect(r.map((x) => x.contact_phone)).toEqual([null, '3330000009']); // svolto trip (fc..03): phone hidden
     });
   });
   it('clients table is gone', async () => {
     expect(await sql`select to_regclass('public.clients') as t`).toEqual([{ t: null }]);
+  });
+});
+
+describe('transports only (ADR-070) checks', () => {
+  const T = 'fc000000-0000-4000-8000-000000000002'; // richiesto, appointment only
+  it('enforces time, odometer, companions and invoice checks (23514)', async () => {
+    await rolledBack(async (tx) => {
+      await world(tx);
+      const bad = [
+        `update transports set appointment_at = null where id = '${T}'`,
+        `update transports set odometer_start = 5 where id = '${T}'`,
+        `update transports set odometer_start = 10, odometer_end = 5 where id = '${T}'`,
+        `update transports set odometer_start = 0, odometer_end = 10000000 where id = '${T}'`,
+        `update transports set companions = 9 where id = '${T}'`,
+        `update transports set contact_phone = repeat('1', 41) where id = '${T}'`,
+        `update transports set invoice_id = 'fd000000-0000-4000-8000-000000000001' where id = '${T}'`,
+        `update transports set status = 'svolto', driver_volunteer_id = '${ID.vol}', departure_at = now() - interval '1 day',
+           from_address = 'a', to_address = 'b' where id = '${T}'`,
+      ];
+      for (const q of bad) expect(await err(tx, q), q).toMatch(/^23514/);
+      expect(await err(tx, `update org_settings set km_rate_cents = 100001`)).toMatch(/^23514/);
+    });
+  });
+  it('km is generated from the odometer', async () => {
+    await rolledBack(async (tx) => {
+      await world(tx);
+      expect(
+        (await tx`select km from transports where id = 'fc000000-0000-4000-8000-000000000003'`)[0]!
+          .km,
+      ).toBe(42);
+      expect(
+        await err(
+          tx,
+          `update transports set km = 1 where id = 'fc000000-0000-4000-8000-000000000003'`,
+        ),
+      ).toMatch(/^428C9/);
+    });
+  });
+  it('staff_org_info returns km_rate_cents; lower roles are denied', async () => {
+    await rolledBack(async (tx) => {
+      await world(tx);
+      await tx.unsafe('update org_settings set km_rate_cents = 35');
+      await actAs(tx, 'staff');
+      expect(
+        (await tx.unsafe('select km_rate_cents from staff_org_info()'))[0]!.km_rate_cents,
+      ).toBe(35);
+      await reset(tx);
+      await actAs(tx, 'volontario');
+      expect(await err(tx, 'select km_rate_cents from staff_org_info()')).toMatch(/^42501/);
+    });
+  });
+  it('complete_transport rejects a missing or inverted odometer and non-volunteers', async () => {
+    await rolledBack(async (tx) => {
+      await world(tx);
+      await actAs(tx, 'volontario');
+      const c = (a: string, b: string) =>
+        `select complete_transport('fc000000-0000-4000-8000-000000000001', ${a}, ${b}, null)`;
+      expect(await err(tx, c('200', '100'))).toMatch(/^23514/);
+      expect(await err(tx, c('null', 'null'))).toMatch(/^23514/);
+      await reset(tx);
+      await actAs(tx, 'anon');
+      expect(await err(tx, c('1', '2'))).toMatch(/^42501/);
+    });
   });
 });

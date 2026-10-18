@@ -38,6 +38,7 @@ export const OrgInfo = z
     stampDutyThresholdCents: z.number().int(),
     stampDutyAmountCents: z.number().int(),
     nextCardNumber: z.number().int(),
+    kmRateCents: z.number().int(),
   })
   .openapi('OrgInfo');
 export type OrgInfo = z.infer<typeof OrgInfo>;

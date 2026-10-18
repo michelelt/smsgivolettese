@@ -92,7 +92,7 @@ describe('ownership and filtering', () => {
     expect((await count('anon', null, 'select 1 from audit_log')) <= 0).toBe(true);
   });
   it('volunteer_transports_v: own assigned transports only, anon denied', async () => {
-    expect(await count('volontario', ID.vol, 'select 1 from volunteer_transports_v')).toBe(1);
+    expect(await count('volontario', ID.vol, 'select 1 from volunteer_transports_v')).toBe(2);
     expect(await count('volontario', ID.vol2, 'select 1 from volunteer_transports_v')).toBe(0);
     expect(await count('anon', null, 'select 1 from volunteer_transports_v')).toBe(-1);
   });
@@ -100,7 +100,7 @@ describe('ownership and filtering', () => {
     const cols =
       await sql`select column_name from information_schema.columns where table_name = 'volunteer_transports_v'`;
     const names = cols.map((c) => c.column_name);
-    for (const bad of ['tax_code', 'reason', 'notes', 'address', 'member_id', 'booking_id'])
+    for (const bad of ['tax_code', 'notes', 'address', 'member_id', 'invoice_id'])
       expect(names).not.toContain(bad);
   });
   it('volunteers cannot read transports base table', async () => {

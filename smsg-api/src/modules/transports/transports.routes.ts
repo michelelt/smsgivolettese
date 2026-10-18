@@ -143,9 +143,8 @@ export const transportsRoutes = new OpenAPIHono<AuthEnv>({ defaultHook })
     c.json(await service.cancel(ctxOf(c), c.req.valid('param').id), 200),
   )
   .openapi(complete, async (c) => {
-    const b = c.req.valid('json');
     return c.json(
-      await service.complete(ctxOf(c), c.req.valid('param').id, b.km, b.driverNotes),
+      await service.complete(ctxOf(c), c.req.valid('param').id, c.req.valid('json')),
       200,
     );
   });

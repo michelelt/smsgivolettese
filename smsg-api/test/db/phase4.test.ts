@@ -7,51 +7,19 @@ const err = async (tx: Tx, q: string) => {
   const r = await attempt(tx, q);
   return r.ok ? 'OK' : `${r.code}:${r.message}`;
 };
-const BOOKING = 'fb000000-0000-4000-8000-000000000001';
 const TRANSPORT = 'fc000000-0000-4000-8000-000000000001';
 const link = (b: string) =>
   `update site_settings set footer_links = '${JSON.stringify([b ? JSON.parse(b) : {}])}'`;
 
-describe('booking -> transport sync (ADR-046)', () => {
-  it('cancel frees the assigned transport and its commitment; restore reopens it without driver', async () => {
+describe('transport cancel frees the commitment (ADR-070: no bookings)', () => {
+  it('cancelling an assigned transport deletes its commitment', async () => {
     await rolledBack(async (tx) => {
       await fixtures(tx);
-      await tx
-        .unsafe(`update bookings set status = 'attesa' where id = '${BOOKING}'`)
-        .catch(() => {});
-      await tx.unsafe(
-        `update transports set booking_id = '${BOOKING}', vehicle_id = 'f1000000-0000-4000-8000-000000000001' where id = '${TRANSPORT}'`,
-      );
-      const commits = () =>
+      const q = () =>
         tx.unsafe(`select 1 from volunteer_commitments where transport_id = '${TRANSPORT}'`);
-      expect(await commits()).toHaveLength(1);
-      await tx.unsafe(
-        `update bookings set status = 'annullata', cancelled_by = 'staff' where id = '${BOOKING}'`,
-      );
-      const [t] = await tx.unsafe(`select status from transports where id = '${TRANSPORT}'`);
-      expect(t!.status).toBe('annullato');
-      expect(await commits()).toHaveLength(0);
-      await tx.unsafe(`update bookings set status = 'attesa' where id = '${BOOKING}'`);
-      const [r] = await tx.unsafe(
-        `select status, driver_volunteer_id, vehicle_id from transports where id = '${TRANSPORT}'`,
-      );
-      expect(r).toEqual({ status: 'richiesto', driver_volunteer_id: null, vehicle_id: null });
-    });
-  });
-  it('cancel leaves a completed transport alone', async () => {
-    await rolledBack(async (tx) => {
-      await fixtures(tx);
-      await tx.unsafe(
-        `update bookings set status = 'attesa', invoice_id = null where id = '${BOOKING}'`,
-      );
-      await tx.unsafe(
-        `update transports set booking_id = '${BOOKING}', status = 'svolto', km = 5 where id = '${TRANSPORT}'`,
-      );
-      await tx.unsafe(
-        `update bookings set status = 'annullata', cancelled_by = 'staff' where id = '${BOOKING}'`,
-      );
-      const [t] = await tx.unsafe(`select status from transports where id = '${TRANSPORT}'`);
-      expect(t!.status).toBe('svolto');
+      expect(await q()).toHaveLength(1);
+      await tx.unsafe(`update transports set status = 'annullato' where id = '${TRANSPORT}'`);
+      expect(await q()).toHaveLength(0);
     });
   });
 });
@@ -127,15 +95,16 @@ describe('staff_org_info', () => {
   });
 });
 
-describe('demo bookings seed', () => {
-  it('has one attesa and two eseguita for the example member', async () => {
+describe('demo transports seed', () => {
+  it('has one richiesto and one svolto (odometers, no invoice) for the example member; km rate 35', async () => {
     const rows =
-      await sql`select b.status, count(*)::int n from bookings b join members c on c.id = b.member_id
-      where c.last_name = 'Rossi (esempio)' group by 1`;
-    expect(Object.fromEntries(rows.map((r) => [r.status, r.n]))).toEqual({
-      attesa: 1,
-      eseguita: 2,
-    });
+      await sql`select t.status, t.km, t.invoice_id from transports t join members c on c.id = t.member_id
+      where c.last_name = 'Rossi (esempio)' order by t.status`;
+    expect(rows).toEqual([
+      { status: 'richiesto', km: null, invoice_id: null },
+      { status: 'svolto', km: 42, invoice_id: null },
+    ]);
+    expect((await sql`select km_rate_cents from org_settings`)[0]!.km_rate_cents).toBe(35);
   });
 });
 

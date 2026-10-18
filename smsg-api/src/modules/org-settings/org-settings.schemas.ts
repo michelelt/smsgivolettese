@@ -14,6 +14,7 @@ export const OrgSettingsInput = z
     stampDutyThresholdCents: cents,
     stampDutyAmountCents: cents,
     membershipFeeCents: cents,
+    kmRateCents: z.number().int().min(0).max(100_000),
     videoMaxMb: z.number().int().min(1).max(50),
   })
   .openapi('OrgSettingsInput');

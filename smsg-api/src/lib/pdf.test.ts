@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { invoicePdf, receiptPdf, type InvoicePdf } from './pdf.js';
+import { invoicePdf, receiptPdf, transportSheetPdf, type InvoicePdf } from './pdf.js';
 
 describe('pdf', () => {
   it('renders an invoice, void and paid, as a PDF', async () => {
@@ -13,7 +13,7 @@ describe('pdf', () => {
       customerName: 'Mario Rossi',
       customerTaxCode: null,
       customerAddress: null,
-      lines: [{ description: 'Pedicure del 07/03/2026', amountCents: 5000 }],
+      lines: [{ description: 'Trasporto del 07/03/2026 (12 km)', amountCents: 5000 }],
       subtotalCents: 5000,
       stampDutyCents: 200,
       totalCents: 5200,
@@ -62,5 +62,24 @@ describe('pdf', () => {
     expect(buf.subarray(0, 4).toString()).toBe('%PDF');
     expect(buf.toString('latin1')).toMatch(/\/FontFile2/);
     expect(buf.toString('latin1')).toMatch(/DejaVuSans/);
+  });
+
+  it('renders the trip sheet with odometer blanks', async () => {
+    const buf = await transportSheetPdf({
+      travelDate: '2026-10-05',
+      departureTime: '08:30',
+      appointmentTime: '09:30',
+      returnTime: null,
+      memberName: 'Anna Verdi',
+      contactPhone: '333 1234567',
+      fromAddress: 'Via Roma 1',
+      toAddress: 'Ospedale',
+      wheelchair: false,
+      mobilityAids: true,
+      companions: 1,
+      driverName: null,
+      vehicle: null,
+    });
+    expect(buf.subarray(0, 4).toString()).toBe('%PDF');
   });
 });

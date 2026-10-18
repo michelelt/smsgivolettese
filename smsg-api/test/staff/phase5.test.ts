@@ -63,7 +63,6 @@ async function cleanup() {
     await t`set local session_replication_role = replica`;
     const zu = t`select id from auth.users where email like 'zzp-%@t.test'`;
     const zc = t`select id from members where first_name = 'ZZP'`;
-    await t`delete from bookings where member_id in (${zc})`;
     await t`delete from transports where member_id in (${zc})`;
     await t`delete from membership_fees where member_id in (${zc})`;
     await t`delete from members where first_name = 'ZZP'`;
@@ -377,10 +376,11 @@ describe('transports', () => {
         returnTime: '10:00',
         fromAddress: 'Via Roma 1',
         toAddress: 'Ospedale',
-        reason: 'visita riservata',
+        contactPhone: '3331234567',
         notes: 'nota staff riservata',
         wheelchair: false,
-        companion: false,
+        mobilityAids: false,
+        companions: 0,
         ...extra,
       })
     ).data;
@@ -396,8 +396,15 @@ describe('transports', () => {
   });
 
   it('create/patch rules; assign needs departure and addresses', async () => {
-    const bare = await staff('POST', '/transports', { memberId: member, travelDate: tomorrow });
+    const bare = await staff('POST', '/transports', {
+      memberId: member,
+      travelDate: tomorrow,
+      appointmentTime: '10:00',
+    });
     expect(bare.status).toBe(201);
+    expect(
+      (await staff('POST', '/transports', { memberId: member, travelDate: tomorrow })).status,
+    ).toBe(400); // neither departure nor appointment
     const inc = await staff('POST', `/transports/${bare.data.id}/assign`, { driverId: ids.a });
     expect(inc.status).toBe(422);
     expect(inc.data.error.code).toBe('TRANSPORT_INCOMPLETE');
@@ -405,8 +412,13 @@ describe('transports', () => {
       'TRANSPORT_INCOMPLETE',
     );
     expect(
-      (await staff('POST', '/transports', { memberId: crypto.randomUUID(), travelDate: tomorrow }))
-        .data.error.code,
+      (
+        await staff('POST', '/transports', {
+          memberId: crypto.randomUUID(),
+          travelDate: tomorrow,
+          departureTime: '08:00',
+        })
+      ).data.error.code,
     ).toBe('MEMBER_NOT_FOUND');
     const p = await staff('PATCH', `/transports/${bare.data.id}`, {
       departureTime: '14:00',
@@ -438,7 +450,7 @@ describe('transports', () => {
     expect(mailsTo('a').at(-1)?.subject).toBe('Nuovo impegno assegnato');
     // email content stays minimal (ADR-057)
     const body = mailsTo('a').at(-1)!.text;
-    expect(body).not.toMatch(/Roma|Ospedale|visita|nota staff|ZZP|3330000000/);
+    expect(body).not.toMatch(/Roma|Ospedale|visita|nota staff|ZZP|3330000000|3331234567/);
 
     const t2 = await mkTransport({ departureTime: '10:00', returnTime: '12:00' });
     const ov = await staff('POST', `/transports/${t2.id}/assign`, { driverId: ids.a });
@@ -460,13 +472,16 @@ describe('transports', () => {
         'fromAddress',
         'toAddress',
         'wheelchair',
-        'companion',
+        'mobilityAids',
+        'companions',
         'status',
+        'odometerStart',
+        'odometerEnd',
         'km',
         'driverNotes',
         'memberFirstName',
         'memberLastName',
-        'memberPhone',
+        'contactPhone',
         'vehiclePlate',
         'vehicleModel',
       ].sort(),
@@ -531,13 +546,29 @@ describe('transports', () => {
       200,
     );
     const done = await staff('POST', `/transports/${t.id}/complete`, {
-      km: 12.5,
+      odometerStart: 1000,
+      odometerEnd: 1012,
       driverNotes: '=SUM(1)',
     });
-    expect(done.data).toMatchObject({ status: 'svolto', km: 12.5 });
-    expect((await staff('POST', `/transports/${t.id}/complete`, { km: 1 })).data.error.code).toBe(
+    expect(done.data).toMatchObject({
+      status: 'svolto',
+      odometerStart: 1000,
+      odometerEnd: 1012,
+      km: 12,
+    });
+    const body = { odometerStart: 1, odometerEnd: 2 };
+    expect((await staff('POST', `/transports/${t.id}/complete`, body)).data.error.code).toBe(
       'TRANSPORT_NOT_COMPLETABLE',
     );
+    for (const b of [
+      { odometerStart: 10, odometerEnd: 9 },
+      { odometerStart: 0, odometerEnd: 2001 },
+      { odometerStart: -1, odometerEnd: 5 },
+      { odometerStart: 1.5, odometerEnd: 5 },
+      { odometerStart: 1 },
+      { km: 3 },
+    ])
+      expect((await staff('POST', `/transports/${t.id}/complete`, b)).status).toBe(400);
     const t2 = await mkTransport({
       travelDate: today,
       departureTime: '07:30',
@@ -545,9 +576,26 @@ describe('transports', () => {
     });
     await staff('POST', `/transports/${t2.id}/assign`, { driverId: ids.c });
     expect(
-      (await call('c', 'POST', `/me/transports/${t2.id}/complete`, { km: 3, driverNotes: 'ok' }))
-        .status,
+      (
+        await call('c', 'POST', `/me/transports/${t2.id}/complete`, {
+          odometerStart: 500,
+          odometerEnd: 503,
+          driverNotes: 'ok',
+        })
+      ).status,
     ).toBe(204);
+    expect((await staff('GET', `/transports/${t2.id}`)).data).toMatchObject({
+      status: 'svolto',
+      km: 3,
+    });
+    expect(
+      (
+        await call('c', 'POST', `/me/transports/${t2.id}/complete`, {
+          odometerStart: 5,
+          odometerEnd: 1,
+        })
+      ).status,
+    ).toBe(400);
 
     const csv = await staff('GET', `/transports/export.csv?month=${today.slice(0, 7)}`);
     expect(csv.status).toBe(200);
@@ -560,59 +608,29 @@ describe('transports', () => {
       [
         'Data',
         'Partenza',
-        'Assistito',
+        'Socio',
         'Da',
         'A',
         'Autista',
         'Targa',
+        'Km partenza',
+        'Km arrivo',
         'Km',
         'Carrozzina',
-        'Accompagnatore',
+        'Ausili',
+        'Accompagnatori',
         'Note autista',
       ]
         .map((h) => `"${h}"`)
         .join(';'),
     );
     const row = lines.find((l) => l.includes(`ZZP C${tag}`) && l.includes('06:00'))!;
-    expect(row).toContain('"12,5"');
+    expect(row).toContain('"1000";"1012";"12"');
     expect(row).toContain(`"'=SUM(1)"`);
     expect(
       row.startsWith(`"${today.slice(8, 10)}/${today.slice(5, 7)}/${today.slice(0, 4)}"`),
     ).toBe(true);
     expect((await staff('GET', '/transports/export.csv?month=2026-13')).status).toBe(400);
-  });
-
-  it('booking cancel emails the driver of the linked transport', async () => {
-    const svc = (
-      await staff('POST', '/services', {
-        name: `ZZP svc ${tag}`,
-        priceCents: 0,
-        requiresTransport: true,
-      })
-    ).data;
-    const b = (
-      await staff('POST', '/bookings', {
-        memberId: member,
-        serviceId: svc.id,
-        day: addDays(today, 3),
-        slot: 'mattina',
-      })
-    ).data;
-    const tr = (
-      await staff('GET', `/transports?from=${addDays(today, 3)}&to=${addDays(today, 3)}`)
-    ).data.items.find((x: J) => x.bookingId === b.id);
-    await staff('PATCH', `/transports/${tr.id}`, {
-      departureTime: '08:00',
-      fromAddress: 'A',
-      toAddress: 'B',
-    });
-    expect((await staff('POST', `/transports/${tr.id}/assign`, { driverId: ids.e })).status).toBe(
-      200,
-    );
-    const n = mailsTo('e').length;
-    expect((await staff('POST', `/bookings/${b.id}/cancel`, { by: 'staff' })).status).toBe(200);
-    expect(mailsTo('e')).toHaveLength(n + 1);
-    expect(mailsTo('e').at(-1)?.subject).toBe('Impegno annullato');
   });
 });
 

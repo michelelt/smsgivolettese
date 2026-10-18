@@ -110,28 +110,19 @@ export const specs: Record<string, Spec> = {
     S: ['staff', 'select 1 from transports'],
     I: [
       'staff',
-      `insert into transports (member_id, travel_date) values ('f7000000-0000-4000-8000-000000000001', current_date) returning 1`,
+      `insert into transports (member_id, travel_date, appointment_at) values ('f7000000-0000-4000-8000-000000000001', current_date, now()) returning 1`,
     ],
     U: ['staff', `update transports set notes = 'x' returning 1`],
     D: [null, `delete from transports returning 1`],
   },
   services: {
     S: ['anon', 'select 1 from services'],
-    I: ['staff', `insert into services (name, price_cents) values ('n', 0) returning 1`],
+    I: ['staff', `insert into services (name) values ('n') returning 1`],
     U: ['staff', `update services set sort_order = 1 returning 1`],
     D: [
       'staff',
       `delete from services where id = 'fa000000-0000-4000-8000-000000000003' returning 1`,
     ],
-  },
-  bookings: {
-    S: ['staff', 'select 1 from bookings'],
-    I: [
-      'staff',
-      `insert into bookings (member_id, service_id, day, slot, price_applied_cents, origin) values ('f7000000-0000-4000-8000-000000000001', 'fa000000-0000-4000-8000-000000000001', current_date, 'mattina', 0, 'telefono') returning 1`,
-    ],
-    U: ['staff', `update bookings set notes = 'x' returning 1`],
-    D: [null, `delete from bookings returning 1`],
   },
   members: {
     S: ['staff', 'select 1 from members'],

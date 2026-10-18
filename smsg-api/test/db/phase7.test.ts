@@ -52,7 +52,7 @@ describe('gdpr_export', () => {
       expect(r.subject).toBe('member');
       expect(r.member.id).toBe(MEMBER);
       expect(r.membershipFees).toHaveLength(2);
-      expect(r.transports).toHaveLength(2);
+      expect(r.transports).toHaveLength(3);
       expect(r.invoices[0].lines).toHaveLength(1);
       expect(r.transports[0]).not.toHaveProperty('driver_volunteer_id');
       expect(r.transports[0]).not.toHaveProperty('created_by');
@@ -74,7 +74,7 @@ describe('gdpr_export', () => {
       expect(r.profile.id).toBe(ID.vol);
       expect(r.role).toBe('volontario');
       expect(r.shiftAssignments).toHaveLength(1);
-      expect(r.transportsAsDriver).toHaveLength(1);
+      expect(r.transportsAsDriver).toHaveLength(2);
       expect(Object.keys(r.transportsAsDriver[0]).sort()).toEqual([
         'driverNotes',
         'id',
@@ -106,9 +106,8 @@ describe('anonymize_member', () => {
       await tx.unsafe(`update members set status = 'cessato', ended_on = current_date, phone = '123', notes = 'n',
         tax_code = 'RSSMRA80A01H501U' where id = '${MEMBER}'`);
       await tx.unsafe(
-        `update transports set notes = 'secret', reason = 'r' where member_id = '${MEMBER}'`,
+        `update transports set notes = 'secret', contact_phone = '123', driver_notes = 'd' where member_id = '${MEMBER}'`,
       );
-      await tx.unsafe(`update bookings set notes = 'secret' where member_id = '${MEMBER}'`);
       await actAs(tx, 'super_admin');
       const [{ r }] = (await tx.unsafe(member('anonymize_member'))) as unknown as [{ r: any }];
       expect(r.retainedInvoices).toEqual([{ id: INVOICE, year: 2020, number: 1 }]);
@@ -124,15 +123,16 @@ describe('anonymize_member', () => {
       });
       expect(m!.anonymized_at).not.toBeNull();
       const t =
-        await tx`select notes, reason, from_address from transports where member_id = ${MEMBER}`;
+        await tx`select notes, contact_phone, driver_notes, from_address from transports where member_id = ${MEMBER}`;
       expect(
         t.every(
-          (x) => x.notes === null && x.reason === null && x.from_address === '(anonimizzato)',
+          (x) =>
+            x.notes === null &&
+            x.contact_phone === null &&
+            x.driver_notes === null &&
+            x.from_address === '(anonimizzato)',
         ),
       ).toBe(true);
-      expect(
-        (await tx`select notes from bookings where member_id = ${MEMBER}`)[0]!.notes,
-      ).toBeNull();
       expect(
         await tx`select customer_name, total_cents from invoices where id = ${INVOICE}`,
       ).toEqual([{ customer_name: 'C', total_cents: 300 }]);

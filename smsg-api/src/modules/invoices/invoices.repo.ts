@@ -52,7 +52,7 @@ export async function detail(tx: Tx, id: string) {
     from public.invoices i where i.id = ${id}`;
   if (!inv) return undefined;
   const lines = await tx<InvoiceDetail['lines']>`
-    select position, description, amount_cents as "amountCents", booking_id as "bookingId"
+    select position, description, amount_cents as "amountCents", transport_id as "transportId"
     from public.invoice_lines where invoice_id = ${id} order by position`;
   return { ...inv, lines };
 }
@@ -63,8 +63,8 @@ export const exists = async (tx: Tx, id: string) =>
 export const issue = async (
   tx: Tx,
   a: {
-    memberId: string;
-    bookingIds: string[];
+    transportId: string;
+    amountCents: number;
     taxCode: string | null;
     address: string | null;
     method: string | null;
@@ -72,7 +72,7 @@ export const issue = async (
 ) =>
   (
     await tx<{ id: string }[]>`
-      select id from public.issue_invoice(${a.memberId}::uuid, ${tx.array(a.bookingIds)}::uuid[],
+      select id from public.issue_invoice(${a.transportId}::uuid, ${a.amountCents}::int,
         ${a.taxCode}::text, ${a.address}::text, ${a.method}::public.payment_method)`
   )[0]!.id;
 

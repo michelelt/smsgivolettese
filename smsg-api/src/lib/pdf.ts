@@ -136,16 +136,17 @@ export type TransportSheet = {
   appointmentTime: string | null;
   returnTime: string | null;
   memberName: string;
-  memberPhone: string | null;
+  contactPhone: string | null;
   fromAddress: string | null;
   toAddress: string | null;
   wheelchair: boolean;
-  companion: boolean;
+  mobilityAids: boolean;
+  companions: number;
   driverName: string | null;
   vehicle: string | null;
 };
 
-/** Trip sheet (ADR-055): volunteer-minimal fields only, no reason or staff notes; Km/Note/Firma left blank. */
+/** Trip sheet (ADR-055): volunteer-minimal fields only, no staff notes; Km/Note/Firma left blank. */
 export const transportSheetPdf = (t: TransportSheet) =>
   render((d) => {
     d.font('Sans-Bold')
@@ -157,16 +158,18 @@ export const transportSheetPdf = (t: TransportSheet) =>
     f('Autista', t.driverName);
     f('Mezzo', t.vehicle);
     d.moveDown(0.5);
-    f('Assistito', t.memberPhone ? `${t.memberName} (${t.memberPhone})` : t.memberName);
+    f('Socio', t.memberName);
+    f('Telefono', t.contactPhone);
     f('Partenza', t.departureTime);
     f('Appuntamento', t.appointmentTime);
     f('Ritorno', t.returnTime);
     f('Da', t.fromAddress);
     f('A', t.toAddress);
     f('Carrozzina', t.wheelchair ? 'Sì' : 'No');
-    f('Accompagnatore', t.companion ? 'Sì' : 'No');
+    f('Ausili (deambulatore/stampelle)', t.mobilityAids ? 'Sì' : 'No');
+    f('Accompagnatori', String(t.companions));
     d.moveDown(2);
-    d.text('Km ______________');
+    d.text('Km partenza ____________   Km arrivo ____________');
     d.moveDown(1.5);
     d.text('Note ______________________________________________');
     d.moveDown(1.5);

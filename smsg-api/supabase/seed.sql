@@ -36,10 +36,11 @@ insert into public.vehicles (plate, model, seats, wheelchair_accessible) values
   ('AA000AA', 'Fiat Doblò (esempio)', 5, true), ('BB111BB', 'Fiat Panda (esempio)', 4, false);
 insert into public.shift_types (name, sort_order) values
   ('Sede', 1), ('Centralino', 2), ('Ambulatorio', 3), ('Accompagnamento', 4);
-insert into public.services (name, description, price_cents, schedule_note, requires_transport, sort_order) values
-  ('Misurazione pressione (esempio)', 'Servizio di esempio', 0, 'martedì mattina', false, 1),
-  ('Prelievi (esempio)', 'Servizio di esempio', 500, 'giovedì mattina', false, 2),
-  ('Accompagnamento (esempio)', 'Servizio di esempio', 1000, 'su richiesta', true, 3);
+insert into public.services (name, description, schedule_note, sort_order) values
+  ('Misurazione pressione (esempio)', 'Servizio di esempio', 'martedì mattina', 1),
+  ('Prelievi (esempio)', 'Servizio di esempio', 'giovedì mattina', 2),
+  ('Accompagnamento (esempio)', 'Servizio di esempio', 'su richiesta', 3);
+update public.org_settings set km_rate_cents = 35;
 insert into public.members (card_number, first_name, last_name, joined_on) values
   (1, 'Maria', 'Esposito (esempio)', current_date - 400), (2, 'Carlo', 'Ferrari (esempio)', current_date - 200);
 insert into public.members (card_number, first_name, last_name, phone, address, joined_on)
@@ -78,12 +79,15 @@ update public.site_settings set slogan = 'Sito di esempio', vat_number = '000000
     {"group":"utili","label":"Comune di esempio","url":"https://example.test/comune"},
     {"group":"utili","label":"ASL di esempio","url":"https://example.test/asl"}]';
 
-insert into public.bookings (member_id, service_id, day, slot, price_applied_cents, origin, status, executed_at)
-select c.id, s.id, current_date + d.off, 'mattina', s.price_cents, 'telefono', d.st::public.booking_status,
-  case when d.st = 'eseguita' then now() end
-from public.members c, public.services s,
-  (values (1, 'attesa'), (-7, 'eseguita'), (-3, 'eseguita')) d (off, st)
-where c.last_name = 'Rossi (esempio)' and s.name = 'Prelievi (esempio)';
+insert into public.transports (member_id, travel_date, departure_at, from_address, to_address, status, odometer_start, odometer_end, completed_at,
+  driver_volunteer_id, vehicle_id)
+select m.id, current_date + 1, (current_date + 1) + time '08:30', 'Via Esempio 1, Givoletto', 'Ospedale di esempio', 'richiesto', null, null, null, null, null
+from public.members m where m.last_name = 'Rossi (esempio)';
+insert into public.transports (member_id, travel_date, departure_at, from_address, to_address, status, odometer_start, odometer_end, completed_at,
+  driver_volunteer_id, vehicle_id)
+select m.id, current_date - 3, (current_date - 3) + time '08:30', 'Via Esempio 1, Givoletto', 'Ospedale di esempio', 'svolto', 10000, 10042, now(),
+  'a0000000-0000-4000-8000-000000000003', (select id from public.vehicles where plate = 'AA000AA')
+from public.members m where m.last_name = 'Rossi (esempio)';
 
 -- Page texts (ADR-061): same copy as the migration default, placeholders included.
 update public.site_settings set pages = $pages${

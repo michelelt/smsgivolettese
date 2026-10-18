@@ -8,26 +8,27 @@ export const Transport = z
     id: z.uuid(),
     memberId: z.uuid(),
     memberName: z.string(),
-    memberPhone: z.string().nullable(),
+    contactPhone: z.string().nullable(),
     travelDate: z.string(),
     departureTime: z.string().nullable(),
     appointmentTime: z.string().nullable(),
     returnTime: z.string().nullable(),
     fromAddress: z.string().nullable(),
     toAddress: z.string().nullable(),
-    requestedBy: z.string().nullable(),
-    reason: z.string().nullable(),
     wheelchair: z.boolean(),
-    companion: z.boolean(),
+    mobilityAids: z.boolean(),
+    companions: z.number().int(),
     notes: z.string().nullable(),
     status,
     driverId: z.uuid().nullable(),
     driverName: z.string().nullable(),
     vehicleId: z.uuid().nullable(),
     vehiclePlate: z.string().nullable(),
-    km: z.number().nullable(),
+    odometerStart: z.number().int().nullable(),
+    odometerEnd: z.number().int().nullable(),
+    km: z.number().int().nullable(),
     driverNotes: z.string().nullable(),
-    bookingId: z.uuid().nullable(),
+    invoiceId: z.uuid().nullable(),
   })
   .openapi('Transport');
 export type Transport = z.infer<typeof Transport>;
@@ -51,10 +52,10 @@ const fields = {
   returnTime: hhmm.nullable().optional(),
   fromAddress: text(200),
   toAddress: text(200),
-  requestedBy: text(100),
-  reason: text(200),
+  contactPhone: text(40),
   wheelchair: z.boolean().optional(),
-  companion: z.boolean().optional(),
+  mobilityAids: z.boolean().optional(),
+  companions: z.number().int().min(0).max(8).optional(),
   notes: text(500),
 };
 const returnAfterDeparture = (t: { departureTime?: string | null; returnTime?: string | null }) =>
@@ -63,6 +64,9 @@ const returnMsg = { message: 'Il ritorno deve seguire la partenza' };
 
 export const TransportCreate = z
   .strictObject({ memberId: z.uuid(), ...fields })
+  .refine((t) => !!t.departureTime || !!t.appointmentTime, {
+    message: "Indica l'ora di partenza da casa o l'ora dell'appuntamento",
+  })
   .refine(returnAfterDeparture, returnMsg)
   .openapi('TransportCreate');
 export const TransportPatch = z
@@ -74,11 +78,21 @@ export const TransportPatch = z
 export const TransportAssign = z
   .strictObject({ driverId: z.uuid(), vehicleId: z.uuid().nullable().optional() })
   .openapi('TransportAssign');
+const odo = z.number().int().min(0).max(9_999_999);
+export const odometerFields = {
+  odometerStart: odo,
+  odometerEnd: odo,
+  driverNotes: z.string().trim().max(500).nullable().optional(),
+};
+export const odometerOk = (o: { odometerStart: number; odometerEnd: number }) =>
+  o.odometerEnd >= o.odometerStart && o.odometerEnd - o.odometerStart <= 2000;
+export const odometerMsg = {
+  message:
+    "Controlli i chilometri: l'arrivo deve essere uguale o maggiore della partenza (al massimo 2000 km)",
+};
 export const TransportComplete = z
-  .strictObject({
-    km: z.number().min(0).max(9999.9),
-    driverNotes: z.string().trim().max(500).nullable().optional(),
-  })
+  .strictObject(odometerFields)
+  .refine(odometerOk, odometerMsg)
   .openapi('TransportComplete');
 
 export const CsvQuery = z.object({ month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/) });

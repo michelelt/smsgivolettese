@@ -23,7 +23,7 @@ export const schema = z
   })
   .superRefine((e, ctx) => {
     if (e.NODE_ENV !== 'production') return;
-    // Turnstile hostname check and revalidation need it; without it every booking fails closed
+    // Turnstile hostname check and revalidation need it; without it every proposal fails closed
     if (!e.WEB_URL)
       ctx.addIssue({ code: 'custom', path: ['WEB_URL'], message: 'required in production' });
     if (!e.SUPERADMIN_MFA)

@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "SMS Givolettese API",
-    "version": "3.1.0"
+    "version": "4.0.0"
   },
   "components": {
     "securitySchemes": {
@@ -318,8 +318,11 @@
           "wheelchair": {
             "type": "boolean"
           },
-          "companion": {
+          "mobilityAids": {
             "type": "boolean"
+          },
+          "companions": {
+            "type": "integer"
           },
           "status": {
             "type": "string",
@@ -329,8 +332,16 @@
               "svolto"
             ]
           },
+          "odometerStart": {
+            "type": "integer",
+            "nullable": true
+          },
+          "odometerEnd": {
+            "type": "integer",
+            "nullable": true
+          },
           "km": {
-            "type": "number",
+            "type": "integer",
             "nullable": true
           },
           "driverNotes": {
@@ -343,7 +354,7 @@
           "memberLastName": {
             "type": "string"
           },
-          "memberPhone": {
+          "contactPhone": {
             "type": "string",
             "nullable": true
           },
@@ -365,13 +376,16 @@
           "fromAddress",
           "toAddress",
           "wheelchair",
-          "companion",
+          "mobilityAids",
+          "companions",
           "status",
+          "odometerStart",
+          "odometerEnd",
           "km",
           "driverNotes",
           "memberFirstName",
           "memberLastName",
-          "memberPhone",
+          "contactPhone",
           "vehiclePlate",
           "vehicleModel"
         ],
@@ -392,10 +406,15 @@
       "MyTransportComplete": {
         "type": "object",
         "properties": {
-          "km": {
-            "type": "number",
+          "odometerStart": {
+            "type": "integer",
             "minimum": 0,
-            "maximum": 9999.9
+            "maximum": 9999999
+          },
+          "odometerEnd": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9999999
           },
           "driverNotes": {
             "type": "string",
@@ -404,7 +423,8 @@
           }
         },
         "required": [
-          "km"
+          "odometerStart",
+          "odometerEnd"
         ],
         "additionalProperties": false
       },
@@ -3465,218 +3485,6 @@
         ],
         "additionalProperties": false
       },
-      "BookingPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Booking"
-            }
-          },
-          "total": {
-            "type": "integer"
-          }
-        },
-        "required": [
-          "items",
-          "total"
-        ]
-      },
-      "Booking": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "memberId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "memberName": {
-            "type": "string"
-          },
-          "memberPhone": {
-            "type": "string",
-            "nullable": true
-          },
-          "serviceId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "serviceName": {
-            "type": "string"
-          },
-          "day": {
-            "type": "string"
-          },
-          "slot": {
-            "type": "string",
-            "enum": [
-              "mattina",
-              "pomeriggio"
-            ]
-          },
-          "time": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "attesa",
-              "confermata",
-              "eseguita",
-              "annullata"
-            ]
-          },
-          "priceAppliedCents": {
-            "type": "integer"
-          },
-          "origin": {
-            "type": "string",
-            "enum": [
-              "online",
-              "telefono"
-            ]
-          },
-          "notes": {
-            "type": "string",
-            "nullable": true
-          },
-          "cancelledBy": {
-            "type": "string",
-            "nullable": true,
-            "enum": [
-              "staff",
-              "utente",
-              null
-            ]
-          },
-          "invoiceId": {
-            "type": "string",
-            "nullable": true,
-            "format": "uuid"
-          },
-          "invoiceNumber": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "id",
-          "memberId",
-          "memberName",
-          "memberPhone",
-          "serviceId",
-          "serviceName",
-          "day",
-          "slot",
-          "time",
-          "status",
-          "priceAppliedCents",
-          "origin",
-          "notes",
-          "cancelledBy",
-          "invoiceId",
-          "invoiceNumber"
-        ],
-        "additionalProperties": false
-      },
-      "BookingKpis": {
-        "type": "object",
-        "properties": {
-          "toConfirm": {
-            "type": "integer"
-          },
-          "today": {
-            "type": "integer"
-          },
-          "toInvoice": {
-            "type": "integer"
-          },
-          "invoicedMonthCents": {
-            "type": "integer"
-          },
-          "toCollectCents": {
-            "type": "integer"
-          }
-        },
-        "required": [
-          "toConfirm",
-          "today",
-          "toInvoice",
-          "invoicedMonthCents",
-          "toCollectCents"
-        ],
-        "additionalProperties": false
-      },
-      "BookingCreate": {
-        "type": "object",
-        "properties": {
-          "memberId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "serviceId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "day": {
-            "type": "string",
-            "format": "date"
-          },
-          "slot": {
-            "type": "string",
-            "enum": [
-              "mattina",
-              "pomeriggio"
-            ]
-          },
-          "time": {
-            "type": "string",
-            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
-          },
-          "notes": {
-            "type": "string",
-            "maxLength": 600
-          }
-        },
-        "required": [
-          "memberId",
-          "serviceId",
-          "day",
-          "slot"
-        ],
-        "additionalProperties": false
-      },
-      "BookingConfirm": {
-        "type": "object",
-        "properties": {
-          "time": {
-            "type": "string",
-            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
-          }
-        },
-        "additionalProperties": false
-      },
-      "BookingCancel": {
-        "type": "object",
-        "properties": {
-          "by": {
-            "type": "string",
-            "enum": [
-              "staff",
-              "utente"
-            ]
-          }
-        },
-        "required": [
-          "by"
-        ],
-        "additionalProperties": false
-      },
       "MemberPage": {
         "type": "object",
         "properties": {
@@ -3857,12 +3665,6 @@
                   "$ref": "#/components/schemas/MembershipFee"
                 }
               },
-              "bookings": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/Booking"
-                }
-              },
               "transports": {
                 "type": "array",
                 "items": {
@@ -3878,7 +3680,6 @@
             },
             "required": [
               "fees",
-              "bookings",
               "transports",
               "invoices"
             ],
@@ -3939,7 +3740,7 @@
           "memberName": {
             "type": "string"
           },
-          "memberPhone": {
+          "contactPhone": {
             "type": "string",
             "nullable": true
           },
@@ -3966,19 +3767,14 @@
             "type": "string",
             "nullable": true
           },
-          "requestedBy": {
-            "type": "string",
-            "nullable": true
-          },
-          "reason": {
-            "type": "string",
-            "nullable": true
-          },
           "wheelchair": {
             "type": "boolean"
           },
-          "companion": {
+          "mobilityAids": {
             "type": "boolean"
+          },
+          "companions": {
+            "type": "integer"
           },
           "notes": {
             "type": "string",
@@ -4012,15 +3808,23 @@
             "type": "string",
             "nullable": true
           },
+          "odometerStart": {
+            "type": "integer",
+            "nullable": true
+          },
+          "odometerEnd": {
+            "type": "integer",
+            "nullable": true
+          },
           "km": {
-            "type": "number",
+            "type": "integer",
             "nullable": true
           },
           "driverNotes": {
             "type": "string",
             "nullable": true
           },
-          "bookingId": {
+          "invoiceId": {
             "type": "string",
             "nullable": true,
             "format": "uuid"
@@ -4030,26 +3834,27 @@
           "id",
           "memberId",
           "memberName",
-          "memberPhone",
+          "contactPhone",
           "travelDate",
           "departureTime",
           "appointmentTime",
           "returnTime",
           "fromAddress",
           "toAddress",
-          "requestedBy",
-          "reason",
           "wheelchair",
-          "companion",
+          "mobilityAids",
+          "companions",
           "notes",
           "status",
           "driverId",
           "driverName",
           "vehicleId",
           "vehiclePlate",
+          "odometerStart",
+          "odometerEnd",
           "km",
           "driverNotes",
-          "bookingId"
+          "invoiceId"
         ],
         "additionalProperties": false
       },
@@ -4454,7 +4259,7 @@
                     "amountCents": {
                       "type": "integer"
                     },
-                    "bookingId": {
+                    "transportId": {
                       "type": "string",
                       "nullable": true,
                       "format": "uuid"
@@ -4464,7 +4269,7 @@
                     "position",
                     "description",
                     "amountCents",
-                    "bookingId"
+                    "transportId"
                   ],
                   "additionalProperties": false
                 }
@@ -4484,18 +4289,14 @@
       "InvoiceIssue": {
         "type": "object",
         "properties": {
-          "memberId": {
+          "transportId": {
             "type": "string",
             "format": "uuid"
           },
-          "bookingIds": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "minItems": 1,
-            "maxItems": 100
+          "amountCents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000000
           },
           "customerTaxCode": {
             "type": "string",
@@ -4520,8 +4321,8 @@
           }
         },
         "required": [
-          "memberId",
-          "bookingIds"
+          "transportId",
+          "amountCents"
         ],
         "additionalProperties": false
       },
@@ -4592,13 +4393,7 @@
             "type": "string",
             "nullable": true
           },
-          "priceCents": {
-            "type": "integer"
-          },
           "active": {
-            "type": "boolean"
-          },
-          "requiresTransport": {
             "type": "boolean"
           },
           "sortOrder": {
@@ -4610,9 +4405,7 @@
           "name",
           "description",
           "scheduleNote",
-          "priceCents",
           "active",
-          "requiresTransport",
           "sortOrder"
         ],
         "additionalProperties": false
@@ -4635,15 +4428,7 @@
             "nullable": true,
             "maxLength": 200
           },
-          "priceCents": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 10000000
-          },
           "active": {
-            "type": "boolean"
-          },
-          "requiresTransport": {
             "type": "boolean"
           },
           "sortOrder": {
@@ -4653,8 +4438,7 @@
           }
         },
         "required": [
-          "name",
-          "priceCents"
+          "name"
         ],
         "additionalProperties": false
       },
@@ -4676,15 +4460,7 @@
             "nullable": true,
             "maxLength": 200
           },
-          "priceCents": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 10000000
-          },
           "active": {
-            "type": "boolean"
-          },
-          "requiresTransport": {
             "type": "boolean"
           },
           "sortOrder": {
@@ -4819,6 +4595,9 @@
           },
           "nextCardNumber": {
             "type": "integer"
+          },
+          "kmRateCents": {
+            "type": "integer"
           }
         },
         "required": [
@@ -4828,7 +4607,8 @@
           "membershipFeeCents",
           "stampDutyThresholdCents",
           "stampDutyAmountCents",
-          "nextCardNumber"
+          "nextCardNumber",
+          "kmRateCents"
         ],
         "additionalProperties": false
       },
@@ -5536,23 +5316,22 @@
             "minLength": 1,
             "maxLength": 200
           },
-          "requestedBy": {
+          "contactPhone": {
             "type": "string",
             "nullable": true,
             "minLength": 1,
-            "maxLength": 100
-          },
-          "reason": {
-            "type": "string",
-            "nullable": true,
-            "minLength": 1,
-            "maxLength": 200
+            "maxLength": 40
           },
           "wheelchair": {
             "type": "boolean"
           },
-          "companion": {
+          "mobilityAids": {
             "type": "boolean"
+          },
+          "companions": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 8
           },
           "notes": {
             "type": "string",
@@ -5601,23 +5380,22 @@
             "minLength": 1,
             "maxLength": 200
           },
-          "requestedBy": {
+          "contactPhone": {
             "type": "string",
             "nullable": true,
             "minLength": 1,
-            "maxLength": 100
-          },
-          "reason": {
-            "type": "string",
-            "nullable": true,
-            "minLength": 1,
-            "maxLength": 200
+            "maxLength": 40
           },
           "wheelchair": {
             "type": "boolean"
           },
-          "companion": {
+          "mobilityAids": {
             "type": "boolean"
+          },
+          "companions": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 8
           },
           "notes": {
             "type": "string",
@@ -5649,10 +5427,15 @@
       "TransportComplete": {
         "type": "object",
         "properties": {
-          "km": {
-            "type": "number",
+          "odometerStart": {
+            "type": "integer",
             "minimum": 0,
-            "maximum": 9999.9
+            "maximum": 9999999
+          },
+          "odometerEnd": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9999999
           },
           "driverNotes": {
             "type": "string",
@@ -5661,7 +5444,8 @@
           }
         },
         "required": [
-          "km"
+          "odometerStart",
+          "odometerEnd"
         ],
         "additionalProperties": false
       },
@@ -5889,6 +5673,11 @@
             "minimum": 0,
             "maximum": 1000000
           },
+          "kmRateCents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000
+          },
           "videoMaxMb": {
             "type": "integer",
             "minimum": 1,
@@ -5903,6 +5692,7 @@
           "stampDutyThresholdCents",
           "stampDutyAmountCents",
           "membershipFeeCents",
+          "kmRateCents",
           "videoMaxMb"
         ],
         "additionalProperties": false
@@ -7642,634 +7432,6 @@
           },
           "429": {
             "description": "Troppe richieste",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/bookings": {
-      "get": {
-        "tags": [
-          "bookings"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 10000,
-              "default": 1
-            },
-            "required": false,
-            "name": "page",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 50
-            },
-            "required": false,
-            "name": "pageSize",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "aperte",
-                "attesa",
-                "confermata",
-                "eseguita",
-                "da_fatturare",
-                "annullata",
-                "tutte"
-              ],
-              "default": "aperte"
-            },
-            "required": false,
-            "name": "status",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "maxLength": 100
-            },
-            "required": false,
-            "name": "q",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "format": "date"
-            },
-            "required": false,
-            "name": "from",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "format": "date"
-            },
-            "required": false,
-            "name": "to",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "required": false,
-            "name": "memberId",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Prenotazioni",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BookingPage"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Dati non validi",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Non autenticato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permesso negato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "bookings"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BookingCreate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Prenotazione creata",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Booking"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Dati non validi",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Non autenticato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permesso negato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Non trovato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Richiede conferma o non elaborabile",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/bookings/kpis": {
-      "get": {
-        "tags": [
-          "bookings"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Indicatori",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BookingKpis"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Dati non validi",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Non autenticato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permesso negato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/bookings/{id}/confirm": {
-      "post": {
-        "tags": [
-          "bookings"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "required": true,
-            "name": "id",
-            "in": "path"
-          }
-        ],
-        "requestBody": {
-          "required": false,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BookingConfirm"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Prenotazione aggiornata",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Booking"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Dati non validi",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Non autenticato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permesso negato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Non trovato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflitto con lo stato attuale",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/bookings/{id}/execute": {
-      "post": {
-        "tags": [
-          "bookings"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "required": true,
-            "name": "id",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Prenotazione aggiornata",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Booking"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Dati non validi",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Non autenticato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permesso negato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Non trovato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflitto con lo stato attuale",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/bookings/{id}/cancel": {
-      "post": {
-        "tags": [
-          "bookings"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "required": true,
-            "name": "id",
-            "in": "path"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BookingCancel"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Prenotazione aggiornata",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Booking"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Dati non validi",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Non autenticato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permesso negato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Non trovato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflitto con lo stato attuale",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/bookings/{id}/restore": {
-      "post": {
-        "tags": [
-          "bookings"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "required": true,
-            "name": "id",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Prenotazione aggiornata",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Booking"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Dati non validi",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Non autenticato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permesso negato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Non trovato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflitto con lo stato attuale",
             "content": {
               "application/json": {
                 "schema": {

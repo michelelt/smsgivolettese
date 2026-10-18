@@ -2,8 +2,6 @@ import type { z } from '@hono/zod-openapi';
 import type { Tx } from '../../lib/db.js';
 import { containsPattern, offsetOf } from '../../lib/pagination.js';
 import { toRow } from '../../lib/sql.js';
-import { bookingSelect } from '../bookings/bookings.repo.js';
-import type { Booking } from '../bookings/bookings.schemas.js';
 import { invoiceSelect } from '../invoices/invoices.repo.js';
 import type { Invoice } from '../invoices/invoices.schemas.js';
 import { select as transportSelect } from '../transports/transports.repo.js';
@@ -95,11 +93,8 @@ export async function detail(tx: Tx, id: string) {
   const m = await byId(tx, id);
   if (!m) return undefined;
   // History is unbounded for now (shortcut: add paging if a member exceeds a few hundred rows).
-  const [f, bookings, transports, invoices] = await Promise.all([
+  const [f, transports, invoices] = await Promise.all([
     fees(tx, id),
-    tx<
-      Booking[]
-    >`${bookingSelect(tx)} where b.member_id = ${id} order by b.day desc, b.created_at desc`,
     tx<
       Transport[]
     >`${transportSelect(tx)} where t.member_id = ${id} order by t.travel_date desc, t.created_at desc`,
@@ -107,7 +102,7 @@ export async function detail(tx: Tx, id: string) {
       Invoice[]
     >`${invoiceSelect(tx)} where i.member_id = ${id} order by i.year desc, i.number desc`,
   ]);
-  return { ...m, fees: f, bookings, transports, invoices };
+  return { ...m, fees: f, transports, invoices };
 }
 
 export const register = async (tx: Tx, p: Record<string, unknown>, feeMethod: string | null) =>

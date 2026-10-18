@@ -73,9 +73,9 @@ const T = (tx: Tx) => tx`
     to_char(departure_at at time zone ${R}, 'HH24:MI') as "departureTime",
     to_char(appointment_at at time zone ${R}, 'HH24:MI') as "appointmentTime",
     to_char(return_at at time zone ${R}, 'HH24:MI') as "returnTime",
-    from_address as "fromAddress", to_address as "toAddress", wheelchair, companion, status,
-    km::float8 as km, driver_notes as "driverNotes", member_first_name as "memberFirstName",
-    member_last_name as "memberLastName", member_phone as "memberPhone",
+    from_address as "fromAddress", to_address as "toAddress", wheelchair, mobility_aids as "mobilityAids", companions, status,
+    odometer_start as "odometerStart", odometer_end as "odometerEnd", km, driver_notes as "driverNotes", member_first_name as "memberFirstName",
+    member_last_name as "memberLastName", contact_phone as "contactPhone",
     vehicle_plate as "vehiclePlate", vehicle_model as "vehicleModel"
   from public.volunteer_transports_v`;
 
@@ -104,5 +104,10 @@ export const respondShift = (tx: Tx, id: string, accept: boolean) =>
   tx`select public.respond_shift_assignment(${id}::uuid, ${accept}::boolean)`;
 export const respondTransport = (tx: Tx, id: string, accept: boolean) =>
   tx`select public.respond_transport(${id}::uuid, ${accept}::boolean)`;
-export const completeTransport = (tx: Tx, id: string, km: number, notes: string | null) =>
-  tx`select public.complete_transport(${id}::uuid, ${km}::numeric, ${notes}::text)`;
+export const completeTransport = (
+  tx: Tx,
+  id: string,
+  start: number,
+  end: number,
+  notes: string | null,
+) => tx`select public.complete_transport(${id}::uuid, ${start}::int, ${end}::int, ${notes}::text)`;

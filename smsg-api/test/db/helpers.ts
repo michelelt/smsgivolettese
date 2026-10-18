@@ -83,14 +83,13 @@ export async function fixtures(tx: Tx) {
     insert into membership_fees (id, member_id, year, amount_cents, paid_on, method) values
       ('f8000000-0000-4000-8000-000000000001','f7000000-0000-4000-8000-000000000001',2025,2000,current_date,'contanti'),
       ('f8000000-0000-4000-8000-000000000002','f7000000-0000-4000-8000-000000000001',2024,2000,current_date,'contanti');
-    insert into services (id, name, price_cents, active) values
-      ('fa000000-0000-4000-8000-000000000001','S-active',0,true),('fa000000-0000-4000-8000-000000000002','S-inactive',0,false),
-      ('fa000000-0000-4000-8000-000000000003','S-spare',0,true);
-    insert into bookings (id, member_id, service_id, day, slot, price_applied_cents, origin, status) values
-      ('fb000000-0000-4000-8000-000000000001','f7000000-0000-4000-8000-000000000001','fa000000-0000-4000-8000-000000000001',current_date,'mattina',300,'telefono','eseguita');
-    insert into transports (id, member_id, travel_date, departure_at, from_address, to_address, driver_volunteer_id, status) values
-      ('fc000000-0000-4000-8000-000000000001','f7000000-0000-4000-8000-000000000001',current_date, now()+interval '10 days','a','b','${ID.vol}','assegnato'),
-      ('fc000000-0000-4000-8000-000000000002','f7000000-0000-4000-8000-000000000001',current_date, null,null,null,null,'richiesto');
+    insert into services (id, name, active) values
+      ('fa000000-0000-4000-8000-000000000001','S-active',true),('fa000000-0000-4000-8000-000000000002','S-inactive',false),
+      ('fa000000-0000-4000-8000-000000000003','S-spare',true);
+    insert into transports (id, member_id, travel_date, departure_at, appointment_at, from_address, to_address, driver_volunteer_id, status, odometer_start, odometer_end) values
+      ('fc000000-0000-4000-8000-000000000001','f7000000-0000-4000-8000-000000000001',current_date, now()+interval '10 days',null,'a','b','${ID.vol}','assegnato',null,null),
+      ('fc000000-0000-4000-8000-000000000002','f7000000-0000-4000-8000-000000000001',current_date, null,now()+interval '11 days',null,null,null,'richiesto',null,null),
+      ('fc000000-0000-4000-8000-000000000003','f7000000-0000-4000-8000-000000000001',current_date - 5, now()-interval '5 days',null,'a','b','${ID.vol}','svolto',1000,1042);
     insert into invoices (id, year, number, issued_on, member_id, customer_name, issuer_name, vat_exemption_text, subtotal_cents, stamp_duty_cents, total_cents, status) values
       ('fd000000-0000-4000-8000-000000000001', 2020, 1, current_date, 'f7000000-0000-4000-8000-000000000001','C','I','v',300,0,300,'emessa');
     insert into invoice_lines (id, invoice_id, position, description, amount_cents) values
