@@ -161,8 +161,18 @@ export function SiteFooter({
 }) {
   const shown = renderLink ? links : httpsOnly(links);
   return (
-    <footer className="mt-8 border-t-4 border-blu bg-white">
-      <div className="mx-auto max-w-5xl space-y-6 p-4">
+    <footer className="mt-8 bg-[#f7efe9]">
+      <div
+        aria-hidden
+        className="h-2 bg-linear-to-r from-blu via-[#b0334a] to-bordeaux"
+      />
+      <div className="mx-auto max-w-5xl space-y-6 p-4 pt-6">
+        <div className="flex items-center gap-3">
+          <Image src="/logo.svg" alt="" width={48} height={48} unoptimized />
+          <p className="text-xl font-extrabold text-bordeaux">
+            Dal 1882 ci aiutiamo a vicenda. <span aria-hidden>♥</span>
+          </p>
+        </div>
         {(renderLink ||
           FOOTER_GROUPS.some(([g]) => shown.some((l) => l.group === g))) && (
           <div className="grid gap-6 sm:grid-cols-3">
