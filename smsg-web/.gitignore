@@ -16,3 +16,9 @@ CLAUDE.local.md
 test-results
 playwright-report
 e2e/.auth
+
+# OS, editors, logs
+Thumbs.db
+.idea/
+.vscode/
+*.log
