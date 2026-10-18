@@ -7872,6 +7872,8 @@ export interface components {
             paidCurrentYear: number;
             unpaidCurrentYear: number;
             joinedCurrentYear: number;
+            ceased: number;
+            total: number;
         };
         MemberDetail: components["schemas"]["Member"] & {
             fees: components["schemas"]["MembershipFee"][];
@@ -8139,7 +8141,12 @@ export interface components {
                 lastName: string;
                 canDrive: boolean;
                 rules: components["schemas"]["AvailabilityRule"][];
-                absences: components["schemas"]["Absence"][];
+                absences: {
+                    /** Format: uuid */
+                    id: string;
+                    startsOn: string;
+                    endsOn: string;
+                }[];
             }[];
         };
         Vehicles: {

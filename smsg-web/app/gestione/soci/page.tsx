@@ -4,20 +4,14 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
 import { PageHeader } from "@/components/ui/actions";
-import { Filters, Kpis, Loading, Pager, Pill } from "@/components/ui/bits";
+import { KpiFilters, Loading, Pager, Pill } from "@/components/ui/bits";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { api, call, saveBlob } from "@/lib/api/call";
 import { useDebounced } from "@/lib/api/hooks";
 import { currentYear } from "@/lib/dates";
 
-const FILTERS = [
-  ["attivi", "Attivi"],
-  ["da_rinnovare", "Quota da pagare"],
-  ["cessati", "Cessati"],
-  ["tutti", "Tutti"],
-] as const;
-type Filter = (typeof FILTERS)[number][0];
+type Filter = "attivi" | "da_rinnovare" | "cessati" | "tutti";
 
 export default function Soci() {
   const year = currentYear();
@@ -64,25 +58,30 @@ export default function Soci() {
         }
       />
       <Loading query={kpis} />
-      {k && (
-        <Kpis
-          items={[
-            ["Soci attivi", k.active],
-            [`Quota ${year} pagata`, k.paidCurrentYear],
-            [`Quota ${year} da pagare`, k.unpaidCurrentYear],
-            [`Iscritti nel ${year}`, k.joinedCurrentYear],
-          ]}
-        />
-      )}
-      <Filters
+      <KpiFilters
         label="Filtro soci"
         value={filter}
-        options={FILTERS}
         onChange={(v) => {
           setFilter(v);
           setPage(1);
         }}
+        items={[
+          { value: "attivi", label: "Soci attivi", count: k?.active },
+          {
+            value: "da_rinnovare",
+            label: `Quota ${year} da pagare`,
+            count: k?.unpaidCurrentYear,
+          },
+          { value: "cessati", label: "Cessati", count: k?.ceased },
+          { value: "tutti", label: "Tutti", count: k?.total },
+        ]}
       />
+      {k && (
+        <p className="mt-2">
+          Quota {year} pagata: <strong>{k.paidCurrentYear}</strong> · Iscritti
+          nel {year}: <strong>{k.joinedCurrentYear}</strong>
+        </p>
+      )}
       <Field
         label="Cerca per nome, tessera o telefono"
         type="search"

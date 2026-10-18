@@ -64,18 +64,71 @@ export function Filters<T extends string>({
   options: readonly (readonly [T, string])[];
 }) {
   return (
-    <div role="group" aria-label={label} className="mt-4 flex flex-wrap gap-2">
-      {options.map(([v, text]) => (
-        <button
-          key={v}
-          type="button"
-          aria-pressed={value === v}
-          onClick={() => onChange(v)}
-          className={`min-h-12 rounded-xl border-2 border-blu px-4 font-bold ${value === v ? "bg-blu text-white underline" : "text-blu"}`}
-        >
-          {text}
-        </button>
-      ))}
+    // Segmented control: one tinted track, the chosen option is a raised white pill with a check (not colour alone).
+    <div
+      role="group"
+      aria-label={label}
+      className="mt-4 grid grid-cols-2 gap-1 rounded-2xl bg-blu/10 p-1 sm:inline-flex sm:flex-wrap"
+    >
+      {options.map(([v, text]) => {
+        const on = value === v;
+        return (
+          <button
+            key={v}
+            type="button"
+            aria-pressed={on}
+            onClick={() => onChange(v)}
+            className={`inline-flex min-h-12 items-center justify-center gap-1.5 text-center rounded-xl px-4 font-bold text-blu transition focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-blu ${on ? "bg-white shadow-md ring-2 ring-blu" : "hover:bg-white/70"}`}
+          >
+            {on && <span aria-hidden="true">✓</span>}
+            {text}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** KPI tiles that are also the list filter: click a number to see who is behind it. */
+export function KpiFilters<T extends string>({
+  label,
+  value,
+  onChange,
+  items,
+}: {
+  label: string;
+  value: T;
+  onChange: (v: T) => void;
+  items: readonly { value: T; label: string; count?: number }[];
+}) {
+  return (
+    <div
+      role="group"
+      aria-label={label}
+      className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4"
+    >
+      {items.map((i) => {
+        const on = value === i.value;
+        return (
+          <button
+            key={i.value}
+            type="button"
+            aria-pressed={on}
+            onClick={() => onChange(i.value)}
+            className={`min-h-24 rounded-xl border-2 border-blu p-3 text-left transition focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-blu ${on ? "bg-blu text-white shadow-md" : "bg-white text-ink hover:bg-blu/10"}`}
+          >
+            <span className="flex items-start justify-between gap-2 text-base font-bold">
+              {i.label}
+              {on && <span aria-hidden="true">✓</span>}
+            </span>
+            <span
+              className={`block text-2xl font-extrabold ${on ? "text-white" : "text-blu"}`}
+            >
+              {i.count ?? "–"}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }
