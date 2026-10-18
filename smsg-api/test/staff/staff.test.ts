@@ -317,7 +317,9 @@ describe('members', () => {
 
     const q = (await staff('GET', `/members?filter=tutti&q=M${tag}`)).data;
     expect(q.total).toBe(1);
-    expect((await staff('GET', '/members/kpis')).data.active).toBeGreaterThan(0);
+    const k = (await staff('GET', '/members/kpis')).data;
+    expect(k.active).toBeGreaterThan(0);
+    expect(k.total).toBeGreaterThanOrEqual(k.active + k.ceased);
     expect((await staff('GET', `/members/${id}`)).data.fees).toHaveLength(1);
     expect((await staff('GET', `/members/${crypto.randomUUID()}`)).status).toBe(404);
     expect((await staff('GET', `/members?page=0`)).status).toBe(400);

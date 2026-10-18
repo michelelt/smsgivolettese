@@ -70,6 +70,8 @@ export const MemberKpis = z
     paidCurrentYear: z.number().int(),
     unpaidCurrentYear: z.number().int(),
     joinedCurrentYear: z.number().int(),
+    ceased: z.number().int(),
+    total: z.number().int(),
   })
   .openapi('MemberKpis');
 

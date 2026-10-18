@@ -75,7 +75,9 @@ export const kpis = async (tx: Tx) =>
         count(*) filter (where status = 'attivo')::int as active,
         count(*) filter (where status = 'attivo' and paid)::int as "paidCurrentYear",
         count(*) filter (where status = 'attivo' and not paid)::int as "unpaidCurrentYear",
-        count(*) filter (where extract(year from joined_on) = ${year(tx)})::int as "joinedCurrentYear"
+        count(*) filter (where extract(year from joined_on) = ${year(tx)})::int as "joinedCurrentYear",
+        count(*) filter (where status = 'cessato')::int as ceased,
+        count(*)::int as total
       from (select m.status, m.joined_on,
               exists (select 1 from public.membership_fees f
                       where f.member_id = m.id and f.year = ${year(tx)}) as paid
