@@ -9,7 +9,7 @@ CONCURRENTLY := pnpm dlx concurrently@9.2.5
 API := ../smsg-api
 WEB := ../smsg-web
 
-.PHONY: help setup dev test e2e db-reset gen-api superadmin deploy-check
+.PHONY: help setup dev test e2e db-reset db-demo gen-api superadmin deploy-check
 
 help: ## Show available targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-13s %s\n", $$1, $$2}'
@@ -43,7 +43,7 @@ test: ## Run lint, typecheck and tests of both repos
 	pnpm -C $(API) typecheck
 	pnpm -C $(API) test:unit
 	@# DB tests mutate schema/data: always start from a fresh LOCAL database
-	$(MAKE) db-reset
+	$(MAKE) db-reset db-demo
 	pnpm -C $(API) test:db
 	pnpm -C $(WEB) lint
 	pnpm -C $(WEB) typecheck
@@ -51,6 +51,7 @@ test: ## Run lint, typecheck and tests of both repos
 
 e2e: ## Run the Playwright suite against the running `make dev` stack (slow, not part of `make test`)
 	@curl -sf -o /dev/null http://localhost:3000 || { echo "Web not reachable on :3000: start 'make dev' first"; exit 1; }
+	$(MAKE) db-reset db-demo
 	pnpm -C $(WEB) e2e
 
 db-reset: ## Reset the local database (migrations + seed)
@@ -65,6 +66,9 @@ db-reset: ## Reset the local database (migrations + seed)
 gen-api: ## Regenerate the web API client from the API OpenAPI schema
 	pnpm -C $(API) openapi:export
 	OPENAPI_URL=../smsg-api/openapi.json pnpm -C $(WEB) gen:api
+
+db-demo: ## Load demo users and data used by the tests (local only; `make db-reset` removes them)
+	cd $(API) && node -e "const s=require('postgres')('postgresql://postgres:postgres@127.0.0.1:54322/postgres');s.file('supabase/fixtures/demo.sql').then(()=>s.end(),e=>{console.error(e.message);process.exit(1)})"
 
 superadmin: ## Create the first super admin from secrets.env (idempotent)
 	@$(LOAD_SECRETS); pnpm -C $(API) superadmin
