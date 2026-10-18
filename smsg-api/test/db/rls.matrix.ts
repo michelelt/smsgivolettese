@@ -209,9 +209,9 @@ export const specs: Record<string, Spec> = {
     D: [null, `delete from site_settings returning 1`],
   },
   org_settings: {
-    S: ['super_admin', 'select 1 from org_settings'],
+    S: ['staff', 'select 1 from org_settings'],
     I: [null, `insert into org_settings (id) values (false) returning 1`],
-    U: ['super_admin', `update org_settings set membership_fee_cents = 2500 returning 1`],
+    U: ['staff', `update org_settings set membership_fee_cents = 2500 returning 1`],
     D: [null, `delete from org_settings returning 1`],
   },
   audit_log: {

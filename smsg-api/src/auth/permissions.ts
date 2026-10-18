@@ -65,8 +65,8 @@ export const PERMISSIONS = {
   'users.change_role': SA,
   'users.deactivate': SA,
   'users.reset_mfa': SA,
-  'org_settings.write': SA,
-  'counters.write': SA,
+  'org_settings.write': S, // ADR-072
+  'counters.write': S, // ADR-072
   'audit.read': SA,
   'gdpr.export': SA,
   'gdpr.anonymize': SA,

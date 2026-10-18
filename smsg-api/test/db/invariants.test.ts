@@ -399,10 +399,10 @@ describe('members and counters', () => {
       expect(m2!.card_number).toBe(9003);
     });
   });
-  it('counters can only move upward (super admin only)', async () => {
+  it('counters can only move upward (staff and up, ADR-072)', async () => {
     await rolledBack(async (tx) => {
       await world(tx);
-      await actAs(tx, 'staff');
+      await actAs(tx, 'volontario');
       expect(await err(tx, 'select app.set_member_counter(50)')).toMatch(/^42501/);
       await reset(tx);
       await actAs(tx, 'super_admin');
