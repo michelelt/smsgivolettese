@@ -88,7 +88,7 @@ export const odometerOk = (o: { odometerStart: number; odometerEnd: number }) =>
   o.odometerEnd >= o.odometerStart && o.odometerEnd - o.odometerStart <= 2000;
 export const odometerMsg = {
   message:
-    "Controlli i chilometri: l'arrivo deve essere uguale o maggiore della partenza (al massimo 2000 km)",
+    "Controlla i chilometri: l'arrivo deve essere uguale o maggiore della partenza (al massimo 2000 km)",
 };
 export const TransportComplete = z
   .strictObject(odometerFields)
