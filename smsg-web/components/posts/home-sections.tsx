@@ -5,13 +5,17 @@ import { fmtDate } from "@/lib/dates";
 import { mediaUrl } from "@/lib/media-url";
 import { getGallery, getPosts } from "@/lib/public/server";
 import { Carousel } from "./carousel";
+import { CATEGORY } from "./post-card";
 
 /** Home blocks fed by the bacheca; each renders nothing when empty. */
 export async function HomeNews() {
-  const [events, gallery] = await Promise.all([
+  const [upcoming, gallery] = await Promise.all([
     getPosts({ upcoming: "true", pageSize: 3 }),
     getGallery(1, 8),
   ]);
+  // No upcoming events: fall back to the newest posts (API default order).
+  const isEvents = upcoming.items.length > 0;
+  const events = isEvents ? upcoming : await getPosts({ pageSize: 3 });
   const photos = gallery.items.filter((g) => g.cover);
   return (
     <>
@@ -21,7 +25,7 @@ export async function HomeNews() {
             id="home-eventi"
             className="text-2xl font-extrabold text-bordeaux"
           >
-            Prossimi eventi
+            {isEvents ? "Prossimi eventi" : "Ultime notizie"}
           </h2>
           <ul className="space-y-4">
             {events.items.map((p) => (
@@ -30,7 +34,11 @@ export async function HomeNews() {
                 className="rounded-2xl border-2 border-ink bg-white p-4"
               >
                 <p className="font-bold text-blu">
-                  {p.eventDate ? fmtDate(p.eventDate) : "Evento"}
+                  {p.eventDate
+                    ? fmtDate(p.eventDate)
+                    : p.publishedAt
+                      ? fmtDate(p.publishedAt)
+                      : CATEGORY[p.category]}
                   {p.location ? ` · ${p.location}` : ""}
                 </p>
                 <h3 className="text-xl font-extrabold">{p.title}</h3>
