@@ -9,7 +9,7 @@ CONCURRENTLY := pnpm dlx concurrently@9.2.5
 API := ../smsg-api
 WEB := ../smsg-web
 
-.PHONY: help setup dev test e2e db-reset db-demo gen-api superadmin deploy-check vercel-env superadmin-remote
+.PHONY: help setup dev test e2e manual-shots db-reset db-demo gen-api superadmin deploy-check vercel-env superadmin-remote
 
 help: ## Show available targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-13s %s\n", $$1, $$2}'
@@ -53,6 +53,11 @@ e2e: ## Run the Playwright suite against the running `make dev` stack (slow, not
 	@curl -sf -o /dev/null http://localhost:3000 || { echo "Web not reachable on :3000: start 'make dev' first"; exit 1; }
 	$(MAKE) db-reset db-demo
 	pnpm -C $(WEB) e2e
+
+manual-shots: ## Retake the README manual screenshots from the running `make dev` stack (leaves demo data loaded)
+	@curl -sf -o /dev/null http://localhost:3000 || { echo "Web not reachable on :3000: start 'make dev' first"; exit 1; }
+	$(MAKE) db-reset db-demo
+	node scripts/manual-screenshots.cjs
 
 db-reset: ## Reset the local database (migrations + seed)
 	@# shortcut: the CLI sometimes fails at "Initialising schema" (container exit 1, cause unknown); one retry, investigate if it fails twice
