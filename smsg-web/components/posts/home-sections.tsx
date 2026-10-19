@@ -37,7 +37,7 @@ export async function HomeNews() {
                   {p.eventDate
                     ? fmtDate(p.eventDate)
                     : p.publishedAt
-                      ? fmtDate(p.publishedAt)
+                      ? fmtDate(p.publishedAt.slice(0, 10))
                       : CATEGORY[p.category]}
                   {p.location ? ` · ${p.location}` : ""}
                 </p>
