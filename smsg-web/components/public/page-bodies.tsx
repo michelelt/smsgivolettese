@@ -60,7 +60,7 @@ export function ChiSiamoBody({
 }) {
   return (
     <div className="space-y-8">
-      <div className="max-w-prose space-y-4">
+      <div className="space-y-4">
         <Title preview={preview}>{title}</Title>
         {intro}
       </div>
