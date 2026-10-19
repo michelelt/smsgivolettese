@@ -1,9 +1,6 @@
 {
   "regions": ["fra1"],
   "buildCommand": "",
-  "git": {
-    "deploymentEnabled": false
-  },
   "functions": {
     "api/index.ts": {
       "includeFiles": "assets/fonts/**"
