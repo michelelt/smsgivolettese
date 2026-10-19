@@ -12,16 +12,18 @@ import {
 import { it } from "@blocknote/core/locales";
 import {
   BasicTextStyleButton,
+  BlockNoteViewEditor,
   BlockTypeSelect,
   CreateLinkButton,
   FilePanel,
   FilePanelController,
   UploadTab,
   FormattingToolbar,
-  FormattingToolbarController,
   SuggestionMenuController,
   blockTypeSelectItems,
   getDefaultReactSlashMenuItems,
+  useBlockNoteEditor,
+  useComponentsContext,
   useCreateBlockNote,
 } from "@blocknote/react";
 import { useState } from "react";
@@ -73,6 +75,60 @@ function UploadPanel({ blockId }: { blockId: string }) {
 }
 
 type Ed = typeof schema.BlockNoteEditor;
+type Insertable = "image" | "gallery" | "video" | "buttonLink" | "divider";
+
+const insert = (e: Ed, type: Insertable) => {
+  e.focus();
+  const cur = e.getTextCursorPosition().block;
+  // The slash-menu helper needs a text block under the cursor; after a photo, just append.
+  if (cur.content === undefined) e.insertBlocks([{ type }], cur, "after");
+  else insertOrUpdateBlockForSlashMenu(e, { type });
+};
+
+const INSERT: [string, Insertable][] = [
+  ["Foto", "image"],
+  ["Galleria", "gallery"],
+  ["Video", "video"],
+  ["Pulsante", "buttonLink"],
+  ["Linea", "divider"],
+];
+
+/** Word-like toolbar, always visible above the text (the "/" menu stays for block-style editing). */
+function WordToolbar() {
+  const editor = useBlockNoteEditor() as unknown as Ed;
+  const C = useComponentsContext()!;
+  return (
+    <div className="sticky top-0 z-10 mb-2 [&_.bn-toolbar]:max-w-none [&_.bn-toolbar]:flex-wrap [&_.bn-toolbar]:shadow-none">
+      <FormattingToolbar>
+        <BlockTypeSelect
+          items={blockTypeSelectItems(editor as never).filter((i) =>
+            [
+              "paragraph",
+              "heading",
+              "quote",
+              "bulletListItem",
+              "numberedListItem",
+            ].includes(i.type),
+          )}
+        />
+        <BasicTextStyleButton basicTextStyle="bold" />
+        <BasicTextStyleButton basicTextStyle="italic" />
+        <BasicTextStyleButton basicTextStyle="underline" />
+        <CreateLinkButton />
+        {INSERT.map(([label, type]) => (
+          <C.FormattingToolbar.Button
+            key={type}
+            label={`Inserisci ${label.toLowerCase()}`}
+            mainTooltip={`Inserisci ${label.toLowerCase()}`}
+            onClick={() => insert(editor, type)}
+          >
+            + {label}
+          </C.FormattingToolbar.Button>
+        ))}
+      </FormattingToolbar>
+    </div>
+  );
+}
 
 export default function BlockEditor({
   initialBlocks,
@@ -114,57 +170,40 @@ export default function BlockEditor({
         theme="light"
         formattingToolbar={false}
         slashMenu={false}
+        renderEditor={false}
         onChange={() => onChange(editor.document as unknown as Block[])}
       >
-        <FormattingToolbarController
-          formattingToolbar={() => (
-            <FormattingToolbar>
-              <BlockTypeSelect
-                items={blockTypeSelectItems(editor).filter((i) =>
-                  [
-                    "paragraph",
-                    "heading",
-                    "quote",
-                    "bulletListItem",
-                    "numberedListItem",
-                  ].includes(i.type),
-                )}
+        <WordToolbar />
+        <BlockNoteViewEditor>
+          {/* Only uploaded files: stored image urls must be MediaPaths, so no "embed link" tab. */}
+          <FilePanelController
+            filePanel={(p) => (
+              <FilePanel
+                {...p}
+                tabs={[
+                  {
+                    name: it.file_panel.upload.title,
+                    tabPanel: <UploadPanel blockId={p.blockId} />,
+                  },
+                ]}
               />
-              <BasicTextStyleButton basicTextStyle="bold" />
-              <BasicTextStyleButton basicTextStyle="italic" />
-              <BasicTextStyleButton basicTextStyle="underline" />
-              <CreateLinkButton />
-            </FormattingToolbar>
-          )}
-        />
-        {/* Only uploaded files: stored image urls must be MediaPaths, so no "embed link" tab. */}
-        <FilePanelController
-          filePanel={(p) => (
-            <FilePanel
-              {...p}
-              tabs={[
-                {
-                  name: it.file_panel.upload.title,
-                  tabPanel: <UploadPanel blockId={p.blockId} />,
-                },
-              ]}
-            />
-          )}
-        />
-        <SuggestionMenuController
-          triggerCharacter="/"
-          getItems={async (q) =>
-            filterSuggestionItems(
-              [
-                ...getDefaultReactSlashMenuItems(editor).filter((i) =>
-                  SLASH_KEEP.has((i as unknown as { key: string }).key),
-                ),
-                ...custom(editor as unknown as Ed),
-              ] as never[],
-              q,
-            )
-          }
-        />
+            )}
+          />
+          <SuggestionMenuController
+            triggerCharacter="/"
+            getItems={async (q) =>
+              filterSuggestionItems(
+                [
+                  ...getDefaultReactSlashMenuItems(editor).filter((i) =>
+                    SLASH_KEEP.has((i as unknown as { key: string }).key),
+                  ),
+                  ...custom(editor as unknown as Ed),
+                ] as never[],
+                q,
+              )
+            }
+          />
+        </BlockNoteViewEditor>
       </BlockNoteView>
     </UploadContext.Provider>
   );

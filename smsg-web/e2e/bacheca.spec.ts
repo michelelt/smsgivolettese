@@ -17,9 +17,6 @@ test("staff writes, publishes and sees the article on /notizie", async ({
 
   await page.goto("/gestione/bacheca/nuovo");
   await page.getByLabel("Titolo").fill(title);
-  await page.getByRole("button", { name: "Crea e scrivi" }).click();
-  await page.waitForURL(/\/gestione\/bacheca\/[0-9a-f-]{36}$/);
-  const editUrl = page.url();
 
   await page.getByLabel(/Scegli la foto in evidenza/).setInputFiles({
     name: "foto.png",
@@ -32,8 +29,13 @@ test("staff writes, publishes and sees the article on /notizie", async ({
 
   await page.locator(".bn-editor").click();
   await page.keyboard.type("Ritrovo davanti alla sede alle nove.");
+  await expect(
+    page.getByRole("button", { name: "Inserisci foto" }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Pubblica", exact: true }).click();
   await expect(page.getByText("Articolo pubblicato")).toBeVisible();
+  await page.waitForURL(/\/gestione\/bacheca\/[0-9a-f-]{36}$/);
+  const editUrl = page.url();
 
   // ISR: the list can lag behind the publish; reload until the article shows up.
   await expect(async () => {
