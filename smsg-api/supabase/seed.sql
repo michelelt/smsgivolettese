@@ -74,7 +74,7 @@ update public.site_settings set pages = $pages${
       },
       {
         "heading": "Il 5 per mille",
-        "body": "Può sostenere la Società con il 5 per mille: nella dichiarazione dei redditi scriva il nostro codice fiscale, 00656590015."
+        "body": "Puoi sostenere la Società con il 5 per mille: nella dichiarazione dei redditi scrivi il nostro codice fiscale, 00656590015."
       }
     ]
   },
@@ -95,8 +95,8 @@ update public.site_settings set pages = $pages${
         "body": "[Da definire.]"
       },
       {
-        "heading": "I suoi diritti",
-        "body": "Può chiedere di vedere, correggere o cancellare i suoi dati rivolgendosi alla sede."
+        "heading": "I tuoi diritti",
+        "body": "Puoi chiedere di vedere, correggere o cancellare i tuoi dati rivolgendoti alla sede."
       }
     ]
   },
