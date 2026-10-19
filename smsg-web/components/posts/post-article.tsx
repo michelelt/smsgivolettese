@@ -19,7 +19,7 @@ type Post = Pick<
 /** Shared by the public page and the staff preview (ADR-062). */
 export function PostArticle({ post }: { post: Post }) {
   return (
-    <article className="max-w-3xl space-y-5">
+    <article className="space-y-5">
       <header className="space-y-2">
         <p className="font-bold text-blu">
           {CATEGORY[post.category]}

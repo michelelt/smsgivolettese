@@ -95,7 +95,7 @@ export function PrivacyBody({
   preview?: boolean;
 }) {
   return (
-    <div className="max-w-prose space-y-4">
+    <div className="space-y-4">
       <Title preview={preview}>{title}</Title>
       {intro}
       {sections.map((s, i) => (
@@ -110,22 +110,20 @@ export function PrivacyBody({
   );
 }
 
-/** Title + optional intro, then the page content. `wide`: card grids use the full width. */
+/** Title + optional intro, then the page content. */
 export function SimplePage({
   title,
   intro,
   preview,
-  prose,
   children,
 }: {
   title: ReactNode;
   intro?: ReactNode;
   preview?: boolean;
-  prose?: boolean;
   children: ReactNode;
 }) {
   return (
-    <div className={prose ? "max-w-prose space-y-4" : "space-y-6"}>
+    <div className="space-y-6">
       <Title preview={preview}>{title}</Title>
       {intro}
       {children}

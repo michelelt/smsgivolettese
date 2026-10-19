@@ -17,7 +17,6 @@ export default async function DoveSiamo() {
   const { address, pages } = await getSiteSettings();
   return (
     <SimplePage
-      prose
       title={pages.doveSiamo.title}
       intro={<Paragraphs text={pages.doveSiamo.intro} />}
     >

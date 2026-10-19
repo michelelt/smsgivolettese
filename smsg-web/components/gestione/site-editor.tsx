@@ -698,7 +698,7 @@ export function SiteEditor({
             </SimplePage>
           )}
           {tab === "dove-siamo" && (
-            <SimplePage preview prose {...titleAndIntro("doveSiamo")}>
+            <SimplePage preview {...titleAndIntro("doveSiamo")}>
               <AddressBlock
                 preview
                 mapQuery={draft.address}

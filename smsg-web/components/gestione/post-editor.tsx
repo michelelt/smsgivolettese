@@ -126,7 +126,8 @@ export function PostEditor({ post }: { post?: Post }) {
               : "Bozza salvata",
       );
       qc.invalidateQueries({ queryKey: ["posts"] });
-      if (post) qc.invalidateQueries({ queryKey: ["post", id] });
+      if (then === "save") router.push("/gestione/bacheca");
+      else if (post) qc.invalidateQueries({ queryKey: ["post", id] });
       else router.replace(`/gestione/bacheca/${id}`);
     },
   });
