@@ -44,7 +44,7 @@ smsg-workspace/            orchestration only
   Makefile  .env.example  README.md  .claude/
 smsg-api/                  layout exactly as in brief.md §smsg-api, plus:
   openapi.json             committed snapshot (contract)
-  vercel.json              crons, fra1; git pushes deploy (main = production)
+  vercel.json              crons, fra1; push to main = staging (Preview), prod by manual promote
   .github/workflows/ci.yml, deploy.yml
 smsg-web/                  layout as in brief.md §smsg-web, plus:
   app/hooks/revalidate/route.ts   ISR webhook (NOT under /api)

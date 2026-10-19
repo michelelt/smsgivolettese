@@ -14,7 +14,13 @@ Topology and reasons: ADR-073 in `decisions.md`. Everything runs on free tiers (
 - `smsg-workspace/secrets.env` (template `secrets.env.example`) with `SUPERADMIN_*` and `SUPABASE_DB_PASSWORD_{STAGING,PROD}`. Optional: `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`, `RESEND_API_KEY`, `EMAIL_FROM`.
 - Vercel projects `smsg-api` and `smsg-web` exist and are linked (`vercel link --project <name>` inside each folder).
 
-## Deploy (staging first, then production)
+## Git flow (normal path, ADR-074)
+- Push to `main`: both projects build a Preview deployment with staging env vars; `smsg-web-staging.vercel.app` and `smsg-api-staging.vercel.app` follow `main`.
+- Run migrations first when there are new ones: `supabase db push --project-ref ydqdnicpfspqewclqrgk` (staging) before the push.
+- Production: `supabase db push --project-ref vcpmnpsfcgebhmgqlqeu` if needed, then in the Vercel dashboard open the `main` deployment of `smsg-api`, then of `smsg-web`, and click "Promote to Production". Alternative: `git push origin main:production`.
+- `make deploy-check ENV=staging|production` must print only `ok`.
+
+## Manual CLI deploy (first setup or emergencies)
 Run from `smsg-api/` unless noted; replace `<ref>` and the env names.
 
 1. Database: `supabase db push --project-ref <ref> --include-seed` (migrations before code; the CLI uses a temporary login role).
