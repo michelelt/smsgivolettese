@@ -15,9 +15,9 @@ import { useDebounced, useGuardedMutation } from "@/lib/api/hooks";
 import { orNull, taxCodeField } from "@/lib/forms";
 
 const schema = z.object({
-  firstName: z.string().trim().min(1, "scriva il nome").max(100),
-  lastName: z.string().trim().min(1, "scriva il cognome").max(100),
-  phone: z.string().trim().min(5, "scriva il numero di telefono").max(30),
+  firstName: z.string().trim().min(1, "scrivi il nome").max(100),
+  lastName: z.string().trim().min(1, "scrivi il cognome").max(100),
+  phone: z.string().trim().min(5, "scrivi il numero di telefono").max(30),
   taxCode: taxCodeField,
 });
 type Values = z.infer<typeof schema>;

@@ -21,13 +21,13 @@ import { optText, orNull } from "@/lib/forms";
 type Service = components["schemas"]["StaffService"];
 
 const schema = z.object({
-  name: z.string().trim().min(1, "scriva il nome").max(120),
+  name: z.string().trim().min(1, "scrivi il nome").max(120),
   description: optText(1000),
   scheduleNote: optText(200),
   active: z.boolean(),
   sortOrder: z
     .string()
-    .refine((v) => /^\d{1,4}$/.test(v), "scriva un numero intero"),
+    .refine((v) => /^\d{1,4}$/.test(v), "scrivi un numero intero"),
 });
 type Values = z.infer<typeof schema>;
 

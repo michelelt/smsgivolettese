@@ -141,14 +141,14 @@ function Weekly() {
         <Field
           label="Dalle"
           type="time"
-          {...f.register("startTime", { required: "scriva l'ora di inizio" })}
+          {...f.register("startTime", { required: "scrivi l'ora di inizio" })}
           error={f.formState.errors.startTime?.message}
         />
         <Field
           label="Alle"
           type="time"
           {...f.register("endTime", {
-            required: "scriva l'ora di fine",
+            required: "scrivi l'ora di fine",
             validate: (v) =>
               v > f.getValues("startTime") || "deve essere dopo l'inizio",
           })}
@@ -242,7 +242,7 @@ function Absences() {
           label="Dal giorno"
           type="date"
           min={today()}
-          {...f.register("startsOn", { required: "scelga la data" })}
+          {...f.register("startsOn", { required: "scegli la data" })}
           error={f.formState.errors.startsOn?.message}
         />
         <Field
@@ -250,7 +250,7 @@ function Absences() {
           type="date"
           min={today()}
           {...f.register("endsOn", {
-            required: "scelga la data",
+            required: "scegli la data",
             validate: (v) =>
               v >= f.getValues("startsOn") ||
               "non può essere prima dell'inizio",
@@ -260,7 +260,7 @@ function Absences() {
         <Field
           label="Nota (facoltativa)"
           maxLength={200}
-          hint="Non scriva informazioni sulla salute."
+          hint="Non scrivi informazioni sulla salute."
           {...f.register("note")}
         />
         <FormError message={add.error?.message} />

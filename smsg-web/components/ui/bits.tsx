@@ -24,7 +24,7 @@ export function TaxWarning({
   return (
     <div role="alert" className="mt-4 rounded-xl border-2 border-bordeaux p-3">
       <p className="font-bold text-bordeaux">Attenzione: {message}</p>
-      <p>Controlli il codice fiscale. Se è corretto, può salvare lo stesso.</p>
+      <p>Controlla il codice fiscale. Se è corretto, puoi salvare lo stesso.</p>
       <Button
         type="button"
         auto

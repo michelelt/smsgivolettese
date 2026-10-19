@@ -112,7 +112,7 @@ function CompleteBody({ t, onClose }: { t: Transport; onClose: () => void }) {
       />
       <Textarea
         label="Note (facoltative)"
-        hint="Non scriva informazioni sulla salute della persona."
+        hint="Non scrivi informazioni sulla salute della persona."
         maxLength={500}
         {...f.register("driverNotes")}
       />

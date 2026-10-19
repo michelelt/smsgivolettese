@@ -78,7 +78,7 @@ function Form({
         inputMode="decimal"
         {...f.register("amount", {
           validate: (v) =>
-            parseEuro(v) !== null || "scriva un importo, per esempio 12,50",
+            parseEuro(v) !== null || "scrivi un importo, per esempio 12,50",
         })}
         error={f.formState.errors.amount?.message}
       />

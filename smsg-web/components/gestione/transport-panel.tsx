@@ -140,7 +140,7 @@ function AssignBody({ t, onClose }: { t: Transport; onClose: () => void }) {
 
 const km = z
   .string()
-  .refine((v) => /^\d{1,7}$/.test(v.trim()), "scriva un numero intero");
+  .refine((v) => /^\d{1,7}$/.test(v.trim()), "scrivi un numero intero");
 export const completeSchema = z
   .object({ odometerStart: km, odometerEnd: km, driverNotes: z.string() })
   .refine(
@@ -150,7 +150,7 @@ export const completeSchema = z
     {
       path: ["odometerEnd"],
       message:
-        "Controlli i chilometri: l'arrivo deve essere uguale o maggiore della partenza (al massimo 2000 km)",
+        "Controlla i chilometri: l'arrivo deve essere uguale o maggiore della partenza (al massimo 2000 km)",
     },
   );
 export type CompleteValues = z.infer<typeof completeSchema>;

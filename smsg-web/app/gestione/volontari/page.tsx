@@ -104,9 +104,9 @@ function EditBody({ v, onClose }: { v: Volunteer; onClose: () => void }) {
 }
 
 const inviteSchema = z.object({
-  firstName: z.string().trim().min(1, "scriva il nome").max(100),
-  lastName: z.string().trim().min(1, "scriva il cognome").max(100),
-  email: z.string().trim().email("scriva un indirizzo email valido"),
+  firstName: z.string().trim().min(1, "scrivi il nome").max(100),
+  lastName: z.string().trim().min(1, "scrivi il cognome").max(100),
+  email: z.string().trim().email("scrivi un indirizzo email valido"),
 });
 type InviteValues = z.infer<typeof inviteSchema>;
 

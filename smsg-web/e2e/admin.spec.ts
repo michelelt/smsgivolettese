@@ -133,7 +133,7 @@ test("org settings save, lower counter refused, audit row visible", async ({
   const cur = Number(await card.inputValue());
   await card.fill(cur > 0 ? String(cur - 1) : "abc");
   await counters.getByRole("button", { name: "Salva le numerazioni" }).click();
-  await expect(counters.getByText(/scriva un numero intero tra/)).toBeVisible();
+  await expect(counters.getByText(/scrivi un numero intero tra/)).toBeVisible();
 
   // Audit log shows the change through the filters.
   await page.goto("/gestione/registro-attivita");
@@ -194,9 +194,9 @@ test("GDPR: export a member, anonymise a ceased one with invoices", async ({
   const dlg = page.getByRole("dialog");
   const go = dlg.getByRole("button", { name: "Anonimizza per sempre" });
   await expect(go).toBeDisabled();
-  await dlg.getByLabel(/Per confermare scriva ANONIMIZZA/).fill("anonimizza");
+  await dlg.getByLabel(/Per confermare scrivi ANONIMIZZA/).fill("anonimizza");
   await expect(go).toBeDisabled(); // case matters
-  await dlg.getByLabel(/Per confermare scriva ANONIMIZZA/).fill("ANONIMIZZA");
+  await dlg.getByLabel(/Per confermare scrivi ANONIMIZZA/).fill("ANONIMIZZA");
   await go.click();
   await expect(dlg.getByText("Anonimizzazione completata.")).toBeVisible();
   await expect(dlg.getByText(/Fattura \d+\/\d{4}/)).toBeVisible();

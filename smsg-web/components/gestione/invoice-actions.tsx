@@ -86,7 +86,7 @@ function VoidBody({ i, onClose }: { i: Invoice; onClose: () => void }) {
       <Textarea
         label="Motivo dell'annullamento"
         {...register("reason", {
-          validate: (v) => v.trim().length > 0 || "scriva il motivo",
+          validate: (v) => v.trim().length > 0 || "scrivi il motivo",
         })}
         error={formState.errors.reason?.message}
       />

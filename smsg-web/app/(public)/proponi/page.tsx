@@ -15,7 +15,7 @@ export default function Proponi() {
       title="Proponi una notizia"
       intro={
         <p>
-          Compili il modulo: il nostro staff leggerà la proposta prima di
+          Compila il modulo: il nostro staff leggerà la proposta prima di
           pubblicarla.
         </p>
       }

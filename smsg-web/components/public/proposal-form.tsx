@@ -18,16 +18,16 @@ import { Turnstile } from "./turnstile";
 
 const schema = z
   .object({
-    submitterName: z.string().trim().min(1, "scriva il suo nome").max(120),
+    submitterName: z.string().trim().min(1, "scrivi il tuo nome").max(120),
     submitterContact: optText(200),
-    title: z.string().trim().min(1, "scriva il titolo").max(200),
+    title: z.string().trim().min(1, "scrivi il titolo").max(200),
     category: z.enum(["evento", "avviso", "notizia"]),
     eventDate: dateField,
     location: optText(200),
     body: z
       .string()
       .trim()
-      .min(1, "scriva il testo")
+      .min(1, "scrivi il testo")
       .max(3000, "al massimo 3000 caratteri"),
     videoUrl: z
       .string()
@@ -53,7 +53,7 @@ async function uploadPhoto(file: File): Promise<string> {
   const { error } = await createClient()
     .storage.from(t.bucket)
     .uploadToSignedUrl(t.path, t.token, r.blob, { contentType: r.mime });
-  if (error) throw new Error("Non siamo riusciti a caricare la foto. Riprovi.");
+  if (error) throw new Error("Non siamo riusciti a caricare la foto. Riprova.");
   return t.path;
 }
 
@@ -80,7 +80,7 @@ export function ProposalForm({ siteKey }: { siteKey?: string }) {
 
   const submit = f.handleSubmit(async (v) => {
     if (siteKey && !token)
-      return setErr("Confermi di non essere un robot, qui sotto.");
+      return setErr("Conferma di non essere un robot, qui sotto.");
     setState("busy");
     setErr("");
     try {
@@ -103,7 +103,7 @@ export function ProposalForm({ siteKey }: { siteKey?: string }) {
       );
       setState("done");
     } catch (x) {
-      setErr(x instanceof Error ? x.message : "Invio non riuscito. Riprovi.");
+      setErr(x instanceof Error ? x.message : "Invio non riuscito. Riprova.");
       setState("idle");
     } finally {
       setToken("");
@@ -117,20 +117,20 @@ export function ProposalForm({ siteKey }: { siteKey?: string }) {
         role="status"
         className="rounded-xl border-2 border-blu p-4 text-xl font-bold"
       >
-        Grazie! Abbiamo ricevuto la sua proposta. La leggeremo e, se va bene, la
+        Grazie! Abbiamo ricevuto la tua proposta. La leggeremo e, se va bene, la
         pubblicheremo.
       </p>
     );
   return (
     <form onSubmit={submit} noValidate className="max-w-xl">
       <Field
-        label="Il suo nome"
+        label="Il tuo nome"
         autoComplete="name"
         {...f.register("submitterName")}
         error={e.submitterName?.message}
       />
       <Field
-        label="Come possiamo contattarla (facoltativo)"
+        label="Come possiamo contattarti (facoltativo)"
         hint="Email o telefono: solo per chiederle chiarimenti, non viene pubblicato."
         {...f.register("submitterContact")}
         error={e.submitterContact?.message}

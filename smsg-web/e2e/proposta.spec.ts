@@ -26,7 +26,7 @@ test("visitor proposes a news item, staff sees it and discards it", async ({
   await page.goto("/proponi");
   // Fill inside the retry: input typed before hydration is wiped.
   await expect(async () => {
-    await page.getByLabel("Il suo nome").fill("Anna Prova");
+    await page.getByLabel("Il tuo nome").fill("Anna Prova");
     await page.getByLabel("Titolo").fill(title);
     await page
       .getByRole("textbox", { name: "Testo", exact: true })

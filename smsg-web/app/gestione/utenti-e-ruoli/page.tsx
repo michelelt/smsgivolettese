@@ -34,9 +34,9 @@ const roleLabel = (r: UserRole) => ROLES.find((x) => x[0] === r)![1];
 const ONLY_SA = "È l'unico super admin: nominane un altro prima.";
 
 const inviteSchema = z.object({
-  firstName: z.string().trim().min(1, "scriva il nome").max(100),
-  lastName: z.string().trim().min(1, "scriva il cognome").max(100),
-  email: z.string().trim().email("scriva un indirizzo email valido"),
+  firstName: z.string().trim().min(1, "scrivi il nome").max(100),
+  lastName: z.string().trim().min(1, "scrivi il cognome").max(100),
+  email: z.string().trim().email("scrivi un indirizzo email valido"),
   role: z.enum(["staff", "super_admin"]),
 });
 type InviteValues = z.infer<typeof inviteSchema>;

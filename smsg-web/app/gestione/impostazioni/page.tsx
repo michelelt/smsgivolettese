@@ -22,13 +22,13 @@ const euro = (label: string) =>
     .string()
     .refine(
       (v) => parseEuro(v) !== null,
-      `${label}: scriva un importo, per esempio 12,50`,
+      `${label}: scrivi un importo, per esempio 12,50`,
     );
 const int = (min: number, max: number) =>
   z.string().refine((v) => {
     const n = Number(v);
     return /^\d+$/.test(v.trim()) && n >= min && n <= max;
-  }, `scriva un numero intero tra ${min} e ${max}`);
+  }, `scrivi un numero intero tra ${min} e ${max}`);
 
 const orgSchema = z.object({
   legalName: z

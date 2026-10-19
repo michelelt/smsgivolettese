@@ -27,13 +27,13 @@ export const useShiftTypes = () =>
 
 const schema = z
   .object({
-    shiftTypeId: z.string().min(1, "scelga il tipo di turno"),
-    day: z.string().min(1, "scelga il giorno"),
-    startTime: z.string().min(1, "scriva l'ora di inizio"),
-    endTime: z.string().min(1, "scriva l'ora di fine"),
+    shiftTypeId: z.string().min(1, "scegli il tipo di turno"),
+    day: z.string().min(1, "scegli il giorno"),
+    startTime: z.string().min(1, "scrivi l'ora di inizio"),
+    endTime: z.string().min(1, "scrivi l'ora di fine"),
     requiredSlots: z.coerce
-      .number<string>("scriva un numero")
-      .int("scriva un numero intero")
+      .number<string>("scrivi un numero")
+      .int("scrivi un numero intero")
       .min(1, "almeno 1 posto")
       .max(50, "al massimo 50 posti"),
     notes: z.string().max(500, "al massimo 500 caratteri"),
@@ -92,7 +92,7 @@ function FormBody({
         {...f.register("shiftTypeId")}
         error={e.shiftTypeId?.message}
       >
-        <option value="">— scelga —</option>
+        <option value="">— scegli —</option>
         {types.data?.items
           .filter((t) => t.active || t.id === shift?.shiftTypeId)
           .map((t) => (
@@ -129,7 +129,7 @@ function FormBody({
       />
       <Textarea
         label="Note (facoltative)"
-        hint="I volontari leggono queste note: non inserisca dati personali o sanitari."
+        hint="I volontari leggono queste note: non inserisci dati personali o sanitari."
         {...f.register("notes")}
         error={e.notes?.message}
       />
@@ -396,7 +396,7 @@ export function ShiftTypesDialog({
         <Field
           label="Nuovo tipo di turno"
           maxLength={100}
-          {...f.register("name", { required: "scriva il nome" })}
+          {...f.register("name", { required: "scrivi il nome" })}
           error={f.formState.errors.name?.message}
         />
         <FormError message={add.error?.message ?? toggle.error?.message} />

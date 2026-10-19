@@ -344,7 +344,7 @@ export function SiteEditor({
       setApiErrors({});
       if (failed.length > 0)
         toast(
-          `Non sono riuscito a salvare ${failed.length} servizi: riprovi.`,
+          `Non sono riuscito a salvare ${failed.length} servizi: riprova.`,
           true,
         );
       else
@@ -361,7 +361,7 @@ export function SiteEditor({
       }
       setApiErrors(found);
       if (Object.keys(found).length === 0) toast(e.message, true);
-      else toast("Controlli i campi segnati e riprovi.", true);
+      else toast("Controlla i campi segnati e riprova.", true);
     },
   });
   const save = () => {

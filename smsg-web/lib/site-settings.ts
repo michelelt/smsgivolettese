@@ -5,35 +5,35 @@ import { isHttps } from "@/lib/public/https-url";
 export const httpsUrl = z
   .string()
   .trim()
-  .regex(/^https:\/\/\S+$/, "scriva un indirizzo che inizia con https://")
-  .refine(isHttps, "scriva un indirizzo che inizia con https://");
+  .regex(/^https:\/\/\S+$/, "scrivi un indirizzo che inizia con https://")
+  .refine(isHttps, "scrivi un indirizzo che inizia con https://");
 
 export const conventionSchema = z.object({
-  title: z.string().trim().min(1, "scriva il titolo").max(200),
-  description: z.string().trim().min(1, "scriva la descrizione").max(1000),
+  title: z.string().trim().min(1, "scrivi il titolo").max(200),
+  description: z.string().trim().min(1, "scrivi la descrizione").max(1000),
   url: z.union([z.literal(""), httpsUrl]),
 });
 export const linkSchema = z.object({
   group: z.enum(["associazioni", "mutuo_soccorso", "utili"]),
-  label: z.string().trim().min(1, "scriva il testo del link").max(100),
+  label: z.string().trim().min(1, "scrivi il testo del link").max(100),
   url: httpsUrl,
 });
-const title = z.string().trim().min(1, "scriva il titolo").max(120);
+const title = z.string().trim().min(1, "scrivi il titolo").max(120);
 const intro = z.string().trim().max(2000, "al massimo 2000 caratteri");
 const sections = z
   .array(
     z.object({
       heading: title,
-      body: z.string().trim().min(1, "scriva il testo").max(5000),
+      body: z.string().trim().min(1, "scrivi il testo").max(5000),
     }),
   )
   .max(20);
 export const pagesSchema = z.object({
   home: z.object({
-    servicesButton: z.string().trim().min(1, "scriva il testo").max(40),
-    whereButton: z.string().trim().min(1, "scriva il testo").max(40),
-    quote: z.string().trim().min(1, "scriva la citazione").max(500),
-    quoteSource: z.string().trim().min(1, "scriva la fonte").max(200),
+    servicesButton: z.string().trim().min(1, "scrivi il testo").max(40),
+    whereButton: z.string().trim().min(1, "scrivi il testo").max(40),
+    quote: z.string().trim().min(1, "scrivi la citazione").max(500),
+    quoteSource: z.string().trim().min(1, "scrivi la fonte").max(200),
   }),
   chiSiamo: z.object({ title, intro, sections }),
   privacy: z.object({ title, intro, sections }),
@@ -44,7 +44,7 @@ export const pagesSchema = z.object({
 export type PagesValues = z.infer<typeof pagesSchema>;
 export const serviceTextSchema = z.object({
   id: z.string(),
-  name: z.string().trim().min(1, "scriva il nome").max(120),
+  name: z.string().trim().min(1, "scrivi il nome").max(120),
   description: z.string().max(1000, "al massimo 1000 caratteri"),
   scheduleNote: z.string().max(200, "al massimo 200 caratteri"),
 });

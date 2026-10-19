@@ -11,7 +11,7 @@ import { safeNext } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/client";
 
 const schema = z.object({
-  code: z.string().regex(/^\d{6}$/, "scriva le 6 cifre che vede nell'app"),
+  code: z.string().regex(/^\d{6}$/, "scrivi le 6 cifre che vedi nell'app"),
 });
 type Factor = { id: string; friendly_name?: string; created_at: string };
 type Enrol = { id: string; qr: string; secret: string };
@@ -84,7 +84,7 @@ export function SecurityPanel({ next }: { next?: string }) {
     setRemoving(undefined);
     if (error)
       return setErr(
-        "Non riusciamo a rimuoverla. Prima inserisca il codice dell'app, poi riprovi.",
+        "Non riusciamo a rimuoverla. Prima inserisci il codice dell'app, poi riprova.",
       );
     setOk("App rimossa.");
     await load();
@@ -101,7 +101,7 @@ export function SecurityPanel({ next }: { next?: string }) {
           Per questa sezione serve il codice dell&apos;app di autenticazione.
           {factors.length === 0
             ? " Configuri prima l'app qui sotto."
-            : " Inserisca il codice per continuare."}
+            : " Inserisci il codice per continuare."}
         </p>
       )}
       {err && (
@@ -177,11 +177,11 @@ export function SecurityPanel({ next }: { next?: string }) {
           </h3>
           <ol className="mt-2 list-decimal space-y-2 pl-6">
             <li>
-              Apra l&apos;app di autenticazione sul telefono e scelga di
+              Apri l&apos;app di autenticazione sul telefono e scegli di
               aggiungere un account.
             </li>
             <li>
-              Inquadri questo disegno oppure scriva a mano la chiave qui sotto.
+              Inquadra questo disegno oppure scrivi a mano la chiave qui sotto.
               {/* eslint-disable-next-line @next/next/no-img-element -- data: SVG from Auth */}
               <img
                 src={enrol.qr}
@@ -195,7 +195,7 @@ export function SecurityPanel({ next }: { next?: string }) {
                 <code className="break-all font-bold">{enrol.secret}</code>
               </p>
             </li>
-            <li>Scriva qui il codice di 6 cifre mostrato dall&apos;app.</li>
+            <li>Scrivi qui il codice di 6 cifre mostrato dall&apos;app.</li>
           </ol>
           <Field
             label="Codice a 6 cifre"
@@ -239,7 +239,7 @@ export function SecurityPanel({ next }: { next?: string }) {
         confirmLabel="Rimuovi"
         onConfirm={() => void remove()}
       >
-        Dopo averla rimossa, se non ha un&apos;altra app configurata, potrà
+        Dopo averla rimossa, se non hai un&apos;altra app configurata, potrai
         entrare solo con la password.
       </ConfirmDialog>
     </div>

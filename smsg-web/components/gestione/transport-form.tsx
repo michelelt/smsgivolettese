@@ -25,7 +25,7 @@ const time = z
   .refine((v) => v === "" || /^\d{2}:\d{2}$/.test(v), "orario non valido");
 const schema = z
   .object({
-    travelDate: z.string().min(1, "scelga la data"),
+    travelDate: z.string().min(1, "scegli la data"),
     departureTime: time,
     appointmentTime: time,
     returnTime: time,
@@ -36,18 +36,18 @@ const schema = z
     mobilityAids: z.boolean(),
     companions: z
       .string()
-      .refine((v) => /^[0-8]$/.test(v.trim()), "scriva un numero da 0 a 8"),
+      .refine((v) => /^[0-8]$/.test(v.trim()), "scrivi un numero da 0 a 8"),
     notes: z.string().max(500, "al massimo 500 caratteri"),
   })
   .refine((v) => v.departureTime !== "" || v.appointmentTime !== "", {
     path: ["departureTime"],
-    message: "Indichi l'ora di partenza da casa o l'ora dell'appuntamento",
+    message: "Indica l'ora di partenza da casa o l'ora dell'appuntamento",
   });
 type Values = z.infer<typeof schema>;
 const nul = (s: string) => s.trim() || null;
 
 export const NO_HEALTH =
-  "Non scriva informazioni sulla salute (malattie, diagnosi, terapie).";
+  "Non scrivi informazioni sulla salute (malattie, diagnosi, terapie).";
 
 export function TransportForm({
   transport,
@@ -122,7 +122,7 @@ export function TransportForm({
       noValidate
       onSubmit={f.handleSubmit((v) => {
         if (!transport && !memberId)
-          return setMemberErr("scelga il socio dall'elenco");
+          return setMemberErr("scegli il socio dall'elenco");
         setMemberErr(undefined);
         m.mutate(v);
       })}
@@ -151,7 +151,7 @@ export function TransportForm({
       />
       <Field
         label="Ora di partenza da casa"
-        hint="Indichi almeno l'ora di partenza o quella dell'appuntamento."
+        hint="Indica almeno l'ora di partenza o quella dell'appuntamento."
         type="time"
         {...f.register("departureTime")}
         error={e.departureTime?.message}
@@ -226,7 +226,7 @@ export function TransportFormForMember({ memberId }: { memberId: string }) {
     <>
       {!m && (
         <p role="status" className="mt-4">
-          Il socio non è attivo: ne scelga un altro.
+          Il socio non è attivo: ne scegli un altro.
         </p>
       )}
       <TransportForm

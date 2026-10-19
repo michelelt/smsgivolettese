@@ -10,7 +10,7 @@ import { safeNext } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/client";
 
 const schema = z.object({
-  code: z.string().regex(/^\d{6}$/, "scriva le 6 cifre che vede nell'app"),
+  code: z.string().regex(/^\d{6}$/, "scrivi le 6 cifre che vedi nell'app"),
 });
 
 export function VerifyForm({ next }: { next?: string }) {
@@ -38,7 +38,7 @@ export function VerifyForm({ next }: { next?: string }) {
   return (
     <form onSubmit={onSubmit} noValidate className="mt-4">
       <p>
-        Apra l&apos;app di autenticazione sul telefono e scriva il codice di 6
+        Apri l&apos;app di autenticazione sul telefono e scrivi il codice di 6
         cifre.
       </p>
       {err && (

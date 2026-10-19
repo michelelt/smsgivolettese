@@ -28,8 +28,8 @@ export const TYPES = [
 ] as const;
 
 const schema = z.object({
-  firstName: z.string().trim().min(1, "scriva il nome").max(100),
-  lastName: z.string().trim().min(1, "scriva il cognome").max(100),
+  firstName: z.string().trim().min(1, "scrivi il nome").max(100),
+  lastName: z.string().trim().min(1, "scrivi il cognome").max(100),
   taxCode: taxCodeField,
   birthDate: dateField,
   birthPlace: optText(100),

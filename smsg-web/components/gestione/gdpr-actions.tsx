@@ -50,7 +50,7 @@ export function GdprActions({
   const exp = useMutation({
     meta: { inline: true },
     mutationFn: () => exportData(subject, id),
-    onSuccess: () => toast("Dati esportati: controlli i download"),
+    onSuccess: () => toast("Dati esportati: controlla i download"),
     onError: (e) => toast(e.message, true),
   });
   const anon = useMutation({
@@ -133,7 +133,7 @@ export function GdprActions({
               htmlFor="conferma-anonimizza"
               className="mt-4 block font-bold"
             >
-              Per confermare scriva ANONIMIZZA
+              Per confermare scrivi ANONIMIZZA
             </label>
             <input
               id="conferma-anonimizza"

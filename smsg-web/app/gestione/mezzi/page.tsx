@@ -21,16 +21,16 @@ const schema = z.object({
   plate: z
     .string()
     .trim()
-    .min(1, "scriva la targa")
+    .min(1, "scrivi la targa")
     .max(20, "al massimo 20 caratteri"),
   model: z
     .string()
     .trim()
-    .min(1, "scriva il modello")
+    .min(1, "scrivi il modello")
     .max(100, "al massimo 100 caratteri"),
   seats: z.coerce
-    .number<string>("scriva un numero")
-    .int("scriva un numero intero")
+    .number<string>("scrivi un numero")
+    .int("scrivi un numero intero")
     .min(1, "almeno 1 posto")
     .max(20, "al massimo 20 posti"),
   wheelchairAccessible: z.boolean(),
