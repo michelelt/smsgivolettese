@@ -18,13 +18,13 @@ test("staff writes, publishes and sees the article on /notizie", async ({
   await page.goto("/gestione/bacheca/nuovo");
   await page.getByLabel("Titolo").fill(title);
 
-  await page.getByLabel(/Scegli la foto in evidenza/).setInputFiles({
+  await page.getByLabel("Carica foto").setInputFiles({
     name: "foto.png",
     mimeType: "image/png",
     buffer: PNG,
   });
   await expect(
-    page.getByRole("button", { name: "Togli la foto in evidenza" }),
+    page.getByRole("button", { name: "Togli la foto" }),
   ).toBeVisible();
 
   await page.locator(".bn-editor").click();

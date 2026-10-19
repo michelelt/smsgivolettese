@@ -11,7 +11,7 @@ import { BlockEditor } from "@/components/gestione/block-editor";
 import type { ApiBlock } from "@/components/posts/block-types";
 import { ActionBar, PageHeader } from "@/components/ui/actions";
 import { FormError, Pill } from "@/components/ui/bits";
-import { Button, ButtonLink } from "@/components/ui/button";
+import { Button, ButtonLink, bigButtonClass } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
 import { Select } from "@/components/ui/select";
@@ -29,7 +29,7 @@ const schema = z
     title: z
       .string()
       .trim()
-      .min(1, "scriva il titolo")
+      .min(1, "scrivi il titolo")
       .max(200, "al massimo 200 caratteri"),
     category: z.enum(["evento", "avviso", "notizia"]),
     eventDate: dateField,
@@ -143,7 +143,7 @@ export function PostEditor({ post }: { post?: Post }) {
     f.handleSubmit((v) => m.mutate({ v, then }))();
 
   return (
-    <>
+    <div className="mx-auto max-w-3xl">
       <PageHeader
         title={
           !post
@@ -165,7 +165,6 @@ export function PostEditor({ post }: { post?: Post }) {
           go("save");
         }}
         noValidate
-        className="max-w-3xl"
       >
         <Field
           label="Titolo"
@@ -202,41 +201,50 @@ export function PostEditor({ post }: { post?: Post }) {
             Foto in evidenza
           </h2>
           {cover && (
-            <Image
-              src={mediaUrl(cover.path)}
-              alt=""
-              width={cover.width || 800}
-              height={cover.height || 600}
-              className="mt-2 h-40 w-auto rounded-xl"
-            />
+            <div className="relative mx-auto mt-2 w-fit">
+              <Image
+                src={mediaUrl(cover.path)}
+                alt=""
+                width={cover.width || 800}
+                height={cover.height || 600}
+                className="h-40 w-auto rounded-xl"
+              />
+              <button
+                type="button"
+                aria-label="Togli la foto"
+                title="Togli la foto"
+                onClick={() => setCover(null)}
+                className="absolute -top-3 -right-3 flex size-12 items-center justify-center rounded-full border-2 border-ink bg-white text-2xl font-extrabold"
+              >
+                <span aria-hidden="true">×</span>
+              </button>
+            </div>
           )}
           <label htmlFor="cover-alt" className="mt-2 block font-bold">
-            Testo alternativo della foto (facoltativo)
+            Didascalia (facoltativo)
           </label>
-          <p id="cover-alt-hint" className="text-base">
-            Descriva la foto per chi non la vede. Lo scriva prima di scegliere
-            la foto.
-          </p>
           <input
             id="cover-alt"
             type="text"
             maxLength={200}
-            aria-describedby="cover-alt-hint"
             value={coverAlt}
             onChange={(ev) => setCoverAlt(ev.target.value)}
             className="mb-2 block min-h-12 w-full rounded-xl border-2 border-ink px-3 text-lg"
           />
-          <label htmlFor="cover" className="mt-2 block font-bold">
-            {cover
-              ? "Cambia la foto in evidenza"
-              : "Scegli la foto in evidenza"}
-          </label>
+          <div className="mt-3 text-center">
+            <label
+              htmlFor="cover"
+              className={`${bigButtonClass("primary")} cursor-pointer focus-within:outline-4 focus-within:outline-offset-2`}
+            >
+              {cover ? "Cambia foto" : "Carica foto"}
+            </label>
+          </div>
           <input
             id="cover"
             type="file"
             accept="image/*"
             disabled={coverBusy}
-            className="block min-h-12 text-base"
+            className="sr-only"
             onChange={async (ev) => {
               const file = ev.target.files?.[0];
               ev.target.value = "";
@@ -258,16 +266,6 @@ export function PostEditor({ post }: { post?: Post }) {
           />
           <p role="status">{coverBusy && "Caricamento in corso…"}</p>
           <FormError message={coverErr} />
-          {cover && (
-            <Button
-              variant="danger"
-              type="button"
-              className="mt-3"
-              onClick={() => setCover(null)}
-            >
-              Togli la foto in evidenza
-            </Button>
-          )}
         </section>
 
         <div className="mt-6">
@@ -275,9 +273,9 @@ export function PostEditor({ post }: { post?: Post }) {
             Testo
           </p>
           <p className="text-base">
-            Scriva qui come in Word: usi la barra in alto per grassetto, titoli,
+            Scrivi qui come in Word: usa la barra in alto per grassetto, titoli,
             elenchi e per aggiungere foto, video o pulsanti. In alternativa
-            scriva «/» (barra) su una riga vuota.
+            scrivi «/» (barra) su una riga vuota.
           </p>
           <div
             role="group"
@@ -366,6 +364,6 @@ export function PostEditor({ post }: { post?: Post }) {
           L&apos;articolo sparisce anche dal sito. Non si può annullare.
         </p>
       </ConfirmDialog>
-    </>
+    </div>
   );
 }
