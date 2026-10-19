@@ -7081,6 +7081,14 @@ export interface components {
                 sections: {
                     heading: string;
                     body: string;
+                    /** @default 1 */
+                    span: number;
+                    image?: {
+                        path: string;
+                        alt: string;
+                        width?: number;
+                        height?: number;
+                    };
                 }[];
             };
             privacy: {

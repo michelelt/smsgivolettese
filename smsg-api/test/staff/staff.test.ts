@@ -58,7 +58,7 @@ beforeAll(async () => {
   counters0 = await sql`select year, last_number from invoice_counters`;
   card0 = (await sql`select last_card_number from org_settings`)[0]!.last_card_number;
   site0 = (
-    await sql`select address, slogan, home_intro, vat_number, conventions, footer_links from site_settings`
+    await sql`select address, slogan, home_intro, vat_number, conventions, footer_links, pages from site_settings`
   )[0]!;
 });
 
@@ -81,7 +81,8 @@ async function cleanup(restore: boolean) {
       await t`update org_settings set last_card_number = ${card0}`;
       await t`update site_settings set address = ${site0.address as string | null}, slogan = ${site0.slogan as string | null},
         home_intro = ${site0.home_intro as string | null}, vat_number = ${site0.vat_number as string | null},
-        conventions = ${sql.json(site0.conventions as never)}, footer_links = ${sql.json(site0.footer_links as never)}`;
+        conventions = ${sql.json(site0.conventions as never)}, footer_links = ${sql.json(site0.footer_links as never)},
+        pages = ${sql.json(site0.pages as never)}`;
     }
     await t`delete from user_roles where user_id in (${zu})`;
     await t`delete from profiles where id in (${zu})`;
@@ -223,9 +224,22 @@ describe('services and settings', () => {
       pg('chiSiamo', { ...chi, extra: 1 }),
       pg('servizi', { title: '', intro: '' }),
       pg('chiSiamo', { ...chi, sections: Array.from({ length: 21 }, () => sec) }),
+      pg('chiSiamo', { ...chi, sections: [{ ...sec, span: 6 }] }),
+      pg('chiSiamo', { ...chi, sections: [{ ...sec, image: { path: '../x.jpg', alt: '' } }] }),
+      pg('privacy', { ...chi, sections: [{ heading: 'H', body: 'B', span: 2 }] }),
       pg('privacy', { ...chi, sections: [{ heading: 'H', body: 'x'.repeat(5001) }] }),
     ];
     for (const b of bad) expect((await staff('PUT', '/site-settings', b)).status).toBe(400);
+    const img = {
+      path: '2026/0b3c3f0e-1d2a-4c1e-9f00-123456789abc.webp',
+      alt: 'Sede',
+      width: 800,
+      height: 600,
+    };
+    const withImg = pg('chiSiamo', { ...chi, sections: [{ ...sec, span: 3, image: img }] });
+    expect((await staff('PUT', '/site-settings', withImg)).status).toBe(200);
+    const saved = (await (await app.request('/public/site-settings')).json()) as J;
+    expect((saved.pages as J).chiSiamo).toMatchObject({ sections: [{ span: 3, image: img }] });
     const o = (await staff('GET', '/org-info')).data;
     expect(o.kmRateCents).toBe((await sql`select km_rate_cents as k from org_settings`)[0]!.k);
     expect(o.nextCardNumber).toBe(

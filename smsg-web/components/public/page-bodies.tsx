@@ -1,5 +1,7 @@
-import type { ReactNode } from "react";
+import Image from "next/image";
+import type { CSSProperties, ReactNode } from "react";
 import { Icon } from "@/components/ui/icon";
+import { mediaUrl } from "@/lib/media-url";
 
 // Page bodies shared by the public site and the staff editor (/gestione/sito).
 // Text props are ReactNode: the editor passes editable nodes, the site passes plain text.
@@ -21,6 +23,9 @@ export type PageSection = {
   body: ReactNode;
   /** Editor controls (move, remove). */
   controls?: ReactNode;
+  /** Chi siamo only: width in fifths of the row on wide screens. */
+  span?: number;
+  image?: { path: string; alt: string; width?: number; height?: number };
 };
 
 function Title({
@@ -64,12 +69,24 @@ export function ChiSiamoBody({
         <Title preview={preview}>{title}</Title>
         {intro}
       </div>
-      <div className="grid gap-4 sm:grid-cols-3">
+      {/* Boxes grow in proportion to their span and wrap when a row passes 5/5. */}
+      <div className="flex flex-wrap gap-4">
         {sections.map((s, i) => (
           <section
             key={i}
-            className="rounded-2xl border-2 border-ink bg-white p-5"
+            style={{ "--span": s.span ?? 1 } as CSSProperties}
+            className="min-w-0 basis-full rounded-2xl border-2 border-ink bg-white p-5 sm:grow sm:basis-[calc(50%-0.5rem)] lg:grow-(--span) lg:basis-[calc(var(--span)*20%-1rem)]"
           >
+            {s.image && (
+              <Image
+                src={mediaUrl(s.image.path)}
+                alt={s.image.alt}
+                width={s.image.width || 800}
+                height={s.image.height || 600}
+                sizes="(min-width: 1024px) 60vw, 100vw"
+                className="mb-4 aspect-[4/3] w-full rounded-xl object-cover"
+              />
+            )}
             <SectionHeading preview={preview}>{s.heading}</SectionHeading>
             <div className="mt-2 space-y-2">{s.body}</div>
             {s.controls}

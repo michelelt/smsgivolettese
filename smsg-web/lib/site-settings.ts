@@ -28,6 +28,23 @@ const sections = z
     }),
   )
   .max(20);
+const chiSiamoSections = z
+  .array(
+    z.object({
+      heading: title,
+      body: z.string().trim().min(1, "scrivi il testo").max(5000),
+      span: z.number().int().min(1).max(5),
+      image: z
+        .object({
+          path: z.string(),
+          alt: z.string().trim().max(300, "al massimo 300 caratteri"),
+          width: z.number().optional(),
+          height: z.number().optional(),
+        })
+        .optional(),
+    }),
+  )
+  .max(20);
 export const pagesSchema = z.object({
   home: z.object({
     servicesButton: z.string().trim().min(1, "scrivi il testo").max(40),
@@ -35,7 +52,7 @@ export const pagesSchema = z.object({
     quote: z.string().trim().min(1, "scrivi la citazione").max(500),
     quoteSource: z.string().trim().min(1, "scrivi la fonte").max(200),
   }),
-  chiSiamo: z.object({ title, intro, sections }),
+  chiSiamo: z.object({ title, intro, sections: chiSiamoSections }),
   privacy: z.object({ title, intro, sections }),
   servizi: z.object({ title, intro }),
   convenzioni: z.object({ title, intro }),

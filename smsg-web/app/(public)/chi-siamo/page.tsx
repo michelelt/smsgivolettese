@@ -19,6 +19,8 @@ export default async function ChiSiamo() {
       sections={p.sections.map((s) => ({
         heading: s.heading,
         body: <Paragraphs text={s.body} />,
+        span: s.span,
+        image: s.image,
       }))}
     />
   );

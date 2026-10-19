@@ -489,6 +489,42 @@
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 5000
+                    },
+                    "span": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 5,
+                      "default": 1
+                    },
+                    "image": {
+                      "type": "object",
+                      "properties": {
+                        "path": {
+                          "type": "string",
+                          "pattern": "^\\d{4}\\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.(webp|jpg|jpeg|png|mp4|webm)$"
+                        },
+                        "alt": {
+                          "type": "string",
+                          "maxLength": 300
+                        },
+                        "width": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "exclusiveMinimum": true,
+                          "maximum": 20000
+                        },
+                        "height": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "exclusiveMinimum": true,
+                          "maximum": 20000
+                        }
+                      },
+                      "required": [
+                        "path",
+                        "alt"
+                      ],
+                      "additionalProperties": false
                     }
                   },
                   "required": [

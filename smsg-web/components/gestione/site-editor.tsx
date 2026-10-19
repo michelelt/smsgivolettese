@@ -25,6 +25,7 @@ import {
   SiteFooter,
   type FooterGroup,
 } from "@/components/public/site-parts";
+import { FilePicker } from "@/components/gestione/file-picker";
 import { ActionBar } from "@/components/ui/actions";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Dialog, DialogActions } from "@/components/ui/dialog";
@@ -33,6 +34,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/toast";
 import { ApiError, api, call } from "@/lib/api/call";
 import { orNull } from "@/lib/forms";
+import { uploadMedia } from "@/lib/upload";
 import {
   conventionSchema,
   linkSchema,
@@ -435,7 +437,18 @@ export function SiteEditor({
           sections: all.map((x, j) => (j === i ? { ...x, ...patch } : x)),
         });
       const base = `pages.${k}.sections.${i}`;
+      const chi = k === "chiSiamo" ? P.chiSiamo.sections[i] : undefined;
+      const setChi = (
+        patch: Partial<PagesValues["chiSiamo"]["sections"][number]>,
+      ) =>
+        setPage("chiSiamo", {
+          sections: P.chiSiamo.sections.map((x, j) =>
+            j === i ? { ...x, ...patch } : x,
+          ),
+        });
       return {
+        span: chi?.span,
+        image: chi?.image,
         heading: text(
           `titolo della sezione ${i + 1}`,
           `${base}.heading`,
@@ -454,36 +467,94 @@ export function SiteEditor({
           true,
         ),
         controls: (
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button
-              type="button"
-              aria-label={`Sposta su la sezione ${i + 1}`}
-              disabled={i === 0}
-              onClick={() => moveSection(k, i, -1)}
-              className={`${small} border-blu text-blu`}
-            >
-              Sposta su
-            </button>
-            <button
-              type="button"
-              aria-label={`Sposta giù la sezione ${i + 1}`}
-              disabled={i === all.length - 1}
-              onClick={() => moveSection(k, i, 1)}
-              className={`${small} border-blu text-blu`}
-            >
-              Sposta giù
-            </button>
-            <button
-              type="button"
-              aria-label={`Togli la sezione ${i + 1}`}
-              onClick={() =>
-                setPage(k, { sections: all.filter((_, j) => j !== i) })
-              }
-              className={`${small} border-bordeaux text-bordeaux`}
-            >
-              Togli
-            </button>
-          </div>
+          <>
+            {chi && (
+              <div className="mt-3 space-y-3">
+                <label className="block font-bold">
+                  Larghezza del riquadro
+                  <select
+                    value={chi.span}
+                    onChange={(e) => setChi({ span: Number(e.target.value) })}
+                    className="mt-1 block min-h-12 w-full rounded-xl border-2 border-ink bg-white px-3 text-lg"
+                  >
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <option key={n} value={n}>
+                        {n === 5
+                          ? "Tutta la riga"
+                          : n === 1
+                            ? "1 quinto della riga"
+                            : `${n} quinti della riga`}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {chi.image &&
+                  text(
+                    `descrizione della foto della sezione ${i + 1}`,
+                    `${base}.image.alt`,
+                    chi.image.alt,
+                    300,
+                    (alt) => setChi({ image: { ...chi.image!, alt } }),
+                    "Descrivi la foto per chi non vede",
+                  )}
+                <FilePicker
+                  label={chi.image ? "Cambia foto" : "Aggiungi foto"}
+                  accept="image/*"
+                  onFiles={async ([f]) => {
+                    const m = await uploadMedia(f!, "image");
+                    setChi({
+                      image: {
+                        path: m.path,
+                        alt: chi.image?.alt ?? "",
+                        ...(m.width && { width: m.width }),
+                        ...(m.height && { height: m.height }),
+                      },
+                    });
+                  }}
+                />
+                {chi.image && (
+                  <button
+                    type="button"
+                    aria-label={`Togli la foto della sezione ${i + 1}`}
+                    onClick={() => setChi({ image: undefined })}
+                    className={`${small} border-bordeaux text-bordeaux`}
+                  >
+                    Togli la foto
+                  </button>
+                )}
+              </div>
+            )}
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                aria-label={`Sposta su la sezione ${i + 1}`}
+                disabled={i === 0}
+                onClick={() => moveSection(k, i, -1)}
+                className={`${small} border-blu text-blu`}
+              >
+                Sposta su
+              </button>
+              <button
+                type="button"
+                aria-label={`Sposta giù la sezione ${i + 1}`}
+                disabled={i === all.length - 1}
+                onClick={() => moveSection(k, i, 1)}
+                className={`${small} border-blu text-blu`}
+              >
+                Sposta giù
+              </button>
+              <button
+                type="button"
+                aria-label={`Togli la sezione ${i + 1}`}
+                onClick={() =>
+                  setPage(k, { sections: all.filter((_, j) => j !== i) })
+                }
+                className={`${small} border-bordeaux text-bordeaux`}
+              >
+                Togli
+              </button>
+            </div>
+          </>
         ),
       };
     });
@@ -493,12 +564,19 @@ export function SiteEditor({
         auto
         variant="secondary"
         onClick={() =>
-          setPage(k, {
-            sections: [
-              ...P[k].sections,
-              { heading: "Nuovo titolo", body: "Nuovo testo" },
-            ],
-          })
+          k === "chiSiamo"
+            ? setPage(k, {
+                sections: [
+                  ...P[k].sections,
+                  { heading: "Nuovo titolo", body: "Nuovo testo", span: 1 },
+                ],
+              })
+            : setPage(k, {
+                sections: [
+                  ...P[k].sections,
+                  { heading: "Nuovo titolo", body: "Nuovo testo" },
+                ],
+              })
         }
       >
         Aggiungi sezione
