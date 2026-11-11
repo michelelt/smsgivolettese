@@ -7074,6 +7074,12 @@ export interface components {
                 whereButton: string;
                 quote: string;
                 quoteSource: string;
+                heroImage?: {
+                    path: string;
+                    alt: string;
+                    width?: number;
+                    height?: number;
+                };
             };
             chiSiamo: {
                 title: string;

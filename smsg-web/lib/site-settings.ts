@@ -51,6 +51,14 @@ export const pagesSchema = z.object({
     whereButton: z.string().trim().min(1, "scrivi il testo").max(40),
     quote: z.string().trim().min(1, "scrivi la citazione").max(500),
     quoteSource: z.string().trim().min(1, "scrivi la fonte").max(200),
+    heroImage: z
+      .object({
+        path: z.string(),
+        alt: z.string().max(300),
+        width: z.number().optional(),
+        height: z.number().optional(),
+      })
+      .optional(),
   }),
   chiSiamo: z.object({ title, intro, sections: chiSiamoSections }),
   privacy: z.object({ title, intro, sections }),

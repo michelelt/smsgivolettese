@@ -12,6 +12,7 @@ import {
 } from "@/components/public/site-parts";
 import { Icon } from "@/components/ui/icon";
 import { getServices, getSiteSettings } from "@/lib/public/server";
+import { plain, rich } from "@/lib/rich";
 
 export const revalidate = 3600;
 export const metadata: Metadata = {
@@ -52,7 +53,7 @@ function Band({
           <span className="grid size-12 shrink-0 place-items-center rounded-full bg-bordeaux text-white">
             <Icon name={icon} />
           </span>
-          {title}
+          {rich(title)}
         </h2>
         {children}
         {more && (
@@ -81,22 +82,33 @@ export default async function Home() {
   return (
     <div className="-mb-4 sm:-mb-6">
       <HomeHero
-        slogan={site.slogan ?? DEFAULT_SLOGAN}
-        servicesButton={h.servicesButton}
-        whereButton={h.whereButton}
+        slogan={rich(site.slogan || DEFAULT_SLOGAN)}
+        servicesButton={rich(h.servicesButton)}
+        whereButton={rich(h.whereButton)}
+        image={h.heroImage}
       />
 
       {services.length > 0 && (
         <Band id="servizi" icon="heart" title={pages.servizi.title}>
           <div className="grid gap-4 sm:grid-cols-2">
             {services.map((s) => (
-              <ServiceCard key={s.id} s={s} />
+              <ServiceCard
+                key={s.id}
+                s={{
+                  name: rich(s.name),
+                  description: rich(s.description),
+                  scheduleNote: rich(s.scheduleNote),
+                }}
+              />
             ))}
           </div>
         </Band>
       )}
 
-      <div className="mx-[calc(50%-50vw)] bg-[#f7efe9] px-4 py-12 sm:px-6">
+      <div
+        id="notizie"
+        className="mx-[calc(50%-50vw)] scroll-mt-28 bg-[#f7efe9] px-4 py-12 sm:px-6"
+      >
         <div className="mx-auto max-w-5xl space-y-10">
           <HomeNews />
         </div>
@@ -115,7 +127,15 @@ export default async function Home() {
         >
           <div className="grid gap-4 sm:grid-cols-2">
             {conventions.slice(0, MAX_CONVENTIONS).map((c, i) => (
-              <ConventionCard key={`${i}-${c.title}`} c={c} name={c.title} />
+              <ConventionCard
+                key={`${i}-${c.title}`}
+                c={{
+                  ...c,
+                  title: rich(c.title),
+                  description: rich(c.description),
+                }}
+                name={plain(c.title)}
+              />
             ))}
           </div>
         </Band>
@@ -128,8 +148,10 @@ export default async function Home() {
         tint
         more={["/chi-siamo", "Leggi la nostra storia"]}
       >
-        {story && <p className="max-w-3xl text-xl">{story}</p>}
-        {h.quote.trim() && <HomeQuote quote={h.quote} source={h.quoteSource} />}
+        {story && <p className="max-w-3xl text-xl">{rich(story)}</p>}
+        {h.quote.trim() && (
+          <HomeQuote quote={rich(h.quote)} source={rich(h.quoteSource)} />
+        )}
       </Band>
 
       <Band id="dove-siamo" icon="pin" title={pages.doveSiamo.title}>

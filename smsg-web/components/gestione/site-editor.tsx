@@ -57,8 +57,9 @@ const diff = <T,>(a: T[], b: T[]) =>
   ).length;
 const same = (a: unknown, b: unknown) =>
   JSON.stringify(a) === JSON.stringify(b);
+// Keys of both sides: an optional field (home photo) may exist on one side only.
 const fieldsDiff = (a: object, b: object) =>
-  Object.keys(a).filter(
+  [...new Set([...Object.keys(a), ...Object.keys(b)])].filter(
     (k) => !same(a[k as keyof typeof a], b[k as keyof typeof b]),
   ).length;
 const dirtyCount = (a: SiteValues, b: SiteValues) =>
@@ -391,8 +392,10 @@ export function SiteEditor({
     onChange: (v: string) => void,
     placeholder: string,
     multiline = false,
+    format = true,
   ) => (
     <Inline
+      format={format}
       label={label}
       value={value}
       max={max}
@@ -652,7 +655,8 @@ export function SiteEditor({
                 slogan={text(
                   "slogan",
                   "slogan",
-                  draft.slogan,
+                  // Empty slogan: the public site shows the default one, so edit that text, not a blank box.
+                  draft.slogan || DEFAULT_SLOGAN,
                   200,
                   (slogan) => edit({ slogan }),
                   DEFAULT_SLOGAN,
@@ -673,6 +677,38 @@ export function SiteEditor({
                   (whereButton) => setPage("home", { whereButton }),
                   "Testo del pulsante",
                 )}
+                image={P.home.heroImage}
+                photoControls={
+                  <>
+                    <FilePicker
+                      icon
+                      label="Cambia la foto della pagina iniziale"
+                      accept="image/*"
+                      onFiles={async ([f]) => {
+                        const m = await uploadMedia(f!, "image");
+                        setPage("home", {
+                          heroImage: {
+                            path: m.path,
+                            alt: "",
+                            ...(m.width && { width: m.width }),
+                            ...(m.height && { height: m.height }),
+                          },
+                        });
+                      }}
+                    />
+                    {P.home.heroImage && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setPage("home", { heroImage: undefined })
+                        }
+                        className="min-h-11 rounded-full bg-white px-4 text-base font-bold text-bordeaux shadow-lg"
+                      >
+                        Foto predefinita
+                      </button>
+                    )}
+                  </>
+                }
               />
               <HomeQuote
                 quote={text(
@@ -777,6 +813,8 @@ export function SiteEditor({
                   200,
                   (address) => edit({ address }),
                   "indirizzo della sede",
+                  false,
+                  false, // plain: the map looks this text up
                 )}
               />
             </SimplePage>
@@ -878,6 +916,7 @@ export function SiteEditor({
             <Inline
               fit
               label="indirizzo nel piè di pagina"
+              format={false}
               value={draft.address}
               max={200}
               placeholder="indirizzo della sede"
@@ -889,6 +928,7 @@ export function SiteEditor({
             <Inline
               fit
               label="partita IVA"
+              format={false}
               value={draft.vatNumber}
               max={11}
               placeholder="11 cifre"

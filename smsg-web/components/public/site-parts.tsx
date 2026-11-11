@@ -5,7 +5,9 @@ import { MainNav } from "@/components/public/main-nav";
 import { TextSize } from "@/components/public/text-size";
 import { bigButtonClass, ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
+import { mediaUrl } from "@/lib/media-url";
 import { httpsOnly, isHttps } from "@/lib/public/https-url";
+import { plain, rich } from "@/lib/rich";
 
 // Shared by the public site and the staff WYSIWYG preview (/gestione/sito).
 // The editor passes editable nodes where the public site passes plain text.
@@ -24,7 +26,8 @@ export function PublicHeader({ inert }: { inert?: boolean }) {
   return (
     <header
       inert={inert}
-      className={`${inert ? "relative" : "sticky top-0"} z-30 border-b-4 border-bordeaux bg-[#f7efe9]`}
+      // Preview (inert) has no z-index: it must scroll under the editor toolbar.
+      className={`${inert ? "relative" : "sticky top-0 z-30"} border-b-4 border-bordeaux bg-[#f7efe9]`}
     >
       <div className="mx-auto flex min-h-24 max-w-7xl items-center justify-between gap-3 px-4 py-3">
         <Link href="/" className="shrink-0">
@@ -62,11 +65,17 @@ export function HomeHero({
   slogan,
   servicesButton,
   whereButton,
+  image,
+  photoControls,
   preview,
 }: {
   slogan: ReactNode;
   servicesButton: ReactNode;
   whereButton: ReactNode;
+  /** Photo chosen by staff; none = the default photo. */
+  image?: { path: string };
+  /** Staff preview: buttons to change the photo, on its top-right corner. */
+  photoControls?: ReactNode;
   /** Staff preview: buttons are not links (their labels are editable) and no second h1 on the page. */
   preview?: boolean;
 }) {
@@ -80,9 +89,9 @@ export function HomeHero({
     <section
       className={`relative isolate overflow-hidden text-white ${preview ? "rounded-2xl" : "-mt-4 mx-[calc(50%-50vw)] sm:-mt-6"}`}
     >
-      {/* shortcut: stock photo, replace with a real photo of Givoletto. */}
+      {/* Background only: the text on it says everything, so no alt. */}
       <Image
-        src="/hero-stock.jpg"
+        src={image ? mediaUrl(image.path) : "/hero-stock.jpg"}
         alt=""
         fill
         priority
@@ -90,6 +99,11 @@ export function HomeHero({
         className="-z-20 object-cover"
       />
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black/30 via-black/45 to-black/70" />
+      {photoControls && (
+        <div className="absolute right-3 top-3 z-10 flex flex-row-reverse items-center gap-2">
+          {photoControls}
+        </div>
+      )}
       <div className="mx-auto flex min-h-[55svh] max-w-5xl flex-col items-center justify-center gap-5 px-4 py-16 text-center">
         <Image
           src="/logo-badge.svg"
@@ -234,7 +248,7 @@ export function SiteFooter({
                               rel="noopener noreferrer"
                               className="inline-flex min-h-6 items-center font-bold text-blu underline"
                             >
-                              {l.label}
+                              {rich(l.label)}
                               <span className="sr-only">
                                 {" "}
                                 (si apre in una nuova scheda)
@@ -259,8 +273,8 @@ export function SiteFooter({
                         href={l.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        aria-label={`${l.label} (si apre in una nuova scheda)`}
-                        title={l.label}
+                        aria-label={`${plain(l.label)} (si apre in una nuova scheda)`}
+                        title={plain(l.label)}
                         className="grid size-12 place-items-center rounded-full bg-bordeaux text-white hover:bg-[#5e1622]"
                       >
                         <Icon name={l.name} />

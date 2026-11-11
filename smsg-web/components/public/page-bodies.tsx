@@ -2,18 +2,19 @@ import Image from "next/image";
 import type { CSSProperties, ReactNode } from "react";
 import { Icon } from "@/components/ui/icon";
 import { mediaUrl } from "@/lib/media-url";
+import { rich } from "@/lib/rich";
 
 // Page bodies shared by the public site and the staff editor (/gestione/sito).
 // Text props are ReactNode: the editor passes editable nodes, the site passes plain text.
 
-/** Plain text, blank line = new paragraph. Rendered as React text, never as HTML. */
+/** Plain text, blank line = new paragraph, **bold** / *italic* marks. Rendered as React elements, never as HTML. */
 export function Paragraphs({ text }: { text: string }) {
   return text
     .split(/\n\s*\n/)
     .filter((p) => p.trim())
     .map((p, i) => (
       <p key={i} className="whitespace-pre-line">
-        {p.trim()}
+        {rich(p.trim())}
       </p>
     ));
 }

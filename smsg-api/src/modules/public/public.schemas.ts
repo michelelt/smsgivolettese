@@ -28,20 +28,19 @@ const simplePage = z.strictObject({ title: t(120), intro });
 const section = z.strictObject({ heading: t(120), body: t(5000) });
 const longPage = z.strictObject({ title: t(120), intro, sections: z.array(section).max(20) });
 const size = z.number().int().positive().max(20000).optional();
+const photo = z.strictObject({
+  path: MediaPath,
+  alt: z.string().trim().max(300),
+  width: size,
+  height: size,
+});
 // Chi siamo boxes: optional photo and width in fifths of the row (1-5).
 const chiSiamoPage = longPage.extend({
   sections: z
     .array(
       section.extend({
         span: z.number().int().min(1).max(5).default(1),
-        image: z
-          .strictObject({
-            path: MediaPath,
-            alt: z.string().trim().max(300),
-            width: size,
-            height: size,
-          })
-          .optional(),
+        image: photo.optional(),
       }),
     )
     .max(20),
@@ -53,6 +52,8 @@ export const PageTexts = z
       whereButton: t(40),
       quote: t(500),
       quoteSource: t(200),
+      // Home photo behind the logo; none = the default photo shipped with the web app.
+      heroImage: photo.optional(),
     }),
     chiSiamo: chiSiamoPage,
     privacy: longPage,

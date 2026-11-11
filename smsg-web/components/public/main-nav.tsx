@@ -9,7 +9,7 @@ import { Icon } from "@/components/ui/icon";
 const ITEMS = [
   { href: "/", label: "Home", icon: "home" },
   { href: "/#servizi", label: "Servizi", icon: "heart" },
-  { href: "/notizie", label: "Notizie", icon: "news" },
+  { href: "/#notizie", label: "Notizie", icon: "news" },
   { href: "/#convenzioni", label: "Convenzioni", icon: "tag" },
   { href: "/#chi-siamo", label: "Chi siamo", icon: "hands" },
   { href: "/#dove-siamo", label: "Dove siamo", icon: "pin" },
@@ -41,7 +41,7 @@ export function MainNav({ tools }: { tools: ReactNode }) {
               <Link
                 href={i.href}
                 aria-current={active(i.href) ? "page" : undefined}
-                className="flex min-h-[62px] w-full flex-col items-center justify-center gap-1 whitespace-nowrap rounded-[10px] px-2 py-1.5 text-center text-[0.85rem] font-bold leading-tight text-blu hover:bg-white focus-visible:bg-white focus-visible:outline-offset-[-3px] aria-[current=page]:bg-blu aria-[current=page]:text-white aria-[current=page]:focus-visible:outline-white"
+                className="flex min-h-[62px] w-full flex-col items-center justify-center gap-1 whitespace-nowrap rounded-[10px] px-2 transition-colors duration-200 py-1.5 text-center text-[0.85rem] font-bold leading-tight text-blu hover:bg-white focus-visible:bg-white focus-visible:outline-offset-[-3px] aria-[current=page]:bg-blu aria-[current=page]:text-white aria-[current=page]:focus-visible:outline-white"
               >
                 <Icon name={i.icon} />
                 {i.label}
@@ -76,7 +76,7 @@ export function MainNav({ tools }: { tools: ReactNode }) {
                     href={i.href}
                     onClick={() => setOpen(false)}
                     aria-current={active(i.href) ? "page" : undefined}
-                    className="flex min-h-14 items-center gap-3 rounded-xl px-3 text-xl font-bold text-blu hover:bg-[#f7efe9] aria-[current=page]:bg-bordeaux aria-[current=page]:text-white"
+                    className="flex min-h-14 items-center gap-3 rounded-xl px-3 text-xl transition-colors duration-200 font-bold text-blu hover:bg-[#f7efe9] aria-[current=page]:bg-bordeaux aria-[current=page]:text-white"
                   >
                     <Icon name={i.icon} />
                     {i.label}

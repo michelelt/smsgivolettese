@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { AddressMap } from "@/components/public/address-map";
 import { Paragraphs, SimplePage } from "@/components/public/page-bodies";
 import { getSiteSettings } from "@/lib/public/server";
+import { rich } from "@/lib/rich";
 
 export const revalidate = 3600;
 export const metadata: Metadata = {
@@ -14,7 +15,7 @@ export default async function DoveSiamo() {
   const { address, pages } = await getSiteSettings();
   return (
     <SimplePage
-      title={pages.doveSiamo.title}
+      title={rich(pages.doveSiamo.title)}
       intro={<Paragraphs text={pages.doveSiamo.intro} />}
     >
       {address ? (

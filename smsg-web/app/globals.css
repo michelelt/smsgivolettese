@@ -13,6 +13,8 @@
 
 html {
   font-size: 19px;
+  /* Menu links jump to home sections: glide instead of snapping (off with reduced motion, below). */
+  scroll-behavior: smooth;
 }
 html[data-text-size="l"] {
   font-size: 22px;
