@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* A+ / A++ chosen: the header menu switches to the Menu button, one row would not fit. */
+@custom-variant big (html[data-text-size] &);
+
 @theme {
   --color-bordeaux: #7a1e2c;
   --color-blu: #1f3f7a;

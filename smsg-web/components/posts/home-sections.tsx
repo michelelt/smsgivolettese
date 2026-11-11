@@ -42,7 +42,7 @@ export async function HomeNews() {
                   {p.location ? ` · ${p.location}` : ""}
                 </p>
                 <h3 className="text-xl font-extrabold">{p.title}</h3>
-                {p.excerpt && <p>{p.excerpt}</p>}
+                {p.excerpt && <p className="line-clamp-2">{p.excerpt}</p>}
                 <Link
                   href={`/notizie/${p.slug}`}
                   aria-label={`Testo completo: ${p.title}`}

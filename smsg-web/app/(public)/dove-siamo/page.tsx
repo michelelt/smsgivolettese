@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
-import {
-  AddressBlock,
-  Paragraphs,
-  SimplePage,
-} from "@/components/public/page-bodies";
+import { AddressMap } from "@/components/public/address-map";
+import { Paragraphs, SimplePage } from "@/components/public/page-bodies";
 import { getSiteSettings } from "@/lib/public/server";
 
 export const revalidate = 3600;
@@ -21,7 +18,7 @@ export default async function DoveSiamo() {
       intro={<Paragraphs text={pages.doveSiamo.intro} />}
     >
       {address ? (
-        <AddressBlock address={address} mapQuery={address} />
+        <AddressMap address={address} />
       ) : (
         <p>L&apos;indirizzo sarà pubblicato a breve.</p>
       )}

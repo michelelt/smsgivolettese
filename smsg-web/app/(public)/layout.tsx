@@ -9,8 +9,8 @@ export default async function PublicLayout({
 }) {
   const site = await getSiteSettings();
   return (
-    // Keeps the footer at the bottom on short pages.
-    <div className="flex min-h-dvh flex-col">
+    // Keeps the footer at the bottom on short pages; clips the full-width home photo.
+    <div className="flex min-h-dvh flex-col overflow-x-clip">
       <a
         href="#contenuto"
         className="sr-only focus:not-sr-only focus:block focus:bg-white focus:p-3 focus:font-bold"

@@ -16,7 +16,6 @@ import {
 import { ServiceCard } from "@/components/public/service-card";
 import {
   ConventionCard,
-  DEFAULT_INTRO,
   DEFAULT_SLOGAN,
   FOOTER_GROUPS,
   HomeHero,
@@ -657,15 +656,6 @@ export function SiteEditor({
                   200,
                   (slogan) => edit({ slogan }),
                   DEFAULT_SLOGAN,
-                )}
-                intro={text(
-                  "testo della pagina iniziale",
-                  "homeIntro",
-                  draft.homeIntro,
-                  2000,
-                  (homeIntro) => edit({ homeIntro }),
-                  DEFAULT_INTRO,
-                  true,
                 )}
                 servicesButton={text(
                   "pulsante dei servizi",

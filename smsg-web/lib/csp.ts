@@ -24,8 +24,9 @@ function build(scriptSrc: string, frames: string) {
   ].join("; ");
 }
 
-// ADR-062: privacy-enhanced YouTube and Vimeo (dnt) players only.
-const EMBEDS = "https://www.youtube-nocookie.com https://player.vimeo.com";
+// ADR-062: privacy-enhanced YouTube and Vimeo (dnt) players only; OpenStreetMap for the address map.
+const EMBEDS =
+  "https://www.youtube-nocookie.com https://player.vimeo.com https://www.openstreetmap.org";
 
 // ADR-036: no hash or nonce here, it would disable 'unsafe-inline' and break Next's inline scripts.
 export const publicCsp = () => {
