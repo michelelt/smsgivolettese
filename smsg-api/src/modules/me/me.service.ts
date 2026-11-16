@@ -64,6 +64,7 @@ export const commitments = (ctx: Ctx) =>
   asUser(ctx, async (tx) => ({
     shifts: await repo.shifts(tx, uid(ctx)),
     transports: await repo.transports(tx),
+    priceBands: await repo.priceBands(tx),
   }));
 
 /** Refusals email active staff (read with the service role: volunteers cannot read other profiles). */
@@ -94,8 +95,20 @@ export async function respondTransport(ctx: Ctx, id: string, accept: boolean) {
 export const completeTransport = (
   ctx: Ctx,
   id: string,
-  o: { odometerStart: number; odometerEnd: number; driverNotes?: string | null },
+  o: {
+    odometerStart: number;
+    odometerEnd: number;
+    driverNotes?: string | null;
+    collectedCents?: number | null;
+  },
 ) =>
   asUser(ctx, (tx) =>
-    repo.completeTransport(tx, id, o.odometerStart, o.odometerEnd, o.driverNotes ?? null),
+    repo.completeTransport(
+      tx,
+      id,
+      o.odometerStart,
+      o.odometerEnd,
+      o.driverNotes ?? null,
+      o.collectedCents ?? null,
+    ),
   ).then(() => undefined);

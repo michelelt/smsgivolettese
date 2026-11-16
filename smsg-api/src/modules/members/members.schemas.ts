@@ -1,7 +1,8 @@
 import { z } from '@hono/zod-openapi';
 import { PageQuery, pageOf } from '../../lib/pagination.js';
 import { Transport } from '../transports/transports.schemas.js';
-import { Invoice, PaymentMethod } from '../invoices/invoices.schemas.js';
+
+export const PaymentMethod = z.enum(['contanti', 'pos', 'bonifico']);
 
 const memberType = z.enum(['ordinario', 'familiare', 'sostenitore', 'onorario']);
 const endReason = z.enum([
@@ -55,7 +56,6 @@ export type Fee = z.infer<typeof Fee>;
 export const MemberDetail = Member.extend({
   fees: z.array(Fee),
   transports: z.array(Transport),
-  invoices: z.array(Invoice),
 }).openapi('MemberDetail');
 
 export const MembersQuery = PageQuery.extend({

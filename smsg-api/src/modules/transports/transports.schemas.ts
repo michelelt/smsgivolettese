@@ -28,7 +28,10 @@ export const Transport = z
     odometerEnd: z.number().int().nullable(),
     km: z.number().int().nullable(),
     driverNotes: z.string().nullable(),
-    invoiceId: z.uuid().nullable(),
+    bandLabel: z.string().nullable(),
+    bandColor: z.string().nullable(),
+    bandPriceCents: z.number().int().nullable(),
+    collectedCents: z.number().int().nullable(),
   })
   .openapi('Transport');
 export type Transport = z.infer<typeof Transport>;
@@ -79,10 +82,13 @@ export const TransportAssign = z
   .strictObject({ driverId: z.uuid(), vehicleId: z.uuid().nullable().optional() })
   .openapi('TransportAssign');
 const odo = z.number().int().min(0).max(9_999_999);
+/** Amount the driver collected (discounts allowed); null = not collected. */
+const collected = z.number().int().min(0).max(10_000_000).nullable();
 export const odometerFields = {
   odometerStart: odo,
   odometerEnd: odo,
   driverNotes: z.string().trim().max(500).nullable().optional(),
+  collectedCents: collected.optional(),
 };
 export const odometerOk = (o: { odometerStart: number; odometerEnd: number }) =>
   o.odometerEnd >= o.odometerStart && o.odometerEnd - o.odometerStart <= 2000;
@@ -94,5 +100,9 @@ export const TransportComplete = z
   .strictObject(odometerFields)
   .refine(odometerOk, odometerMsg)
   .openapi('TransportComplete');
+
+export const TransportCollected = z
+  .strictObject({ collectedCents: collected })
+  .openapi('TransportCollected');
 
 export const CsvQuery = z.object({ month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/) });

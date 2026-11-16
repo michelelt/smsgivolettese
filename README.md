@@ -27,7 +27,7 @@ Una sola piattaforma per tre cose:
 
 - **Il sito pubblico.** Racconta chi siamo, i servizi, le convenzioni, gli eventi e la galleria fotografica. Testi grandi, pulsanti grandi, tre misure di carattere. Nessun prezzo, nessun numero di telefono: è una vetrina.
 - **L'agenda dei volontari.** Ogni volontario indica quando è libero, vede i suoi turni e i suoi trasporti, li conferma con un tocco e chiude il viaggio con i chilometri.
-- **Il gestionale dello staff.** Trasporti, turni, libro soci con quote, fatture con PDF ed export per il commercialista, bacheca delle notizie e modifica dei testi del sito. Senza toccare una riga di codice.
+- **Il gestionale dello staff.** Trasporti, turni, libro soci con quote, fasce di prezzo per km con incassi e pro forma per i soci, bacheca delle notizie e modifica dei testi del sito. Senza toccare una riga di codice.
 
 Chi entra vede solo quello che gli serve:
 
@@ -35,7 +35,7 @@ Chi entra vede solo quello che gli serve:
 |---|---|
 | **Visitatore** | Legge il sito, propone una notizia. |
 | **Volontario** | *I miei impegni* (turni e trasporti), *Le mie disponibilità*, cambio password. |
-| **Staff** | Tutto il gestionale: trasporti, turni, soci, volontari, fatture, servizi, mezzi, impostazioni, bacheca, testi del sito. |
+| **Staff** | Tutto il gestionale: trasporti, turni, soci, volontari, rendicontazione, servizi, mezzi, impostazioni, bacheca, testi del sito. |
 | **Super admin** | Come lo staff, più *Utenti e ruoli*, *Registro attività*, esportazione e cancellazione dei dati personali (GDPR), autenticazione a due fattori. |
 
 > Le immagini di questo manuale vengono dalla copia locale con i **dati di esempio**: ogni nome che finisce con "(esempio)" è finto.
@@ -50,7 +50,7 @@ Chi entra vede solo quello che gli serve:
 4. [Guida per lo staff: il pannello](#4-guida-per-lo-staff-il-pannello)
    - [Trasporti](#41-trasporti) · [Turni](#42-turni) · [Disponibilità volontari](#43-disponibilità-volontari)
 5. [Persone: soci e volontari](#5-persone-soci-e-volontari)
-6. [Amministrazione: fatture, servizi, mezzi, impostazioni](#6-amministrazione)
+6. [Amministrazione: rendicontazione, servizi, mezzi, impostazioni](#6-amministrazione)
 7. [Sito: bacheca, proposte e testi delle pagine](#7-sito-bacheca-proposte-e-testi)
 8. [Guida per il super admin](#8-guida-per-il-super-admin)
 9. [Per chi sviluppa](#9-per-chi-sviluppa)
@@ -189,9 +189,10 @@ Quando lo staff ti assegna qualcosa ricevi un'email e la scheda dice **Da confer
 
 Dal giorno del viaggio, sulla scheda del trasporto compare la chiusura:
 
-1. Scrivi i **chilometri del contachilometri alla partenza** e **all'arrivo**.
-2. Se serve, aggiungi una nota (senza informazioni sulla salute).
-3. Conferma. La scheda diventa **Svolto**: lo staff vede i km percorsi e può fare la fattura.
+1. Scrivi i **chilometri del contachilometri alla partenza** e **all'arrivo**. Sotto compaiono i km, il **colore della fascia** e il suo prezzo.
+2. In **Quanto hai incassato** scrivi l'importo che il socio ti ha dato, anche se hai fatto uno sconto. Lascia vuoto se non hai incassato.
+3. Se serve, aggiungi una nota (senza informazioni sulla salute).
+4. Conferma. La scheda diventa **Svolto**: lo staff vede km, fascia e incassato.
 
 ---
 
@@ -209,7 +210,7 @@ Il menu in alto ha quattro gruppi. Ogni voce ha una riga che spiega a cosa serve
 |---|---|
 | **Attività** | Turni · Trasporti · Disponibilità volontari |
 | **Persone** | Soci · Volontari |
-| **Amministrazione** | Fatture · Servizi · Mezzi · Impostazioni |
+| **Amministrazione** | Rendicontazione · Servizi · Mezzi · Impostazioni |
 | **Sito** | Bacheca · Modifica il sito |
 
 Calendari, elenchi e schede usano sempre gli stessi gesti: frecce **‹ ›** e **Oggi** per le settimane, un pulsante principale colorato per l'azione più comune, **Altro ▾** per le azioni meno frequenti.
@@ -227,7 +228,7 @@ Gli stati di un trasporto:
 | **Da assegnare** | Registrato, manca l'autista. |
 | **Assegnato, in attesa di conferma** | L'autista ha ricevuto l'email, deve confermare. |
 | **Confermato dall'autista** | Tutto pronto. |
-| **Svolto** | Chiuso con i chilometri. Si può fatturare. |
+| **Svolto** | Chiuso con i chilometri e l'incassato. |
 | **Annullato** | Non si fa più. |
 
 #### Registrare un trasporto
@@ -255,20 +256,23 @@ Sotto **Altro ▾** trovi:
 
 <img src="smsg-workspace/docs/manual/img/staff-trasporto-altro.png" alt="Menu Altro del trasporto" width="640">
 
-#### Chiudere e fatturare
+#### Chiudere, incassato e pro forma
 
-Di solito chiude l'autista dalla sua agenda. Se non lo fa, dal giorno del viaggio puoi chiudere tu con **Chiudi con i km**: chilometri del contachilometri alla partenza e all'arrivo. I km si calcolano da soli.
+Di solito chiude l'autista dalla sua agenda. Se non lo fa, dal giorno del viaggio puoi chiudere tu con **Chiudi con i km**: chilometri del contachilometri alla partenza e all'arrivo, e l'importo incassato dall'autista. I km e la fascia di prezzo si calcolano da soli.
 
-Su un trasporto **Svolto** premi **Emetti fattura**. L'importo è già proposto (km × tariffa al km delle *Impostazioni*) ma lo puoi cambiare. Controlla codice fiscale e indirizzo del socio, scegli se è **già pagata** e conferma.
+Su un trasporto **Svolto** vedi la fascia (colore e prezzo) e quanto ha incassato l'autista:
+
+- **Modifica incassato**: corregge l'importo, per esempio se l'autista ha sbagliato a scriverlo.
+- **Pro forma (PDF)**: il riepilogo del servizio da dare al socio (data, tratta, km, autista e pallino del colore della fascia). **Non mostra prezzi** e non è un documento fiscale.
 
 <table>
 <tr>
-<td width="50%"><img src="smsg-workspace/docs/manual/img/staff-trasporto-svolto.png" alt="Trasporto svolto con il pulsante Emetti fattura"></td>
-<td width="50%"><img src="smsg-workspace/docs/manual/img/staff-fattura-emetti.png" alt="Finestra Emetti fattura con importo proposto"></td>
+<td width="50%"><img src="smsg-workspace/docs/manual/img/staff-trasporto-svolto.png" alt="Trasporto svolto con fascia e incassato"></td>
+<td width="50%"><img src="smsg-workspace/docs/manual/img/staff-incassato.png" alt="Finestra Importo incassato"></td>
 </tr>
 </table>
 
-Un trasporto chiuso o annullato non si modifica più. Un trasporto si fattura una volta sola; se annulli la fattura, torna fatturabile.
+Un trasporto chiuso o annullato non si modifica più, tranne l'importo incassato. La fascia resta quella del giorno di chiusura, anche se poi cambi i prezzi.
 
 #### Riepilogo mensile
 
@@ -310,14 +314,14 @@ Ogni turno mostra tipo, orario, posti occupati (per esempio *1/2 posti*) e i vol
 
 <img src="smsg-workspace/docs/manual/img/staff-socio-nuovo.png" alt="Modulo Nuovo socio" width="640">
 
-**La scheda del socio** raccoglie tutto: dati, **Quote versate** (con la **Ricevuta PDF** di ognuna), **Trasporti** e **Fatture**. Da qui:
+**La scheda del socio** raccoglie tutto: dati, **Quote versate** (con la **Ricevuta PDF** di ognuna), e **Trasporti**. Da qui:
 
 - **Registra quota *anno***: importo e come ha pagato. Poi scarichi la ricevuta.
 - **Nuovo trasporto**: già compilato con il socio.
 - **Modifica dati**.
 - **Cessa iscrizione**: scegli il motivo (*Dimissioni*, *Decesso*, *Mancato pagamento della quota*, *Esclusione*, *Trasferimento*) e la data. Il numero di tessera resta nel libro soci. Un socio cessato si può riattivare.
 
-<img src="smsg-workspace/docs/manual/img/staff-socio.png" alt="Scheda del socio con quote, trasporti e fatture" width="720">
+<img src="smsg-workspace/docs/manual/img/staff-socio.png" alt="Scheda del socio con quote e trasporti" width="720">
 
 ### Volontari
 
@@ -332,21 +336,13 @@ Ogni turno mostra tipo, orario, posti occupati (per esempio *1/2 posti*) e i vol
 
 ## 6. Amministrazione
 
-### Fatture
+### Rendicontazione
 
-**Amministrazione → Fatture**: scegli l'**Anno** e vedi *Fatture emesse*, *Totale fatturato*, *Incassato*, *Da incassare*. Filtri *Tutte*, *Da incassare*, *Pagate*, *Annullate* e ricerca per socio o numero.
+**Amministrazione → Rendicontazione**: scegli il **Mese** e vedi i trasporti svolti con km, fascia (colore e prezzo), autista e **incassato**. In alto i totali: *Trasporti svolti*, *Totale prezzi di fascia*, *Incassato*, *Non incassati*. Il nome del socio apre il trasporto.
 
-<img src="smsg-workspace/docs/manual/img/staff-fatture.png" alt="Elenco fatture con totali dell'anno" width="720">
+<img src="smsg-workspace/docs/manual/img/staff-rendicontazione.png" alt="Rendicontazione mensile con fasce e incassi" width="720">
 
-Su ogni fattura:
-
-- **Segna pagata**: scegli come ha pagato.
-- **Scarica PDF**: la fattura pronta da stampare o inviare, con intestazione, testo di esenzione IVA e bollo quando serve.
-- **Annulla**: chiede il motivo. Il numero non viene riusato e il trasporto torna fatturabile.
-
-**Esporta CSV per il commercialista** scarica tutte le fatture dell'anno in un file che si apre con Excel.
-
-Le fatture si creano solo dai trasporti svolti ([vedi sopra](#chiudere-e-fatturare)). La numerazione riparte ogni anno e non ha buchi.
+**Scarica il mese (CSV)** scarica i trasporti svolti del mese, con fascia, prezzo di fascia e incassato, in un file che si apre con Excel.
 
 ### Servizi
 
@@ -364,12 +360,11 @@ Le fatture si creano solo dai trasporti svolti ([vedi sopra](#chiudere-e-fattura
 
 **Amministrazione → Impostazioni** raccoglie i valori che il gestionale usa ovunque:
 
-- **Intestazione**: denominazione, codice fiscale, indirizzo (compaiono sulle fatture).
-- **Fatture e bollo**: testo di esenzione IVA, soglia e importo del bollo.
+- **Intestazione**: denominazione, codice fiscale, indirizzo (compaiono su ricevute e pro forma).
 - **Quota**: quota annuale di iscrizione.
-- **Trasporti**: importo per ogni chilometro (per esempio 0,35 €), usato per proporre l'importo della fattura.
+- **Fasce di prezzo dei trasporti**: quante fasce vuoi (fino a 20). Per ognuna: fino a quanti km, prezzo fisso, nome e colore. L'ultima vale per tutti i km oltre; i km uguali al limite stanno nella fascia più bassa. **Aggiungi una fascia** / **Togli la fascia**.
 - **Sito**: dimensione massima dei video caricati.
-- **Numerazioni**: ultimo numero di tessera e di fattura usati. I numeri possono solo aumentare.
+- **Numerazioni**: ultimo numero di tessera usato. Il numero può solo aumentare.
 
 <img src="smsg-workspace/docs/manual/img/staff-impostazioni.png" alt="Pagina Impostazioni" width="720">
 
@@ -435,7 +430,7 @@ Qui gestisci tutti gli account. Filtra per stato (*Attivi*, *Disattivati*, *Tutt
 - **Cambia ruolo**: volontario, staff o super admin.
 - **Disattiva** / **Riattiva**: chi è disattivato non può più entrare; i suoi dati restano.
 - **Esporta dati**: scarica tutti i dati personali di quella persona (diritto di accesso GDPR).
-- **Anonimizza**: cancella per sempre i dati personali, lasciando intatte fatture e storico. **Non si può tornare indietro.**
+- **Anonimizza**: cancella per sempre i dati personali, lasciando intatto lo storico. **Non si può tornare indietro.**
 
 Gli stessi pulsanti **Esporta dati** e **Anonimizza** sono anche sulla scheda di ogni socio; un socio si anonimizza solo dopo averlo cessato.
 - **Azzera** l'autenticazione a due fattori di qualcuno che ha perso il telefono.
@@ -444,7 +439,7 @@ Deve esserci sempre almeno un super admin attivo: l'ultimo non può essere disat
 
 ### Registro attività
 
-Ogni modifica a soci, trasporti, fatture, impostazioni e utenti viene registrata: **chi** ha fatto **cosa** e **quando**. Filtra per tabella, azione, intervallo di date o codice della riga; **Vedi i dettagli** mostra i valori prima e dopo. Il registro non si può modificare.
+Ogni modifica a soci, trasporti, impostazioni e utenti viene registrata: **chi** ha fatto **cosa** e **quando**. Filtra per tabella, azione, intervallo di date o codice della riga; **Vedi i dettagli** mostra i valori prima e dopo. Il registro non si può modificare.
 
 <img src="smsg-workspace/docs/manual/img/admin-registro.png" alt="Registro attività" width="720">
 
@@ -498,8 +493,8 @@ Documentazione tecnica in [`smsg-workspace/docs/`](smsg-workspace/docs/): [archi
 **Non trovo un volontario tra gli autisti.**
 Controlla in *Volontari* che sia attivo, che abbia **Può guidare** e la patente non scaduta, e che quel giorno non sia segnato assente.
 
-**Ho sbagliato una fattura.**
-Annullala (con il motivo) e riemettila dal trasporto. Il numero annullato resta nello storico e non viene riusato.
+**L'autista ha scritto un incassato sbagliato.**
+Apri il trasporto e premi **Modifica incassato**.
 
 **Ho cambiato un testo del sito ma non lo vedo.**
 Hai premuto **Salva e pubblica**? Le modifiche compaiono entro pochi istanti; ricarica la pagina.
@@ -512,3 +507,6 @@ Chiedi a un altro super admin di usare **Azzera** su *Utenti e ruoli*.
 
 **Come tolgo i dati di una persona che lo chiede?**
 Il super admin apre *Utenti e ruoli* (per un account) o la scheda del socio (dopo averlo cessato): **Esporta dati** se la persona li vuole, poi **Anonimizza**.
+
+
+

@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { FormError, Pill } from "@/components/ui/bits";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog, Dialog, DialogActions } from "@/components/ui/dialog";
@@ -18,10 +18,13 @@ import {
   WeekCalendar,
 } from "@/components/gestione/week-calendar";
 import { completeSchema, type CompleteValues } from "./transport-panel";
+import { BandDot, bandFor, collectedCents } from "./price-band";
 import { fmtTime, today } from "@/lib/dates";
+import { formatEuro } from "@/lib/money";
 
 type Shift = components["schemas"]["MyShift"];
 type Transport = components["schemas"]["MyTransport"];
+type Band = components["schemas"]["PriceBand"];
 type Pending =
   | { kind: "shift"; id: string; accept: boolean }
   | { kind: "transport"; id: string; accept: boolean };
@@ -69,13 +72,35 @@ function Answer({
   );
 }
 
-function CompleteBody({ t, onClose }: { t: Transport; onClose: () => void }) {
+function CompleteBody({
+  t,
+  bands,
+  onClose,
+}: {
+  t: Transport;
+  bands: Band[];
+  onClose: () => void;
+}) {
   const toast = useToast();
   const f = useForm<CompleteValues>({
     resolver: zodResolver(completeSchema),
-    defaultValues: { odometerStart: "", odometerEnd: "", driverNotes: "" },
+    defaultValues: {
+      odometerStart: "",
+      odometerEnd: "",
+      driverNotes: "",
+      collected: "",
+    },
   });
   const e = f.formState.errors;
+  const [start, end] = useWatch({
+    control: f.control,
+    name: ["odometerStart", "odometerEnd"],
+  });
+  const km = Number(end) - Number(start);
+  const band =
+    /^\d+$/.test(start.trim()) && /^\d+$/.test(end.trim()) && km >= 0
+      ? bandFor(bands, km)
+      : undefined;
   const m = useMutation({
     meta: { inline: true },
     mutationFn: (v: CompleteValues) =>
@@ -86,6 +111,7 @@ function CompleteBody({ t, onClose }: { t: Transport; onClose: () => void }) {
             odometerStart: Number(v.odometerStart),
             odometerEnd: Number(v.odometerEnd),
             driverNotes: v.driverNotes.trim() || null,
+            collectedCents: collectedCents(v.collected),
           },
         }),
       ),
@@ -109,6 +135,20 @@ function CompleteBody({ t, onClose }: { t: Transport; onClose: () => void }) {
         autoComplete="off"
         {...f.register("odometerEnd")}
         error={e.odometerEnd?.message}
+      />
+      {band && (
+        <p className="mt-3 font-bold" aria-live="polite">
+          {km} km · <BandDot color={band.color} label={band.label} /> ·{" "}
+          {formatEuro(band.priceCents)}
+        </p>
+      )}
+      <Field
+        label="Quanto hai incassato (euro)"
+        hint="Scrivi l'importo ricevuto, anche se hai fatto uno sconto. Lascia vuoto se non hai incassato."
+        inputMode="decimal"
+        autoComplete="off"
+        {...f.register("collected")}
+        error={e.collected?.message}
       />
       <Textarea
         label="Note (facoltative)"
@@ -188,7 +228,19 @@ function TransportCard({
             .join(" · ")}
         </p>
       )}
-      {t.status === "svolto" && t.km != null && <p>Km: {t.km}</p>}
+      {t.status === "svolto" && t.km != null && (
+        <p>
+          Km: {t.km}
+          {t.bandColor && (
+            <>
+              {" · "}
+              <BandDot color={t.bandColor} label={t.bandLabel} />
+            </>
+          )}
+          {" · Incassato: "}
+          {t.collectedCents != null ? formatEuro(t.collectedCents) : "niente"}
+        </p>
+      )}
       {t.toAddress && (
         <p className="mt-2">
           <a
@@ -334,7 +386,11 @@ export function MyCommitments() {
         title="Trasporto svolto"
       >
         {closing && (
-          <CompleteBody t={closing} onClose={() => setClosing(null)} />
+          <CompleteBody
+            t={closing}
+            bands={q.data?.priceBands ?? []}
+            onClose={() => setClosing(null)}
+          />
         )}
       </Dialog>
     </>

@@ -26,7 +26,12 @@ export const SECTIONS = [
     group: "Attività",
   },
   { slug: "soci", label: "Soci", min: "staff", group: "Persone" },
-  { slug: "fatture", label: "Fatture", min: "staff", group: "Amministrazione" },
+  {
+    slug: "rendicontazione",
+    label: "Rendicontazione",
+    min: "staff",
+    group: "Amministrazione",
+  },
   { slug: "bacheca", label: "Bacheca", min: "staff", group: "Sito" },
   {
     slug: "servizi",

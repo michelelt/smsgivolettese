@@ -9,7 +9,8 @@ import {
   Unprocessable,
   ValidationError,
 } from '../../lib/errors.js';
-import { transportSheetPdf } from '../../lib/pdf.js';
+import { centsToDecimal } from '../../lib/money.js';
+import { proformaPdf, transportSheetPdf } from '../../lib/pdf.js';
 import { candidates } from '../shifts/candidates.js';
 import { dispatch, transportItem, volunteerMail, type Mail } from '../notifications/notify.js';
 import * as repo from './transports.repo.js';
@@ -139,15 +140,34 @@ export const cancel = (ctx: Ctx, id: string) => release(ctx, id, (tx) => repo.ca
 export const complete = (
   ctx: Ctx,
   id: string,
-  o: { odometerStart: number; odometerEnd: number; driverNotes?: string | null },
+  o: {
+    odometerStart: number;
+    odometerEnd: number;
+    driverNotes?: string | null;
+    collectedCents?: number | null;
+  },
 ) =>
   asUser(ctx, async (tx) => {
     await transition(
       tx,
       id,
-      () => repo.complete(tx, id, o.odometerStart, o.odometerEnd, o.driverNotes ?? null),
+      () =>
+        repo.complete(
+          tx,
+          id,
+          o.odometerStart,
+          o.odometerEnd,
+          o.driverNotes ?? null,
+          o.collectedCents ?? null,
+        ),
       () => new Conflict('Il trasporto non può essere completato', 'TRANSPORT_NOT_COMPLETABLE'),
     );
+    return (await repo.byId(tx, id))!;
+  });
+
+export const setCollected = (ctx: Ctx, id: string, cents: number | null) =>
+  asUser(ctx, async (tx) => {
+    await transition(tx, id, () => repo.setCollected(tx, id, cents));
     return (await repo.byId(tx, id))!;
   });
 
@@ -178,6 +198,17 @@ export async function sheet(ctx: Ctx, id: string) {
   };
 }
 
+/** Pro forma (ADR-075): reminder of the service for the member, never a price. */
+export async function proforma(ctx: Ctx, id: string) {
+  const [t, org] = await asUser(ctx, (tx) => Promise.all([repo.byId(tx, id), repo.issuer(tx)]));
+  if (!t) throw missing();
+  if (t.status !== 'svolto') throw invalid();
+  return {
+    filename: `riepilogo-servizio-${t.travelDate}.pdf`,
+    body: await proformaPdf({ ...t, ...org }),
+  };
+}
+
 type CsvRow = Awaited<ReturnType<typeof repo.csvRows>>[number];
 export const TRANSPORT_CSV_HEADER = [
   'Data',
@@ -194,6 +225,9 @@ export const TRANSPORT_CSV_HEADER = [
   'Ausili',
   'Accompagnatori',
   'Note autista',
+  'Fascia',
+  'Prezzo fascia',
+  'Incassato',
 ];
 export const transportsCsv = (rows: CsvRow[]) =>
   toCsv(
@@ -213,6 +247,9 @@ export const transportsCsv = (rows: CsvRow[]) =>
       r.mobilityAids ? 'Sì' : 'No',
       r.companions,
       r.driverNotes,
+      r.bandLabel,
+      r.bandPriceCents === null ? '' : centsToDecimal(r.bandPriceCents),
+      r.collectedCents === null ? '' : centsToDecimal(r.collectedCents),
     ]),
   );
 

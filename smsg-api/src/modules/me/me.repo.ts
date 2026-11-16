@@ -1,4 +1,5 @@
 import type { Tx } from '../../lib/db.js';
+import type { PriceBands } from '../org-settings/org-settings.schemas.js';
 import type { Item } from '../notifications/templates.js';
 import type { AvailabilityRule } from '../volunteers/volunteers.schemas.js';
 import type { MyShift, MyTransport } from './me.schemas.js';
@@ -74,7 +75,9 @@ const T = (tx: Tx) => tx`
     to_char(appointment_at at time zone ${R}, 'HH24:MI') as "appointmentTime",
     to_char(return_at at time zone ${R}, 'HH24:MI') as "returnTime",
     from_address as "fromAddress", to_address as "toAddress", wheelchair, mobility_aids as "mobilityAids", companions, status,
-    odometer_start as "odometerStart", odometer_end as "odometerEnd", km, driver_notes as "driverNotes", member_first_name as "memberFirstName",
+    odometer_start as "odometerStart", odometer_end as "odometerEnd", km, driver_notes as "driverNotes",
+    band_label as "bandLabel", band_color as "bandColor", band_price_cents as "bandPriceCents",
+    collected_cents as "collectedCents", member_first_name as "memberFirstName",
     member_last_name as "memberLastName", contact_phone as "contactPhone",
     vehicle_plate as "vehiclePlate", vehicle_model as "vehicleModel"
   from public.volunteer_transports_v`;
@@ -110,4 +113,9 @@ export const completeTransport = (
   start: number,
   end: number,
   notes: string | null,
-) => tx`select public.complete_transport(${id}::uuid, ${start}::int, ${end}::int, ${notes}::text)`;
+  collected: number | null,
+) =>
+  tx`select public.complete_transport(${id}::uuid, ${start}::int, ${end}::int, ${notes}::text, ${collected}::int)`;
+
+export const priceBands = async (tx: Tx) =>
+  (await tx<{ b: PriceBands }[]>`select public.price_bands() as b`)[0]!.b;

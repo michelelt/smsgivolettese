@@ -1,58 +1,31 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { login } from "./session";
-import { invoicedTransport } from "./transport";
+import { doneTransport } from "./transport";
 
 // Needs `make dev` with the seeded local database (services, members).
 const env = (k: string) => process.env[k]!;
 
 test.beforeEach(({ page }) => login(page, env("E2E_STAFF_EMAIL")));
 
-const card = (page: Page, text: string) =>
-  page.getByRole("listitem").filter({ hasText: text });
-
-test("invoice issuance end to end", async ({ page }) => {
+test("done transport: band, collected amount, pro forma", async ({ page }) => {
   test.setTimeout(90_000); // long flow, slower when workers run in parallel
   const last = `Prova${Date.now()}`;
-  const name = `E2E ${last}`;
+  await doneTransport(page, last);
 
-  // Transport for a brand new member created inline, closed and invoiced.
-  const url = await invoicedTransport(page, last);
+  // 25 km falls in a band; staff can correct the collected amount.
+  await expect(page.getByText(/^Fascia:/)).toBeVisible();
+  await page.getByRole("button", { name: "Modifica incassato" }).click();
+  const dlg = page.getByRole("dialog", { name: "Importo incassato" });
+  await dlg.getByLabel(/Importo incassato/).fill("");
+  await dlg.getByRole("button", { name: "Salva" }).click();
+  await expect(page.getByText("non incassato")).toBeVisible();
 
-  // PDF, paid, void.
-  await page.goto("/gestione/fatture");
-  // Data rendered = hydrated; filling earlier is wiped by hydration and the
-  // new invoice then sits beyond page 1 of the unfiltered list.
-  await expect(page.getByText(/^Fattura n\. \d+\//).first()).toBeVisible();
-  const filtered = page.waitForResponse(
-    (r) => r.url().includes("/invoices?") && r.url().includes(last),
-  );
-  await page.getByLabel("Cerca per socio o numero").fill(last);
-  await filtered;
-  const inv = card(page, name);
   const [dl] = await Promise.all([
     page.waitForEvent("download"),
-    inv.getByRole("button", { name: "Scarica PDF" }).click(),
+    page.getByRole("button", { name: "Pro forma (PDF)" }).click(),
   ]);
-  expect(dl.suggestedFilename()).toMatch(/\.pdf$/);
-  await inv.getByRole("button", { name: "Segna pagata" }).click();
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "Segna pagata" })
-    .click();
-  await expect(inv.getByText("Pagata", { exact: true })).toBeVisible();
-  await inv.getByRole("button", { name: "Annulla" }).click();
-  const v = page.getByRole("dialog");
-  await expect(v.getByText(/nota di credito/)).toBeVisible();
-  await v.getByLabel("Motivo dell'annullamento").fill("Prova automatica");
-  await v.getByRole("button", { name: "Annulla fattura" }).click();
-  await expect(inv.getByText("Annullata", { exact: true })).toBeVisible();
-
-  // The transport can be invoiced again.
-  await page.goto(url);
-  await expect(
-    page.getByRole("button", { name: "Emetti fattura" }),
-  ).toBeVisible();
+  expect(dl.suggestedFilename()).toMatch(/^riepilogo-servizio-.*\.pdf$/);
 });
 
 test("a doubtful tax code can be saved anyway", async ({ page }) => {
@@ -92,7 +65,7 @@ for (const p of [
   "/gestione/trasporti/nuovo",
   "/gestione/soci",
   "/gestione/soci/nuovo",
-  "/gestione/fatture",
+  "/gestione/rendicontazione",
   "/gestione/servizi",
   "/gestione/sito",
 ])

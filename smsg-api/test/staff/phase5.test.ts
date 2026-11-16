@@ -555,13 +555,16 @@ describe('transports', () => {
       odometerStart: 1000,
       odometerEnd: 1012,
       driverNotes: '=SUM(1)',
+      collectedCents: 900,
     });
     expect(done.data).toMatchObject({
       status: 'svolto',
       odometerStart: 1000,
       odometerEnd: 1012,
       km: 12,
+      collectedCents: 900,
     });
+    expect(done.data.bandLabel).not.toBeNull();
     const body = { odometerStart: 1, odometerEnd: 2 };
     expect((await staff('POST', `/transports/${t.id}/complete`, body)).data.error.code).toBe(
       'TRANSPORT_NOT_COMPLETABLE',
@@ -587,12 +590,19 @@ describe('transports', () => {
           odometerStart: 500,
           odometerEnd: 503,
           driverNotes: 'ok',
+          collectedCents: 300,
         })
       ).status,
     ).toBe(204);
     expect((await staff('GET', `/transports/${t2.id}`)).data).toMatchObject({
       status: 'svolto',
       km: 3,
+      collectedCents: 300,
+    });
+    const mine = (await call('c', 'GET', '/me/commitments')).data;
+    expect(mine.priceBands.at(-1).upToKm).toBeNull();
+    expect(mine.transports.find((x: { id: string }) => x.id === t2.id)).toMatchObject({
+      collectedCents: 300,
     });
     expect(
       (

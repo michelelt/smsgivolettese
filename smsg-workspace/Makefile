@@ -9,7 +9,7 @@ CONCURRENTLY := pnpm dlx concurrently@9.2.5
 API := ../smsg-api
 WEB := ../smsg-web
 
-.PHONY: help setup dev test e2e manual-shots db-reset db-demo gen-api superadmin deploy-check vercel-env superadmin-remote
+.PHONY: help setup dev test e2e manual-shots db-reset db-demo db-fake gen-api superadmin deploy-check vercel-env superadmin-remote
 
 help: ## Show available targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-13s %s\n", $$1, $$2}'
@@ -74,6 +74,9 @@ gen-api: ## Regenerate the web API client from the API OpenAPI schema
 
 db-demo: ## Load demo users and data used by the tests (local only; `make db-reset` removes them)
 	cd $(API) && node -e "const s=require('postgres')('postgresql://postgres:postgres@127.0.0.1:54322/postgres');s.file('supabase/fixtures/demo.sql').then(()=>s.end(),e=>{console.error(e.message);process.exit(1)})"
+
+db-fake: ## Add fake transports to try price bands, collected amounts and Rendicontazione (local only, needs db-demo)
+	cd $(API) && node -e "const s=require('postgres')('postgresql://postgres:postgres@127.0.0.1:54322/postgres');s.file('../smsg-workspace/scripts/fake-rendicontazione.sql').then(()=>{console.log('Trasporti di prova caricati');return s.end()},e=>{console.error(e.message);process.exit(1)})"
 
 superadmin: ## Create the first super admin from secrets.env (idempotent)
 	@$(LOAD_SECRETS); pnpm -C $(API) superadmin

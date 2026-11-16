@@ -2,10 +2,10 @@ import { expect, type Page } from "@playwright/test";
 
 /**
  * Creates a transport on a random past day (so runs never share a driver slot), assigns the first selectable driver, closes it with
- * odometer readings and issues its invoice. Returns the transport page URL.
+ * odometer readings and the collected amount. Returns the transport page URL.
  * `existing`: the member already exists (found by surname); otherwise it is enrolled inline.
  */
-export async function invoicedTransport(
+export async function doneTransport(
   page: Page,
   last: string,
   existing = false,
@@ -48,12 +48,8 @@ export async function invoicedTransport(
   const done = page.getByRole("dialog", { name: "Chiudi il trasporto" });
   await done.getByLabel(/alla partenza/).fill("1000");
   await done.getByLabel(/all'arrivo/).fill("1025");
+  await done.getByLabel(/incassato/).fill("8,50");
   await done.getByRole("button", { name: "Chiudi il trasporto" }).click();
-
-  await page.getByRole("button", { name: "Emetti fattura" }).click();
-  const inv = page.getByRole("dialog", { name: "Emetti fattura" });
-  await expect(inv.getByLabel("Importo (euro)")).toBeVisible();
-  await inv.getByRole("button", { name: "Emetti fattura" }).click();
-  await expect(page.getByText(/Fattura n\. \d+\/\d{4} emessa/)).toBeVisible();
+  await expect(page.getByText("8,50 €")).toBeVisible();
   return url;
 }

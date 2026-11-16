@@ -41,7 +41,10 @@ insert into public.services (name, description, schedule_note, sort_order) value
   ('Misurazione pressione (esempio)', 'Servizio di esempio', 'martedì mattina', 1),
   ('Prelievi (esempio)', 'Servizio di esempio', 'giovedì mattina', 2),
   ('Accompagnamento (esempio)', 'Servizio di esempio', 'su richiesta', 3);
-update public.org_settings set km_rate_cents = 35;
+update public.org_settings set price_bands = '[
+  {"upToKm": 20, "priceCents": 1000, "color": "#2E7D32", "label": "Verde"},
+  {"upToKm": 30, "priceCents": 1500, "color": "#F9A825", "label": "Giallo"},
+  {"upToKm": null, "priceCents": 2000, "color": "#C62828", "label": "Rosso"}]';
 insert into public.members (card_number, first_name, last_name, joined_on) values
   (1, 'Maria', 'Esposito (esempio)', current_date - 400), (2, 'Carlo', 'Ferrari (esempio)', current_date - 200);
 insert into public.members (card_number, first_name, last_name, phone, address, joined_on)

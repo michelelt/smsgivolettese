@@ -161,9 +161,8 @@ describe('permissions', () => {
     ['GET', '/members'],
     ['GET', '/members/export.csv'],
     ['POST', '/members'],
-    ['GET', '/invoices'],
-    ['POST', '/invoices'],
-    ['GET', '/invoices/export.csv'],
+    ['GET', '/transports/00000000-0000-4000-8000-000000000000/proforma.pdf'],
+    ['PUT', '/transports/00000000-0000-4000-8000-000000000000/collected'],
     ['GET', '/services'],
     ['POST', '/services'],
     ['PUT', '/site-settings'],
@@ -241,7 +240,7 @@ describe('services and settings', () => {
     const saved = (await (await app.request('/public/site-settings')).json()) as J;
     expect((saved.pages as J).chiSiamo).toMatchObject({ sections: [{ span: 3, image: img }] });
     const o = (await staff('GET', '/org-info')).data;
-    expect(o.kmRateCents).toBe((await sql`select km_rate_cents as k from org_settings`)[0]!.k);
+    expect(o).not.toHaveProperty('kmRateCents');
     expect(o.nextCardNumber).toBe(
       (await sql`select last_card_number + 1 as n from org_settings`)[0]!.n,
     );
@@ -292,7 +291,8 @@ describe('members', () => {
     expect(r.data.cardNumber).toBe(before);
     expect(r.data.feePaidCurrentYear).toBe(true);
     expect(r.data.fees).toHaveLength(1);
-    expect(r.data).toMatchObject({ transports: [], invoices: [] });
+    expect(r.data).toMatchObject({ transports: [] });
+    expect(r.data).not.toHaveProperty('invoices');
 
     const dup = await staff('POST', '/members', {
       firstName: 'ZZT',
@@ -441,16 +441,15 @@ describe('members', () => {
     expect(text).toContain(`"Quota ${year}"`);
   });
 
-  it('member detail lists transports and invoices; q matches name, card, tax code, phone', async () => {
+  it('member detail lists transports; q matches name, card, tax code, phone', async () => {
     const tc = fakeTax();
     const m = await mkMember({ taxCode: tc, taxCodeConfirmed: true, phone: `339${tag}` });
     const t = await mkDone(m.id);
-    const inv = (await staff('POST', '/invoices', { transportId: t, amountCents: 1500 })).data;
     const d = (await staff('GET', `/members/${m.id}`)).data;
     expect(d).not.toHaveProperty('bookings');
+    expect(d).not.toHaveProperty('invoices');
     expect(d.transports.map((x: J) => x.id)).toEqual([t]);
-    expect(d.transports[0]).toMatchObject({ invoiceId: inv.id, odometerStart: 100, km: 12 });
-    expect(d.invoices.map((x: J) => x.id)).toEqual([inv.id]);
+    expect(d.transports[0]).toMatchObject({ odometerStart: 100, km: 12 });
     for (const q of [m.lastName, String(m.cardNumber), tc, `339${tag}`])
       expect(
         ((await staff('GET', `/members?q=${encodeURIComponent(q)}`)).data.items as J[]).map(
@@ -481,7 +480,8 @@ describe('transports create', () => {
       companions: 2,
       status: 'richiesto',
       km: null,
-      invoiceId: null,
+      bandLabel: null,
+      collectedCents: null,
     });
     expect(ok.data).not.toHaveProperty('companion');
     const bad = (b: object) =>
@@ -501,205 +501,96 @@ describe('transports create', () => {
   });
 });
 
-describe('invoices', () => {
-  const issue = (transportId: string, amountCents: number, extra: object = {}) =>
-    staff('POST', '/invoices', { transportId, amountCents, ...extra });
-
-  it('applies stamp duty above the threshold only (7747 none, 7748 yes)', async () => {
-    const c = await mkMember();
-    const a = await issue(await mkDone(c.id), 7747);
-    expect(a.status).toBe(201);
-    expect(a.data).toMatchObject({
-      subtotalCents: 7747,
-      stampDutyCents: 0,
-      totalCents: 7747,
-      status: 'emessa',
-    });
-    const b = await issue(await mkDone(c.id), 7748);
-    expect(b.data).toMatchObject({ subtotalCents: 7748, stampDutyCents: 200, totalCents: 7948 });
-    expect(b.data.lines).toHaveLength(1);
-    expect(b.data.lines[0]).toMatchObject({
-      amountCents: 7748,
-      description: expect.stringContaining('12 km'),
-    });
-    expect(b.data.lines[0].transportId).toBeTruthy();
+describe('price bands, collected amount, pro forma (ADR-075)', () => {
+  let bands0: unknown;
+  beforeAll(async () => {
+    bands0 = (await sql`select price_bands from org_settings`)[0]!.price_bands;
+    await sql`update org_settings set price_bands = ${sql.json([
+      { upToKm: 10, priceCents: 500, color: '#00AA00', label: 'Verde' },
+      { upToKm: 20, priceCents: 1000, color: '#FFAA00', label: 'Giallo' },
+      { upToKm: null, priceCents: 2000, color: '#AA0000', label: 'Rosso' },
+    ])}`;
+  });
+  afterAll(async () => {
+    await sql`update org_settings set price_bands = ${sql.json(bands0 as never)}`;
   });
 
-  it('numbers per year, creates only the current counter row, keeps numbers after void', async () => {
-    const c = await mkMember();
-    const before = (await sql`select year, last_number from invoice_counters`).map((r) => ({
-      ...r,
-    }));
-    const cur0 = before.find((r) => r.year === year)?.last_number ?? 0;
-    const b1 = await mkDone(c.id);
-    const rid = `rid-${tag}-inv`;
-    const i1 = await staff(
-      'POST',
-      '/invoices',
-      { transportId: b1, amountCents: 1000 },
-      { 'x-request-id': rid },
-    );
-    expect([i1.data.year, i1.data.number]).toEqual([year, cur0 + 1]);
-    const rows = await sql`select year, last_number from invoice_counters`;
-    expect(rows.find((r) => r.year === year)!.last_number).toBe(cur0 + 1);
-    for (const o of before.filter((r) => r.year !== year))
-      expect(rows.find((r) => r.year === o.year)!.last_number).toBe(o.last_number);
-    expect(rows.length).toBe(
-      before.some((r) => r.year === year) ? before.length : before.length + 1,
-    );
-    expect((await staff('GET', `/transports/${b1}`)).data.invoiceId).toBe(i1.data.id);
+  it('snapshots the band from km at completion; boundary km stays in the lower band', async () => {
+    const m = await mkMember();
+    const t = await mkDone(m.id); // 12 km
+    expect((await staff('GET', `/transports/${t}`)).data).toMatchObject({
+      km: 12,
+      bandLabel: 'Giallo',
+      bandColor: '#FFAA00',
+      bandPriceCents: 1000,
+      collectedCents: null,
+    });
+    await sql`update transports set odometer_end = 120 where id = ${t}`; // 20 km
+    expect((await staff('GET', `/transports/${t}`)).data.bandLabel).toBe('Giallo');
+    await sql`update transports set odometer_end = 121 where id = ${t}`;
+    expect((await staff('GET', `/transports/${t}`)).data.bandLabel).toBe('Rosso');
+    // a later price change does not rewrite the snapshot
+    await sql`update org_settings set price_bands = jsonb_set(price_bands, '{2,priceCents}', '9999')`;
+    expect((await staff('GET', `/transports/${t}`)).data.bandPriceCents).toBe(2000);
+  });
 
-    // an invoiced transport cannot be invoiced twice
-    const again = await issue(b1, 1000);
-    expect([again.status, again.data.error.code]).toEqual([409, 'TRANSPORT_NOT_INVOICEABLE']);
-
-    // void: reason required, transport invoiceable again, number kept and not reused
-    expect((await staff('POST', `/invoices/${i1.data.id}/void`, { reason: '  ' })).status).toBe(
+  it('staff records the collected amount on a done transport only', async () => {
+    const m = await mkMember();
+    const t = await mkDone(m.id);
+    const r = await staff('PUT', `/transports/${t}/collected`, { collectedCents: 800 });
+    expect([r.status, r.data.collectedCents]).toEqual([200, 800]);
+    expect(
+      (await staff('PUT', `/transports/${t}/collected`, { collectedCents: null })).data,
+    ).toMatchObject({ collectedCents: null });
+    expect((await staff('PUT', `/transports/${t}/collected`, { collectedCents: -1 })).status).toBe(
       400,
     );
-    const v = await staff(
-      'POST',
-      `/invoices/${i1.data.id}/void`,
-      { reason: 'Errore' },
-      { 'x-request-id': `${rid}-v` },
-    );
-    expect(v.data).toMatchObject({ status: 'annullata', voidReason: 'Errore', number: cur0 + 1 });
-    expect(v.data.voidedOn).toBe(today);
-    expect((await staff('GET', `/transports/${b1}`)).data.invoiceId).toBeNull();
-    const v2 = await staff('POST', `/invoices/${i1.data.id}/void`, { reason: 'Ancora' });
-    expect([v2.status, v2.data.error.code]).toEqual([409, 'INVOICE_NOT_VOIDABLE']);
-    expect(
-      (await staff('POST', `/invoices/${crypto.randomUUID()}/void`, { reason: 'x' })).status,
-    ).toBe(404);
-    const i2 = await issue(b1, 1200);
-    expect(i2.data.number).toBe(cur0 + 2);
-    expect((await staff('GET', `/invoices/${i1.data.id}`)).data.number).toBe(cur0 + 1);
-
-    const audit =
-      await sql`select table_name, action from audit_log where request_id in (${rid}, ${rid + '-v'}) and actor_id = ${STAFF}`;
-    const has = (t: string, a: string) => audit.some((x) => x.table_name === t && x.action === a);
-    expect(
-      has('invoices', 'insert') &&
-        has('invoices', 'update') &&
-        (has('invoice_counters', 'insert') || has('invoice_counters', 'update')),
-    ).toBe(true);
-
-    // void PDF
-    const pdf = await staff('GET', `/invoices/${i1.data.id}/pdf`);
-    expect(pdf.res.headers.get('content-type')).toBe('application/pdf');
-    expect(
-      Buffer.from(await pdf.res.arrayBuffer())
-        .subarray(0, 4)
-        .toString(),
-    ).toBe('%PDF');
-  });
-
-  it('issue edge cases, tax code saved on member, pay, list, kpis, csv', async () => {
-    const c = await mkMember();
-    const b = await mkDone(c.id);
     const open = (
       await staff('POST', '/transports', {
-        memberId: c.id,
+        memberId: m.id,
         travelDate: today,
         departureTime: '09:00',
       })
-    ).data.id;
-    expect((await issue(open, 4000)).data.error.code).toBe('TRANSPORT_NOT_INVOICEABLE');
-    expect((await staff('POST', '/invoices', { amountCents: 100 })).status).toBe(400);
-    expect((await staff('POST', '/invoices', { transportId: b })).status).toBe(400);
-    expect((await issue(b, -1)).status).toBe(400);
-    expect((await issue(b, 10_000_001)).status).toBe(400);
+    ).data;
+    const no = await staff('PUT', `/transports/${open.id}/collected`, { collectedCents: 100 });
+    expect([no.status, no.data.error.code]).toEqual([409, 'TRANSPORT_INVALID_TRANSITION']);
     expect(
-      (await staff('POST', '/invoices', { transportId: b, amountCents: 1, memberId: c.id })).status,
-    ).toBe(400);
-    expect((await issue(crypto.randomUUID(), 100)).status).toBe(409);
-    const bad = await issue(b, 4000, { customerTaxCode: 'RSSMRA85T10A562T' });
-    expect([bad.status, bad.data.error.code]).toEqual([422, 'TAX_CODE_INVALID']);
-    expect((await sql`select count(*)::int n from invoices where member_id = ${c.id}`)[0]!.n).toBe(
-      0,
-    );
-
-    const invTax = fakeTax();
-    const i = await issue(b, 4000, {
-      customerTaxCode: invTax,
-      taxCodeConfirmed: true,
-      customerAddress: 'Via Fattura 3',
-      paymentMethod: 'bonifico',
-    });
-    expect(i.status).toBe(201);
-    expect(i.data).toMatchObject({
-      status: 'pagata',
-      paymentMethod: 'bonifico',
-      paidOn: today,
-      customerTaxCode: invTax,
-      customerAddress: 'Via Fattura 3',
-    });
-    // the tax code is kept on the member, the address is not
-    const md = (await staff('GET', `/members/${c.id}`)).data;
-    expect(md.taxCode).toBe(invTax);
-    expect(md.address).toBeNull();
-    expect(md.invoices).toHaveLength(1);
-    expect(md.transports.length).toBe(2);
-
-    // pay
-    const paid = await staff('POST', `/invoices/${i.data.id}/pay`, { method: 'pos' });
-    expect([paid.status, paid.data.error.code]).toEqual([409, 'INVOICE_NOT_PAYABLE']);
-    const i2 = await issue(await mkDone(c.id), 4000);
-    expect(i2.data.status).toBe('emessa');
-    expect(
-      (await staff('POST', `/invoices/${i2.data.id}/pay`, { method: 'pos', paidOn: today })).data,
-    ).toMatchObject({ status: 'pagata', paymentMethod: 'pos', paidOn: today });
-    const c4 = await mkMember(); // separate member: keeps the counts below untouched
-    const i4 = await issue(await mkDone(c4.id), 4000);
-    const nextYear = `${year + 1}-01-01`;
-    const early = await staff('POST', `/invoices/${i4.data.id}/pay`, {
-      method: 'pos',
-      paidOn: '2000-01-01',
-    });
-    expect([early.status, early.data.error.code]).toEqual([400, 'VALIDATION_ERROR']);
-    const fut = await staff('POST', `/invoices/${i4.data.id}/pay`, {
-      method: 'pos',
-      paidOn: nextYear,
-    });
-    expect([fut.status, fut.data.error.code]).toEqual([400, 'VALIDATION_ERROR']);
-    expect(fut.res.headers.get('cache-control')).toBe('no-store');
-    expect(
-      (await staff('POST', `/invoices/${crypto.randomUUID()}/pay`, { method: 'pos' })).status,
+      (await staff('PUT', `/transports/${crypto.randomUUID()}/collected`, { collectedCents: 1 }))
+        .status,
     ).toBe(404);
-    expect((await staff('POST', `/invoices/${i2.data.id}/pay`, { method: 'x' })).status).toBe(400);
-    const i3 = await issue(await mkDone(c.id), 4000);
-    expect((await staff('POST', `/invoices/${i3.data.id}/void`, { reason: 'x' })).data.status).toBe(
-      'annullata',
-    );
-    expect(
-      (await staff('POST', `/invoices/${i3.data.id}/pay`, { method: 'pos' })).data.error.code,
-    ).toBe('INVOICE_NOT_PAYABLE');
+  });
 
-    // list / kpis / csv
-    const l = (await staff('GET', `/invoices?year=${year}&q=${c.lastName}`)).data;
-    expect(l.total).toBe(3);
-    expect(l.items[0].number).toBeGreaterThan(l.items[2].number); // number desc
-    expect(
-      (await staff('GET', `/invoices?status=annullata&year=${year}&q=${c.lastName}`)).data.total,
-    ).toBe(1);
-    const k = (await staff('GET', `/invoices/kpis?year=${year}`)).data;
-    expect(Object.keys(k).sort()).toEqual([
-      'collectedCents',
-      'count',
-      'toCollectCents',
-      'totalCents',
-    ]);
-    expect(k.collectedCents).toBeGreaterThanOrEqual(8000);
-    const csv = await staff('GET', `/invoices/export.csv?year=${year}`);
-    expect(csv.res.headers.get('content-disposition')).toContain(`fatture-${year}.csv`);
-    const raw = Buffer.from(await csv.res.arrayBuffer());
-    expect([...raw.subarray(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
-    const text = raw.toString('utf8');
-    expect(text.startsWith('﻿"Numero";"Data"')).toBe(true);
-    expect(text).toContain('"40,00"');
-    expect(text).toContain('"Annullata"');
-    expect(text).toContain(`"Via Fattura 3"`);
-    expect((await staff('GET', '/invoices/not-a-uuid')).status).toBe(400);
-    expect((await staff('GET', `/invoices/${crypto.randomUUID()}`)).status).toBe(404);
+  it('pro forma PDF for done transports only', async () => {
+    const m = await mkMember();
+    const t = await mkDone(m.id);
+    const pdf = await staff('GET', `/transports/${t}/proforma.pdf`);
+    expect(pdf.status).toBe(200);
+    expect(pdf.res.headers.get('content-type')).toContain('application/pdf');
+    const open = (
+      await staff('POST', '/transports', {
+        memberId: m.id,
+        travelDate: today,
+        departureTime: '10:00',
+      })
+    ).data;
+    expect((await staff('GET', `/transports/${open.id}/proforma.pdf`)).status).toBe(409);
+  });
+
+  it('rejects unordered bands or a closed last band', async () => {
+    const o = (await staff('GET', '/org-settings')).data;
+    const b = (priceBands: unknown) => ({ ...o, priceBands });
+    const band = (upToKm: number | null) => ({
+      upToKm,
+      priceCents: 1,
+      color: '#000000',
+      label: 'X',
+    });
+    for (const bad of [
+      [band(20)],
+      [band(20), band(10), band(null)],
+      [],
+      [{ ...band(null), color: 'red' }],
+    ])
+      expect((await staff('PUT', '/org-settings', b(bad))).status).toBe(400);
   });
 });

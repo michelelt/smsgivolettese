@@ -1,6 +1,6 @@
 // Takes the screenshots of the user manual (root README.md) from the running `make dev` stack.
 // Run through `make manual-shots`: it reloads the demo data first, and this script adds a few
-// more demo rows and issues one invoice, so the local database is left dirty on purpose.
+// more demo rows, so the local database is left dirty on purpose.
 // shortcut: PNGs are saved uncompressed (~5 MB total); quantize them to 256 colours before committing, add a step if this gets run often.
 const path = require("node:path");
 const root = path.resolve(__dirname, "../..");
@@ -108,11 +108,10 @@ async function as(browser, email, fn, viewport = { width: 1280, height: 960 }) {
     await p.locator("summary", { hasText: "Altro" }).first().click();
     await shot(p, "staff-trasporto-altro", null);
     await shot(p, "staff-trasporto-svolto", `/gestione/trasporti/${done.id}`);
-    await p.getByRole("button", { name: "Emetti fattura" }).click();
-    await shot(p, "staff-fattura-emetti", null);
-    await p.getByRole("dialog").getByRole("button", { name: "Emetti fattura" }).click();
-    await p.waitForTimeout(2500);
-    await shot(p, "staff-fatture", "/gestione/fatture", { full: true });
+    await p.getByRole("button", { name: "Modifica incassato" }).click();
+    await shot(p, "staff-incassato", null);
+    await p.keyboard.press("Escape");
+    await shot(p, "staff-rendicontazione", "/gestione/rendicontazione", { full: true });
     await shot(p, "staff-turni", "/gestione/turni");
     await p.getByRole("button", { name: "Assegna" }).last().click();
     await shot(p, "staff-turni-assegna", null);

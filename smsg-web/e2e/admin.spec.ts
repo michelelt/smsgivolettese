@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { login } from "./session";
-import { invoicedTransport } from "./transport";
+import { doneTransport } from "./transport";
 
 // Super admin flows (ADR-068). Local SUPERADMIN_MFA=off; MFA is not covered here.
 const env = (k: string) => process.env[k]!;
@@ -128,6 +128,7 @@ test("org settings save, lower counter refused, audit row visible", async ({
   await save(changed);
 
   // A counter below its current value is refused.
+  await page.getByRole("button", { name: "Numerazioni" }).click();
   const counters = page.getByRole("form", { name: "Numerazioni" });
   const card = counters.getByLabel("Ultimo numero di tessera usato");
   const cur = Number(await card.inputValue());
@@ -149,9 +150,7 @@ test("org settings save, lower counter refused, audit row visible", async ({
   await save(original);
 });
 
-test("GDPR: export a member, anonymise a ceased one with invoices", async ({
-  page,
-}) => {
+test("GDPR: export a member, anonymise a ceased one", async ({ page }) => {
   test.setTimeout(120_000);
   const last = `Gdpr${run}`;
   const full = `E2E ${last}`;
@@ -178,8 +177,8 @@ test("GDPR: export a member, anonymise a ceased one with invoices", async ({
     page.getByRole("button", { name: `Anonimizza ${full}` }),
   ).toBeDisabled();
 
-  // A closed, invoiced transport, so there is an invoice to retain.
-  await invoicedTransport(page, last, true);
+  // A closed transport in the member history.
+  await doneTransport(page, last, true);
   await page.goto(memberUrl);
 
   // Cease, then anonymise.
@@ -199,5 +198,4 @@ test("GDPR: export a member, anonymise a ceased one with invoices", async ({
   await dlg.getByLabel(/Per confermare scrivi ANONIMIZZA/).fill("ANONIMIZZA");
   await go.click();
   await expect(dlg.getByText("Anonimizzazione completata.")).toBeVisible();
-  await expect(dlg.getByText(/Fattura \d+\/\d{4}/)).toBeVisible();
 });

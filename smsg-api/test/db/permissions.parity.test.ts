@@ -17,8 +17,6 @@ const BACKING: Partial<Record<Action, [string, Op][]>> = {
     ['membership_fees', 'I'],
     ['membership_fees', 'U'],
   ],
-  'invoices.read': [['invoices', 'S']],
-  'invoices.mark_paid': [['invoices', 'U']],
   'services.write': [
     ['services', 'I'],
     ['services', 'U'],

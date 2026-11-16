@@ -234,11 +234,15 @@
             "items": {
               "$ref": "#/components/schemas/MyTransport"
             }
+          },
+          "priceBands": {
+            "$ref": "#/components/schemas/PriceBands"
           }
         },
         "required": [
           "shifts",
-          "transports"
+          "transports",
+          "priceBands"
         ],
         "additionalProperties": false
       },
@@ -348,6 +352,22 @@
             "type": "string",
             "nullable": true
           },
+          "bandLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "bandColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "bandPriceCents": {
+            "type": "integer",
+            "nullable": true
+          },
+          "collectedCents": {
+            "type": "integer",
+            "nullable": true
+          },
           "memberFirstName": {
             "type": "string"
           },
@@ -383,11 +403,55 @@
           "odometerEnd",
           "km",
           "driverNotes",
+          "bandLabel",
+          "bandColor",
+          "bandPriceCents",
+          "collectedCents",
           "memberFirstName",
           "memberLastName",
           "contactPhone",
           "vehiclePlate",
           "vehicleModel"
+        ],
+        "additionalProperties": false
+      },
+      "PriceBands": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/PriceBand"
+        },
+        "minItems": 1,
+        "maxItems": 20
+      },
+      "PriceBand": {
+        "type": "object",
+        "properties": {
+          "upToKm": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "priceCents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "color": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          }
+        },
+        "required": [
+          "upToKm",
+          "priceCents",
+          "color",
+          "label"
         ],
         "additionalProperties": false
       },
@@ -420,6 +484,12 @@
             "type": "string",
             "nullable": true,
             "maxLength": 500
+          },
+          "collectedCents": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 10000000
           }
         },
         "required": [
@@ -3742,18 +3812,11 @@
                 "items": {
                   "$ref": "#/components/schemas/Transport"
                 }
-              },
-              "invoices": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/Invoice"
-                }
               }
             },
             "required": [
               "fees",
-              "transports",
-              "invoices"
+              "transports"
             ],
             "additionalProperties": false
           }
@@ -3896,10 +3959,21 @@
             "type": "string",
             "nullable": true
           },
-          "invoiceId": {
+          "bandLabel": {
             "type": "string",
-            "nullable": true,
-            "format": "uuid"
+            "nullable": true
+          },
+          "bandColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "bandPriceCents": {
+            "type": "integer",
+            "nullable": true
+          },
+          "collectedCents": {
+            "type": "integer",
+            "nullable": true
           }
         },
         "required": [
@@ -3926,98 +4000,10 @@
           "odometerEnd",
           "km",
           "driverNotes",
-          "invoiceId"
-        ],
-        "additionalProperties": false
-      },
-      "Invoice": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "year": {
-            "type": "integer"
-          },
-          "number": {
-            "type": "integer"
-          },
-          "issuedOn": {
-            "type": "string"
-          },
-          "memberId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "customerName": {
-            "type": "string"
-          },
-          "customerTaxCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "customerAddress": {
-            "type": "string",
-            "nullable": true
-          },
-          "subtotalCents": {
-            "type": "integer"
-          },
-          "stampDutyCents": {
-            "type": "integer"
-          },
-          "totalCents": {
-            "type": "integer"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "emessa",
-              "pagata",
-              "annullata"
-            ]
-          },
-          "paymentMethod": {
-            "type": "string",
-            "nullable": true,
-            "enum": [
-              "contanti",
-              "pos",
-              "bonifico",
-              null
-            ]
-          },
-          "paidOn": {
-            "type": "string",
-            "nullable": true
-          },
-          "voidedOn": {
-            "type": "string",
-            "nullable": true
-          },
-          "voidReason": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "id",
-          "year",
-          "number",
-          "issuedOn",
-          "memberId",
-          "customerName",
-          "customerTaxCode",
-          "customerAddress",
-          "subtotalCents",
-          "stampDutyCents",
-          "totalCents",
-          "status",
-          "paymentMethod",
-          "paidOn",
-          "voidedOn",
-          "voidReason"
+          "bandLabel",
+          "bandColor",
+          "bandPriceCents",
+          "collectedCents"
         ],
         "additionalProperties": false
       },
@@ -4253,186 +4239,6 @@
         ],
         "additionalProperties": false
       },
-      "InvoicePage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Invoice"
-            }
-          },
-          "total": {
-            "type": "integer"
-          }
-        },
-        "required": [
-          "items",
-          "total"
-        ]
-      },
-      "InvoiceKpis": {
-        "type": "object",
-        "properties": {
-          "count": {
-            "type": "integer"
-          },
-          "totalCents": {
-            "type": "integer"
-          },
-          "collectedCents": {
-            "type": "integer"
-          },
-          "toCollectCents": {
-            "type": "integer"
-          }
-        },
-        "required": [
-          "count",
-          "totalCents",
-          "collectedCents",
-          "toCollectCents"
-        ],
-        "additionalProperties": false
-      },
-      "InvoiceDetail": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Invoice"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "issuerName": {
-                "type": "string"
-              },
-              "issuerTaxCode": {
-                "type": "string",
-                "nullable": true
-              },
-              "issuerAddress": {
-                "type": "string",
-                "nullable": true
-              },
-              "vatExemptionText": {
-                "type": "string"
-              },
-              "lines": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "position": {
-                      "type": "integer"
-                    },
-                    "description": {
-                      "type": "string"
-                    },
-                    "amountCents": {
-                      "type": "integer"
-                    },
-                    "transportId": {
-                      "type": "string",
-                      "nullable": true,
-                      "format": "uuid"
-                    }
-                  },
-                  "required": [
-                    "position",
-                    "description",
-                    "amountCents",
-                    "transportId"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            },
-            "required": [
-              "issuerName",
-              "issuerTaxCode",
-              "issuerAddress",
-              "vatExemptionText",
-              "lines"
-            ],
-            "additionalProperties": false
-          }
-        ]
-      },
-      "InvoiceIssue": {
-        "type": "object",
-        "properties": {
-          "transportId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "amountCents": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 10000000
-          },
-          "customerTaxCode": {
-            "type": "string",
-            "nullable": true,
-            "maxLength": 40
-          },
-          "taxCodeConfirmed": {
-            "type": "boolean"
-          },
-          "customerAddress": {
-            "type": "string",
-            "nullable": true,
-            "maxLength": 200
-          },
-          "paymentMethod": {
-            "type": "string",
-            "enum": [
-              "contanti",
-              "pos",
-              "bonifico"
-            ]
-          }
-        },
-        "required": [
-          "transportId",
-          "amountCents"
-        ],
-        "additionalProperties": false
-      },
-      "InvoicePay": {
-        "type": "object",
-        "properties": {
-          "method": {
-            "type": "string",
-            "enum": [
-              "contanti",
-              "pos",
-              "bonifico"
-            ]
-          },
-          "paidOn": {
-            "type": "string",
-            "format": "date"
-          }
-        },
-        "required": [
-          "method"
-        ],
-        "additionalProperties": false
-      },
-      "InvoiceVoid": {
-        "type": "object",
-        "properties": {
-          "reason": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 300
-          }
-        },
-        "required": [
-          "reason"
-        ],
-        "additionalProperties": false
-      },
       "StaffServices": {
         "type": "object",
         "properties": {
@@ -4659,16 +4465,7 @@
           "membershipFeeCents": {
             "type": "integer"
           },
-          "stampDutyThresholdCents": {
-            "type": "integer"
-          },
-          "stampDutyAmountCents": {
-            "type": "integer"
-          },
           "nextCardNumber": {
-            "type": "integer"
-          },
-          "kmRateCents": {
             "type": "integer"
           }
         },
@@ -4677,10 +4474,7 @@
           "taxCode",
           "address",
           "membershipFeeCents",
-          "stampDutyThresholdCents",
-          "stampDutyAmountCents",
-          "nextCardNumber",
-          "kmRateCents"
+          "nextCardNumber"
         ],
         "additionalProperties": false
       },
@@ -5535,11 +5329,32 @@
             "type": "string",
             "nullable": true,
             "maxLength": 500
+          },
+          "collectedCents": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 10000000
           }
         },
         "required": [
           "odometerStart",
           "odometerEnd"
+        ],
+        "additionalProperties": false
+      },
+      "TransportCollected": {
+        "type": "object",
+        "properties": {
+          "collectedCents": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 10000000
+          }
+        },
+        "required": [
+          "collectedCents"
         ],
         "additionalProperties": false
       },
@@ -5704,27 +5519,10 @@
               },
               "lastCardNumber": {
                 "type": "integer"
-              },
-              "invoiceCounter": {
-                "type": "object",
-                "properties": {
-                  "year": {
-                    "type": "integer"
-                  },
-                  "lastNumber": {
-                    "type": "integer"
-                  }
-                },
-                "required": [
-                  "year",
-                  "lastNumber"
-                ],
-                "additionalProperties": false
               }
             },
             "required": [
-              "lastCardNumber",
-              "invoiceCounter"
+              "lastCardNumber"
             ],
             "additionalProperties": false
           }
@@ -5747,30 +5545,13 @@
             "minLength": 1,
             "maxLength": 300
           },
-          "vatExemptionText": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 500
-          },
-          "stampDutyThresholdCents": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 1000000
-          },
-          "stampDutyAmountCents": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 1000000
-          },
           "membershipFeeCents": {
             "type": "integer",
             "minimum": 0,
             "maximum": 1000000
           },
-          "kmRateCents": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 100000
+          "priceBands": {
+            "$ref": "#/components/schemas/PriceBands"
           },
           "videoMaxMb": {
             "type": "integer",
@@ -5782,11 +5563,8 @@
           "legalName",
           "taxCode",
           "address",
-          "vatExemptionText",
-          "stampDutyThresholdCents",
-          "stampDutyAmountCents",
           "membershipFeeCents",
-          "kmRateCents",
+          "priceBands",
           "videoMaxMb"
         ],
         "additionalProperties": false
@@ -5798,18 +5576,11 @@
             "type": "integer",
             "minimum": 0,
             "maximum": 2000000000
-          },
-          "invoiceYear": {
-            "type": "integer",
-            "minimum": 2000,
-            "maximum": 2100
-          },
-          "invoiceLastNumber": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 2000000000
           }
         },
+        "required": [
+          "lastCardNumber"
+        ],
         "additionalProperties": false
       },
       "AuditPage": {
@@ -8382,684 +8153,6 @@
         }
       }
     },
-    "/invoices": {
-      "get": {
-        "tags": [
-          "invoices"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 10000,
-              "default": 1
-            },
-            "required": false,
-            "name": "page",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 50
-            },
-            "required": false,
-            "name": "pageSize",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "emessa",
-                "pagata",
-                "annullata",
-                "tutte"
-              ],
-              "default": "tutte"
-            },
-            "required": false,
-            "name": "status",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 2000,
-              "maximum": 2100
-            },
-            "required": false,
-            "name": "year",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "maxLength": 100
-            },
-            "required": false,
-            "name": "q",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Fatture",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InvoicePage"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Dati non validi",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Non autenticato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permesso negato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "invoices"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/InvoiceIssue"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Fattura emessa",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InvoiceDetail"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Dati non validi",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Non autenticato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permesso negato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Non trovato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflitto con lo stato attuale",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Richiede conferma o non elaborabile",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/invoices/kpis": {
-      "get": {
-        "tags": [
-          "invoices"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 2000,
-              "maximum": 2100
-            },
-            "required": false,
-            "name": "year",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Indicatori (fatture non annullate)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InvoiceKpis"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Dati non validi",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Non autenticato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permesso negato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/invoices/export.csv": {
-      "get": {
-        "tags": [
-          "invoices"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 2000,
-              "maximum": 2100
-            },
-            "required": false,
-            "name": "year",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "File",
-            "content": {
-              "text/csv": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Dati non validi",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Non autenticato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permesso negato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/invoices/{id}": {
-      "get": {
-        "tags": [
-          "invoices"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "required": true,
-            "name": "id",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Fattura con righe",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InvoiceDetail"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Dati non validi",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Non autenticato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permesso negato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Non trovato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/invoices/{id}/pdf": {
-      "get": {
-        "tags": [
-          "invoices"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "required": true,
-            "name": "id",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "File",
-            "content": {
-              "application/pdf": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Dati non validi",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Non autenticato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permesso negato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Non trovato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/invoices/{id}/pay": {
-      "post": {
-        "tags": [
-          "invoices"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "required": true,
-            "name": "id",
-            "in": "path"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/InvoicePay"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Fattura pagata",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InvoiceDetail"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Dati non validi",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Non autenticato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permesso negato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Non trovato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflitto con lo stato attuale",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/invoices/{id}/void": {
-      "post": {
-        "tags": [
-          "invoices"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "required": true,
-            "name": "id",
-            "in": "path"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/InvoiceVoid"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Fattura annullata",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InvoiceDetail"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Dati non validi",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Non autenticato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Permesso negato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Non trovato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflitto con lo stato attuale",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/services": {
       "get": {
         "tags": [
@@ -11399,6 +10492,92 @@
         }
       }
     },
+    "/transports/{id}/proforma.pdf": {
+      "get": {
+        "tags": [
+          "transports"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dati non validi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Non autenticato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permesso negato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Non trovato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflitto con lo stato attuale",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/transports/{id}/candidates": {
       "get": {
         "tags": [
@@ -11806,6 +10985,111 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/TransportComplete"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Trasporto aggiornato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Transport"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dati non validi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Non autenticato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permesso negato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Non trovato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflitto con lo stato attuale",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Richiede conferma o non elaborabile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transports/{id}/collected": {
+      "put": {
+        "tags": [
+          "transports"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransportCollected"
               }
             }
           }

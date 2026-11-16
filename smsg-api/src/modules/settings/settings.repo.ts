@@ -18,9 +18,6 @@ export const orgInfo = async (tx: Tx) =>
   (
     await tx<OrgInfo[]>`
       select legal_name as "legalName", tax_code as "taxCode", address,
-             membership_fee_cents as "membershipFeeCents",
-             stamp_duty_threshold_cents as "stampDutyThresholdCents",
-             stamp_duty_amount_cents as "stampDutyAmountCents", next_card_number as "nextCardNumber",
-             km_rate_cents as "kmRateCents"
+             membership_fee_cents as "membershipFeeCents", next_card_number as "nextCardNumber"
       from public.staff_org_info()`
   )[0]!;

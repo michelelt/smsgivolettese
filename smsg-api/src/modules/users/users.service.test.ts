@@ -120,10 +120,8 @@ describe('users hardening', () => {
 });
 
 describe('CountersInput', () => {
-  it('needs a change and year+number together', () => {
+  it('needs the card number', () => {
     expect(CountersInput.safeParse({}).success).toBe(false);
-    expect(CountersInput.safeParse({ invoiceYear: 2026 }).success).toBe(false);
-    expect(CountersInput.safeParse({ invoiceYear: 2026, invoiceLastNumber: 5 }).success).toBe(true);
     expect(CountersInput.safeParse({ lastCardNumber: 10 }).success).toBe(true);
   });
 });

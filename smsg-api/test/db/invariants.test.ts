@@ -592,13 +592,13 @@ describe('volunteer functions', () => {
       expect(
         await err(
           tx,
-          `select complete_transport('fc000000-0000-4000-8000-000000000001', 100, 112, 'ok')`,
+          `select complete_transport('fc000000-0000-4000-8000-000000000001', 100, 112, 'ok', null)`,
         ),
       ).toBe('OK');
       expect(
         await err(
           tx,
-          `select complete_transport('fc000000-0000-4000-8000-000000000001', 100, 112, 'ok')`,
+          `select complete_transport('fc000000-0000-4000-8000-000000000001', 100, 112, 'ok', null)`,
         ),
       ).toMatch(/TRANSPORT_NOT_COMPLETABLE/);
       expect(await err(tx, `select update_my_profile('0123456')`)).toBe('OK');
@@ -855,7 +855,7 @@ describe('transports only (ADR-070) checks', () => {
       await world(tx);
       await actAs(tx, 'volontario');
       const c = (a: string, b: string) =>
-        `select complete_transport('fc000000-0000-4000-8000-000000000001', ${a}, ${b}, null)`;
+        `select complete_transport('fc000000-0000-4000-8000-000000000001', ${a}, ${b}, null, null)`;
       expect(await err(tx, c('200', '100'))).toMatch(/^23514/);
       expect(await err(tx, c('null', 'null'))).toMatch(/^23514/);
       await reset(tx);

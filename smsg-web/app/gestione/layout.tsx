@@ -17,10 +17,13 @@ const MENU: Record<string, Record<string, Pick<Item, "icon" | "desc">>> = {
     volontari: { icon: "hands", desc: "Elenco dei volontari" },
   },
   Amministrazione: {
-    fatture: { icon: "doc", desc: "Fatture e pagamenti" },
+    rendicontazione: { icon: "doc", desc: "Fasce di prezzo e incassi" },
     servizi: { icon: "tag", desc: "Elenco servizi e tariffe" },
     mezzi: { icon: "car", desc: "Veicoli dell’associazione" },
-    impostazioni: { icon: "gear", desc: "Quota, bollo e numerazioni" },
+    impostazioni: {
+      icon: "gear",
+      desc: "Quota, fasce di prezzo e numerazioni",
+    },
   },
   Sito: {
     bacheca: { icon: "news", desc: "Avvisi per i soci" },

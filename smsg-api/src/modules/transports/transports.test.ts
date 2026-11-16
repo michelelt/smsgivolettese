@@ -20,13 +20,16 @@ describe('transports csv (ADR-055)', () => {
         mobilityAids: false,
         companions: 1,
         driverNotes: '+39 333 1234567',
+        bandLabel: 'Verde',
+        bandPriceCents: 1000,
+        collectedCents: 800,
       },
     ]);
     const [h, r] = out.replace('﻿', '').split('\r\n');
     expect(h).toBe(TRANSPORT_CSV_HEADER.map((c) => `"${c}"`).join(';'));
-    expect(TRANSPORT_CSV_HEADER).toHaveLength(14);
+    expect(TRANSPORT_CSV_HEADER).toHaveLength(17);
     expect(r).toBe(
-      '"05/10/2026";"08:30";"Anna Verdi";"Via Roma 1";"Ospedale";"Mario Rossi";"AB123CD";"1000";"1012";"12";"Sì";"No";"1";"+39 333 1234567"',
+      '"05/10/2026";"08:30";"Anna Verdi";"Via Roma 1";"Ospedale";"Mario Rossi";"AB123CD";"1000";"1012";"12";"Sì";"No";"1";"+39 333 1234567";"Verde";"10,00";"8,00"',
     );
   });
 });

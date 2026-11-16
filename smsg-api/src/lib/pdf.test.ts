@@ -1,33 +1,26 @@
 import { describe, expect, it } from 'vitest';
-import { invoicePdf, receiptPdf, transportSheetPdf, type InvoicePdf } from './pdf.js';
+import { proformaPdf, receiptPdf, transportSheetPdf } from './pdf.js';
 
 describe('pdf', () => {
-  it('renders an invoice, void and paid, as a PDF', async () => {
-    const base: Omit<InvoicePdf, 'status'> = {
-      year: 2026,
-      number: 7,
-      issuedOn: '2026-03-07',
-      issuerName: 'Società',
-      issuerTaxCode: '123',
-      issuerAddress: 'Via Roma 1',
-      customerName: 'Mario Rossi',
-      customerTaxCode: null,
-      customerAddress: null,
-      lines: [{ description: 'Trasporto del 07/03/2026 (12 km)', amountCents: 5000 }],
-      subtotalCents: 5000,
-      stampDutyCents: 200,
-      totalCents: 5200,
-      vatExemptionText: 'Esente IVA',
-      paymentMethod: null,
-      paidOn: null,
-      voidReason: null,
-    };
-    for (const extra of [
-      { status: 'emessa' },
-      { status: 'pagata', paymentMethod: 'pos', paidOn: '2026-03-08' },
-      { status: 'annullata', voidReason: 'Errore' },
-    ] as const) {
-      const buf = await invoicePdf({ ...base, ...extra });
+  it('renders a pro forma, with and without band', async () => {
+    for (const band of [
+      { bandLabel: 'Verde', bandColor: '#2E7D32' },
+      { bandLabel: null, bandColor: null },
+    ]) {
+      const buf = await proformaPdf({
+        issuerName: 'Società',
+        issuerTaxCode: '123',
+        issuerAddress: 'Via Roma 1',
+        memberName: 'Mario Rossi',
+        travelDate: '2026-03-07',
+        departureTime: '08:30',
+        returnTime: null,
+        fromAddress: 'Via Roma 1',
+        toAddress: 'Ospedale',
+        km: 12,
+        driverName: 'Luca Bianchi',
+        ...band,
+      });
       expect(buf.subarray(0, 4).toString()).toBe('%PDF');
     }
   });

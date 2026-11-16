@@ -35,10 +35,7 @@ export const OrgInfo = z
     taxCode: z.string().nullable(),
     address: z.string().nullable(),
     membershipFeeCents: z.number().int(),
-    stampDutyThresholdCents: z.number().int(),
-    stampDutyAmountCents: z.number().int(),
     nextCardNumber: z.number().int(),
-    kmRateCents: z.number().int(),
   })
   .openapi('OrgInfo');
 export type OrgInfo = z.infer<typeof OrgInfo>;

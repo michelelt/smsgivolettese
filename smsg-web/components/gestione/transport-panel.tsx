@@ -16,7 +16,8 @@ import { useToast } from "@/components/ui/toast";
 import { api, call, saveBlob } from "@/lib/api/call";
 import type { components } from "@/lib/api/schema";
 import { today } from "@/lib/dates";
-import { IssueInvoiceDialog } from "./issue-invoice-dialog";
+import { formatEuro, centsToInput } from "@/lib/money";
+import { BandDot, collectedCents, collectedInput } from "./price-band";
 import { NO_HEALTH } from "./transport-form";
 
 type Transport = components["schemas"]["Transport"];
@@ -142,7 +143,12 @@ const km = z
   .string()
   .refine((v) => /^\d{1,7}$/.test(v.trim()), "scrivi un numero intero");
 export const completeSchema = z
-  .object({ odometerStart: km, odometerEnd: km, driverNotes: z.string() })
+  .object({
+    odometerStart: km,
+    odometerEnd: km,
+    driverNotes: z.string(),
+    collected: collectedInput,
+  })
   .refine(
     (v) =>
       Number(v.odometerEnd) >= Number(v.odometerStart) &&
@@ -163,6 +169,7 @@ function CompleteBody({ t, onClose }: { t: Transport; onClose: () => void }) {
       odometerStart: t.odometerStart != null ? String(t.odometerStart) : "",
       odometerEnd: t.odometerEnd != null ? String(t.odometerEnd) : "",
       driverNotes: t.driverNotes ?? "",
+      collected: "",
     },
   });
   const e = f.formState.errors;
@@ -176,6 +183,7 @@ function CompleteBody({ t, onClose }: { t: Transport; onClose: () => void }) {
             odometerStart: Number(v.odometerStart),
             odometerEnd: Number(v.odometerEnd),
             driverNotes: v.driverNotes.trim() || null,
+            collectedCents: collectedCents(v.collected),
           },
         }),
       ),
@@ -198,6 +206,14 @@ function CompleteBody({ t, onClose }: { t: Transport; onClose: () => void }) {
         {...f.register("odometerEnd")}
         error={e.odometerEnd?.message}
       />
+      <Field
+        label="Importo incassato dall'autista (euro)"
+        hint="Lascia vuoto se non ha incassato."
+        inputMode="decimal"
+        autoComplete="off"
+        {...f.register("collected")}
+        error={e.collected?.message}
+      />
       <Textarea
         label="Note dell'autista (facoltative)"
         hint={NO_HEALTH}
@@ -217,10 +233,55 @@ function CompleteBody({ t, onClose }: { t: Transport; onClose: () => void }) {
   );
 }
 
+function CollectedBody({ t, onClose }: { t: Transport; onClose: () => void }) {
+  const toast = useToast();
+  const f = useForm<{ collected: string }>({
+    resolver: zodResolver(z.object({ collected: collectedInput })),
+    defaultValues: {
+      collected: t.collectedCents != null ? centsToInput(t.collectedCents) : "",
+    },
+  });
+  const m = useMutation({
+    meta: { inline: true },
+    mutationFn: (v: { collected: string }) =>
+      call(
+        api.PUT("/transports/{id}/collected", {
+          params: { path: { id: t.id } },
+          body: { collectedCents: collectedCents(v.collected) },
+        }),
+      ),
+    onSuccess: () => {
+      toast("Incassato salvato");
+      onClose();
+    },
+  });
+  return (
+    <form onSubmit={f.handleSubmit((v) => m.mutate(v))} noValidate>
+      <Field
+        label="Importo incassato (euro)"
+        hint="Lascia vuoto se non è stato incassato."
+        inputMode="decimal"
+        autoComplete="off"
+        {...f.register("collected")}
+        error={f.formState.errors.collected?.message}
+      />
+      <FormError message={m.error?.message} />
+      <DialogActions>
+        <Button auto type="submit" disabled={m.isPending}>
+          Salva
+        </Button>
+        <Button auto type="button" variant="secondary" onClick={onClose}>
+          Indietro
+        </Button>
+      </DialogActions>
+    </form>
+  );
+}
+
 export function TransportPanel({ t }: { t: Transport }) {
   const toast = useToast();
   const [dlg, setDlg] = useState<
-    "assign" | "cancel" | "complete" | "invoice" | null
+    "assign" | "cancel" | "complete" | "collected" | null
   >(null);
   const close = () => setDlg(null);
   const unassign = useMutation({
@@ -255,6 +316,17 @@ export function TransportPanel({ t }: { t: Transport }) {
       ),
     onSuccess: () => toast("Foglio di viaggio scaricato"),
   });
+  const proforma = useMutation({
+    mutationFn: () =>
+      saveBlob(
+        api.GET("/transports/{id}/proforma.pdf", {
+          params: { path: { id: t.id } },
+          parseAs: "blob",
+        }),
+        `riepilogo-servizio-${t.travelDate}.pdf`,
+      ),
+    onSuccess: () => toast("Pro forma scaricato"),
+  });
   const live =
     t.status === "richiesto" ||
     t.status === "assegnato" ||
@@ -278,6 +350,24 @@ export function TransportPanel({ t }: { t: Transport }) {
         {t.status === "svolto" &&
           ` · Km: ${t.km ?? "—"} (contachilometri ${t.odometerStart ?? "—"} → ${t.odometerEnd ?? "—"})`}
       </p>
+      {t.status === "svolto" && (
+        <p>
+          Fascia:{" "}
+          {t.bandColor ? (
+            <BandDot color={t.bandColor} label={t.bandLabel} />
+          ) : (
+            "—"
+          )}
+          {t.bandPriceCents != null &&
+            ` · Prezzo fascia ${formatEuro(t.bandPriceCents)}`}
+          {" · Incassato: "}
+          <b>
+            {t.collectedCents != null
+              ? formatEuro(t.collectedCents)
+              : "non incassato"}
+          </b>
+        </p>
+      )}
       {t.driverNotes && <p>Note dell&apos;autista: {t.driverNotes}</p>}
       <div className="mt-3 flex flex-wrap gap-3">
         {t.status === "richiesto" && (
@@ -299,10 +389,23 @@ export function TransportPanel({ t }: { t: Transport }) {
             Cambia autista
           </Button>
         )}
-        {t.status === "svolto" && !t.invoiceId && (
-          <Button auto onClick={() => setDlg("invoice")}>
-            Emetti fattura
-          </Button>
+        {t.status === "svolto" && (
+          <>
+            <Button
+              auto
+              disabled={proforma.isPending}
+              onClick={() => proforma.mutate()}
+            >
+              Pro forma (PDF)
+            </Button>
+            <Button
+              auto
+              variant="secondary"
+              onClick={() => setDlg("collected")}
+            >
+              Modifica incassato
+            </Button>
+          </>
         )}
         {(live || hasSheet) && (
           <MoreActions>
@@ -332,9 +435,6 @@ export function TransportPanel({ t }: { t: Transport }) {
           </MoreActions>
         )}
       </div>
-      {t.invoiceId && (
-        <p className="mt-2">Il trasporto è già stato fatturato.</p>
-      )}
       {open && t.travelDate > today() && (
         <p className="mt-2">Si può chiudere dal giorno del viaggio.</p>
       )}
@@ -348,10 +448,13 @@ export function TransportPanel({ t }: { t: Transport }) {
       >
         <CompleteBody t={t} onClose={close} />
       </Dialog>
-      <IssueInvoiceDialog
-        transport={dlg === "invoice" ? t : null}
+      <Dialog
+        open={dlg === "collected"}
         onClose={close}
-      />
+        title="Importo incassato"
+      >
+        <CollectedBody t={t} onClose={close} />
+      </Dialog>
       <ConfirmDialog
         open={dlg === "cancel"}
         onClose={() => {

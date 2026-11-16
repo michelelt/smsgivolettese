@@ -14,7 +14,9 @@ export const select = (tx: Tx) => tx`
     t.driver_volunteer_id as "driverId", dp.first_name || ' ' || dp.last_name as "driverName",
     t.vehicle_id as "vehicleId", v.plate as "vehiclePlate",
     t.odometer_start as "odometerStart", t.odometer_end as "odometerEnd", t.km,
-    t.driver_notes as "driverNotes", t.invoice_id as "invoiceId"
+    t.driver_notes as "driverNotes",
+    t.band_label as "bandLabel", t.band_color as "bandColor", t.band_price_cents as "bandPriceCents",
+    t.collected_cents as "collectedCents"
   from public.transports t
   join public.members c on c.id = t.member_id
   left join public.profiles dp on dp.id = t.driver_volunteer_id
@@ -109,11 +111,22 @@ export const unassign = (tx: Tx, id: string) =>
 export const cancel = (tx: Tx, id: string) =>
   tx`update public.transports set status = 'annullato', updated_at = now()
      where id = ${id} and status in ('richiesto', 'assegnato', 'confermato') returning id`;
-export const complete = (tx: Tx, id: string, start: number, end: number, notes: string | null) =>
+export const complete = (
+  tx: Tx,
+  id: string,
+  start: number,
+  end: number,
+  notes: string | null,
+  collected: number | null,
+) =>
   tx`update public.transports set status = 'svolto', odometer_start = ${start}, odometer_end = ${end},
-       driver_notes = ${notes}, completed_at = now()
+       driver_notes = ${notes}, collected_cents = ${collected}, completed_at = now()
      where id = ${id} and status in ('assegnato', 'confermato')
        and travel_date <= (now() at time zone ${R})::date returning id`;
+
+export const setCollected = (tx: Tx, id: string, cents: number | null) =>
+  tx`update public.transports set collected_cents = ${cents}, updated_at = now()
+     where id = ${id} and status = 'svolto' returning id`;
 
 /** ADR-015 busy period as timestamptz text, null when departure is unknown. */
 export const busyPeriod = async (tx: Tx, id: string) =>
@@ -142,6 +155,9 @@ export const csvRows = (tx: Tx, month: string) => tx<
     mobilityAids: boolean;
     companions: number;
     driverNotes: string | null;
+    bandLabel: string | null;
+    bandPriceCents: number | null;
+    collectedCents: number | null;
   }[]
 >`
   select t.travel_date::text as "travelDate",
@@ -149,7 +165,8 @@ export const csvRows = (tx: Tx, month: string) => tx<
     c.first_name || ' ' || c.last_name as "memberName", t.from_address as "fromAddress",
     t.to_address as "toAddress", dp.first_name || ' ' || dp.last_name as "driverName",
     v.plate as "vehiclePlate", t.odometer_start as "odometerStart", t.odometer_end as "odometerEnd",
-    t.km, t.wheelchair, t.mobility_aids as "mobilityAids", t.companions, t.driver_notes as "driverNotes"
+    t.km, t.wheelchair, t.mobility_aids as "mobilityAids", t.companions, t.driver_notes as "driverNotes",
+    t.band_label as "bandLabel", t.band_price_cents as "bandPriceCents", t.collected_cents as "collectedCents"
   from public.transports t
   join public.members c on c.id = t.member_id
   left join public.profiles dp on dp.id = t.driver_volunteer_id
@@ -157,3 +174,10 @@ export const csvRows = (tx: Tx, month: string) => tx<
   where t.status = 'svolto'
     and t.travel_date >= (${month} || '-01')::date and t.travel_date < ((${month} || '-01')::date + interval '1 month')
   order by t.travel_date, t.departure_at nulls last, t.id`;
+
+export const issuer = async (tx: Tx) =>
+  (
+    await tx<{ issuerName: string; issuerAddress: string | null; issuerTaxCode: string | null }[]>`
+      select legal_name as "issuerName", address as "issuerAddress", tax_code as "issuerTaxCode"
+      from public.staff_org_info()`
+  )[0]!;

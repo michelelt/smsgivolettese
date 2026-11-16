@@ -22,69 +22,53 @@ function render(draw: (d: PDFKit.PDFDocument) => void): Promise<Buffer> {
   });
 }
 
-const row = (d: PDFKit.PDFDocument, left: string, right: string, bold = false) => {
-  const y = d.y;
-  d.font(bold ? 'Sans-Bold' : 'Sans').text(left, 50, y, { width: 380 });
-  d.text(right, 440, y, { width: 105, align: 'right' });
-  d.moveDown(0.3);
-};
-
-export type InvoicePdf = {
-  year: number;
-  number: number;
-  issuedOn: string;
+export type ProformaPdf = {
   issuerName: string;
   issuerTaxCode: string | null;
   issuerAddress: string | null;
-  customerName: string;
-  customerTaxCode: string | null;
-  customerAddress: string | null;
-  lines: { description: string; amountCents: number }[];
-  subtotalCents: number;
-  stampDutyCents: number;
-  totalCents: number;
-  vatExemptionText: string;
-  status: 'emessa' | 'pagata' | 'annullata';
-  paymentMethod: keyof typeof METHOD | null;
-  paidOn: string | null;
-  voidReason: string | null;
+  memberName: string;
+  travelDate: string;
+  departureTime: string | null;
+  returnTime: string | null;
+  fromAddress: string | null;
+  toAddress: string | null;
+  km: number | null;
+  driverName: string | null;
+  bandLabel: string | null;
+  bandColor: string | null;
 };
 
-/** Uses only the invoice snapshot, never live org data. */
-export const invoicePdf = (i: InvoicePdf) =>
+/** Pro forma (ADR-075): service summary for the member. No price, no tax data. */
+export const proformaPdf = (p: ProformaPdf) =>
   render((d) => {
-    d.font('Sans-Bold').fontSize(16).text(i.issuerName);
+    d.font('Sans-Bold').fontSize(16).text(p.issuerName);
     d.font('Sans').fontSize(10);
-    if (i.issuerAddress) d.text(i.issuerAddress);
-    if (i.issuerTaxCode) d.text(`C.F. ${i.issuerTaxCode}`);
-    d.moveDown();
-    if (i.status === 'annullata')
-      d.font('Sans-Bold').fontSize(18).fillColor('#B00020').text('ANNULLATA').fillColor('black');
-    d.font('Sans-Bold').fontSize(14).text(`Fattura n. ${i.number}/${i.year}`);
+    if (p.issuerAddress) d.text(p.issuerAddress);
+    if (p.issuerTaxCode) d.text(`C.F. ${p.issuerTaxCode}`);
+    d.moveDown(2);
+    d.font('Sans-Bold').fontSize(14).text('Riepilogo del servizio');
     d.font('Sans')
-      .fontSize(10)
-      .text(`Data: ${dmy(i.issuedOn)}`);
-    if (i.status === 'annullata' && i.voidReason) d.text(`Motivo annullamento: ${i.voidReason}`);
+      .fontSize(9)
+      .text('Pro forma - documento non fiscale, promemoria del servizio svolto.');
     d.moveDown();
-    d.font('Sans-Bold').text('Cliente');
-    d.font('Sans').text(i.customerName);
-    if (i.customerAddress) d.text(i.customerAddress);
-    if (i.customerTaxCode) d.text(`C.F. ${i.customerTaxCode}`);
-    d.moveDown();
-    for (const l of i.lines) row(d, l.description, formatEuro(l.amountCents));
-    d.moveDown(0.5);
-    row(d, 'Totale prestazioni (esente IVA)', formatEuro(i.subtotalCents));
-    if (i.stampDutyCents > 0) row(d, 'Imposta di bollo', formatEuro(i.stampDutyCents));
-    row(d, 'Totale', formatEuro(i.totalCents), true);
-    d.moveDown();
-    d.font('Sans').fontSize(9).text(i.vatExemptionText);
-    if (i.stampDutyCents > 0) d.text('Imposta di bollo assolta in modo virtuale.');
-    d.moveDown();
-    d.fontSize(10).text(
-      i.status === 'pagata' && i.paymentMethod && i.paidOn
-        ? `Pagata il ${dmy(i.paidOn)} - ${METHOD[i.paymentMethod]}`
-        : 'Pagamento: da incassare',
-    );
+    d.fontSize(11);
+    const f = (k: string, v: string | number | null) => v !== null && d.text(`${k}: ${v}`);
+    f('Socio', p.memberName);
+    f('Data', dmy(p.travelDate));
+    f('Partenza', p.departureTime);
+    f('Ritorno', p.returnTime);
+    f('Da', p.fromAddress);
+    f('A', p.toAddress);
+    f('Km percorsi', p.km);
+    f('Autista', p.driverName);
+    if (p.bandColor) {
+      d.moveDown();
+      const y = d.y;
+      d.circle(58, y + 7, 7)
+        .fill(p.bandColor)
+        .fillColor('black');
+      d.text(p.bandLabel ?? '', 72, y, { lineBreak: false });
+    }
   });
 
 export type ReceiptPdf = {

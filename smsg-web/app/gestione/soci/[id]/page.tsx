@@ -22,7 +22,6 @@ import {
   GdprActions,
   useIsSuperAdmin,
 } from "@/components/gestione/gdpr-actions";
-import { InvoiceActions } from "@/components/gestione/invoice-actions";
 import { TYPES } from "@/components/gestione/member-form";
 
 type Member = components["schemas"]["MemberDetail"];
@@ -312,28 +311,6 @@ export default function Socio() {
                   {t.toAddress && ` · ${t.toAddress}`}
                 </Link>{" "}
                 <Pill>{t.status}</Pill>
-              </li>
-            ))}
-          </ul>
-          <h2 className="mt-8 text-2xl font-extrabold text-bordeaux">
-            Fatture
-          </h2>
-          {m.invoices.length === 0 && <p className="mt-2">Nessuna fattura.</p>}
-          <ul className="mt-2 space-y-3">
-            {m.invoices.map((i) => (
-              <li key={i.id} className="rounded-xl border-2 border-ink p-4">
-                <p className="font-bold">
-                  Fattura n. {i.number}/{i.year} del {fmtDate(i.issuedOn)} ·{" "}
-                  {formatEuro(i.totalCents)}{" "}
-                  <Pill>
-                    {i.status === "emessa"
-                      ? "Da incassare"
-                      : i.status === "pagata"
-                        ? "Pagata"
-                        : "Annullata"}
-                  </Pill>
-                </p>
-                <InvoiceActions invoice={i} />
               </li>
             ))}
           </ul>

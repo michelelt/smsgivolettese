@@ -1,4 +1,5 @@
 import { z } from '@hono/zod-openapi';
+import { PriceBands } from '../org-settings/org-settings.schemas.js';
 import { odometerFields, odometerMsg, odometerOk } from '../transports/transports.schemas.js';
 import { Absence, AvailabilityRule } from '../volunteers/volunteers.schemas.js';
 
@@ -44,7 +45,7 @@ export const MyShift = z
   .openapi('MyShift');
 export type MyShift = z.infer<typeof MyShift>;
 
-/** Strict: only what `volunteer_transports_v` exposes (no reason, no staff notes, no billing). */
+/** Strict: only what `volunteer_transports_v` exposes (no reason, no staff notes). */
 export const MyTransport = z
   .strictObject({
     id: z.uuid(),
@@ -62,6 +63,10 @@ export const MyTransport = z
     odometerEnd: z.number().int().nullable(),
     km: z.number().int().nullable(),
     driverNotes: z.string().nullable(),
+    bandLabel: z.string().nullable(),
+    bandColor: z.string().nullable(),
+    bandPriceCents: z.number().int().nullable(),
+    collectedCents: z.number().int().nullable(),
     memberFirstName: z.string(),
     memberLastName: z.string(),
     contactPhone: z.string().nullable(),
@@ -72,7 +77,11 @@ export const MyTransport = z
 export type MyTransport = z.infer<typeof MyTransport>;
 
 export const MyCommitments = z
-  .strictObject({ shifts: z.array(MyShift), transports: z.array(MyTransport) })
+  .strictObject({
+    shifts: z.array(MyShift),
+    transports: z.array(MyTransport),
+    priceBands: PriceBands,
+  })
   .openapi('MyCommitments');
 
 export const Respond = z.strictObject({ accept: z.boolean() }).openapi('Respond');

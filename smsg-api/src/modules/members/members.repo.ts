@@ -2,8 +2,6 @@ import type { z } from '@hono/zod-openapi';
 import type { Tx } from '../../lib/db.js';
 import { containsPattern, offsetOf } from '../../lib/pagination.js';
 import { toRow } from '../../lib/sql.js';
-import { invoiceSelect } from '../invoices/invoices.repo.js';
-import type { Invoice } from '../invoices/invoices.schemas.js';
 import { select as transportSelect } from '../transports/transports.repo.js';
 import type { Transport } from '../transports/transports.schemas.js';
 import type { Fee, Member, MemberKpis, MembersQuery } from './members.schemas.js';
@@ -95,16 +93,13 @@ export async function detail(tx: Tx, id: string) {
   const m = await byId(tx, id);
   if (!m) return undefined;
   // History is unbounded for now (shortcut: add paging if a member exceeds a few hundred rows).
-  const [f, transports, invoices] = await Promise.all([
+  const [f, transports] = await Promise.all([
     fees(tx, id),
     tx<
       Transport[]
     >`${transportSelect(tx)} where t.member_id = ${id} order by t.travel_date desc, t.created_at desc`,
-    tx<
-      Invoice[]
-    >`${invoiceSelect(tx)} where i.member_id = ${id} order by i.year desc, i.number desc`,
   ]);
-  return { ...m, fees: f, transports, invoices };
+  return { ...m, fees: f, transports };
 }
 
 export const register = async (tx: Tx, p: Record<string, unknown>, feeMethod: string | null) =>

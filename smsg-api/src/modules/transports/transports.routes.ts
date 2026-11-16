@@ -16,6 +16,7 @@ import {
   CsvQuery,
   Transport,
   TransportAssign,
+  TransportCollected,
   TransportComplete,
   TransportCreate,
   TransportPatch,
@@ -110,6 +111,21 @@ const complete = createRoute({
   middleware: [requirePermission('transports.assign')] as const,
   request: { params: IdParam, body: jsonBody(TransportComplete) },
 });
+const collected = createRoute({
+  ...verbRoute,
+  method: 'put',
+  path: '/transports/{id}/collected',
+  middleware: [requirePermission('transports.assign')] as const,
+  request: { params: IdParam, body: jsonBody(TransportCollected) },
+});
+const proforma = createRoute({
+  ...base,
+  method: 'get',
+  path: '/transports/{id}/proforma.pdf',
+  middleware: [requirePermission('transports.read')] as const,
+  request: { params: IdParam },
+  responses: { 200: fileContent('application/pdf'), ...errs(404, 409) },
+});
 
 export const transportsRoutes = new OpenAPIHono<AuthEnv>({ defaultHook })
   .openapi(list, async (c) => c.json(await service.list(ctxOf(c), c.req.valid('query')), 200))
@@ -124,6 +140,10 @@ export const transportsRoutes = new OpenAPIHono<AuthEnv>({ defaultHook })
   )
   .openapi(sheet, async (c) => {
     const f = await service.sheet(ctxOf(c), c.req.valid('param').id);
+    return attachment(f.body, 'application/pdf', f.filename) as never;
+  })
+  .openapi(proforma, async (c) => {
+    const f = await service.proforma(ctxOf(c), c.req.valid('param').id);
     return attachment(f.body, 'application/pdf', f.filename) as never;
   })
   .openapi(candidates, async (c) =>
@@ -147,4 +167,14 @@ export const transportsRoutes = new OpenAPIHono<AuthEnv>({ defaultHook })
       await service.complete(ctxOf(c), c.req.valid('param').id, c.req.valid('json')),
       200,
     );
-  });
+  })
+  .openapi(collected, async (c) =>
+    c.json(
+      await service.setCollected(
+        ctxOf(c),
+        c.req.valid('param').id,
+        c.req.valid('json').collectedCents,
+      ),
+      200,
+    ),
+  );

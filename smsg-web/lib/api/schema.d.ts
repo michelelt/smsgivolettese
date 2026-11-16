@@ -1816,597 +1816,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/invoices": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: {
-                    page?: number;
-                    pageSize?: number;
-                    status?: "emessa" | "pagata" | "annullata" | "tutte";
-                    year?: number;
-                    q?: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Fatture */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["InvoicePage"];
-                    };
-                };
-                /** @description Dati non validi */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non autenticato */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Permesso negato */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["InvoiceIssue"];
-                };
-            };
-            responses: {
-                /** @description Fattura emessa */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["InvoiceDetail"];
-                    };
-                };
-                /** @description Dati non validi */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non autenticato */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Permesso negato */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non trovato */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Conflitto con lo stato attuale */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Richiede conferma o non elaborabile */
-                422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/invoices/kpis": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: {
-                    year?: number;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Indicatori (fatture non annullate) */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["InvoiceKpis"];
-                    };
-                };
-                /** @description Dati non validi */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non autenticato */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Permesso negato */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/invoices/export.csv": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: {
-                    year?: number;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description File */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "text/csv": string;
-                    };
-                };
-                /** @description Dati non validi */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non autenticato */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Permesso negato */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/invoices/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Fattura con righe */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["InvoiceDetail"];
-                    };
-                };
-                /** @description Dati non validi */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non autenticato */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Permesso negato */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non trovato */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/invoices/{id}/pdf": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description File */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/pdf": string;
-                    };
-                };
-                /** @description Dati non validi */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non autenticato */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Permesso negato */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non trovato */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/invoices/{id}/pay": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["InvoicePay"];
-                };
-            };
-            responses: {
-                /** @description Fattura pagata */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["InvoiceDetail"];
-                    };
-                };
-                /** @description Dati non validi */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non autenticato */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Permesso negato */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non trovato */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Conflitto con lo stato attuale */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/invoices/{id}/void": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["InvoiceVoid"];
-                };
-            };
-            responses: {
-                /** @description Fattura annullata */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["InvoiceDetail"];
-                    };
-                };
-                /** @description Dati non validi */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non autenticato */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Permesso negato */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Non trovato */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-                /** @description Conflitto con lo stato attuale */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorBody"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/services": {
         parameters: {
             query?: never;
@@ -4462,6 +3871,88 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/transports/{id}/proforma.pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description File */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/pdf": string;
+                    };
+                };
+                /** @description Dati non validi */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non autenticato */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Permesso negato */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non trovato */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Conflitto con lo stato attuale */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/transports/{id}/candidates": {
         parameters: {
             query?: never;
@@ -4910,6 +4401,101 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/transports/{id}/collected": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["TransportCollected"];
+                };
+            };
+            responses: {
+                /** @description Trasporto aggiornato */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Transport"];
+                    };
+                };
+                /** @description Dati non validi */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non autenticato */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Permesso negato */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non trovato */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Conflitto con lo stato attuale */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Richiede conferma o non elaborabile */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -7024,6 +6610,7 @@ export interface components {
         MyCommitments: {
             shifts: components["schemas"]["MyShift"][];
             transports: components["schemas"]["MyTransport"][];
+            priceBands: components["schemas"]["PriceBands"];
         };
         MyShift: {
             /** Format: uuid */
@@ -7054,11 +6641,22 @@ export interface components {
             odometerEnd: number | null;
             km: number | null;
             driverNotes: string | null;
+            bandLabel: string | null;
+            bandColor: string | null;
+            bandPriceCents: number | null;
+            collectedCents: number | null;
             memberFirstName: string;
             memberLastName: string;
             contactPhone: string | null;
             vehiclePlate: string | null;
             vehicleModel: string | null;
+        };
+        PriceBands: components["schemas"]["PriceBand"][];
+        PriceBand: {
+            upToKm: number | null;
+            priceCents: number;
+            color: string;
+            label: string;
         };
         Respond: {
             accept: boolean;
@@ -7067,6 +6665,7 @@ export interface components {
             odometerStart: number;
             odometerEnd: number;
             driverNotes?: string | null;
+            collectedCents?: number | null;
         };
         PageTexts: {
             home: {
@@ -7892,7 +7491,6 @@ export interface components {
         MemberDetail: components["schemas"]["Member"] & {
             fees: components["schemas"]["MembershipFee"][];
             transports: components["schemas"]["Transport"][];
-            invoices: components["schemas"]["Invoice"][];
         };
         MembershipFee: {
             /** Format: uuid */
@@ -7934,30 +7532,10 @@ export interface components {
             odometerEnd: number | null;
             km: number | null;
             driverNotes: string | null;
-            /** Format: uuid */
-            invoiceId: string | null;
-        };
-        Invoice: {
-            /** Format: uuid */
-            id: string;
-            year: number;
-            number: number;
-            issuedOn: string;
-            /** Format: uuid */
-            memberId: string;
-            customerName: string;
-            customerTaxCode: string | null;
-            customerAddress: string | null;
-            subtotalCents: number;
-            stampDutyCents: number;
-            totalCents: number;
-            /** @enum {string} */
-            status: "emessa" | "pagata" | "annullata";
-            /** @enum {string|null} */
-            paymentMethod: "contanti" | "pos" | "bonifico" | null;
-            paidOn: string | null;
-            voidedOn: string | null;
-            voidReason: string | null;
+            bandLabel: string | null;
+            bandColor: string | null;
+            bandPriceCents: number | null;
+            collectedCents: number | null;
         };
         MemberCreate: {
             firstName: string;
@@ -8019,48 +7597,6 @@ export interface components {
             /** Format: date */
             paidOn?: string;
         };
-        InvoicePage: {
-            items: components["schemas"]["Invoice"][];
-            total: number;
-        };
-        InvoiceKpis: {
-            count: number;
-            totalCents: number;
-            collectedCents: number;
-            toCollectCents: number;
-        };
-        InvoiceDetail: components["schemas"]["Invoice"] & {
-            issuerName: string;
-            issuerTaxCode: string | null;
-            issuerAddress: string | null;
-            vatExemptionText: string;
-            lines: {
-                position: number;
-                description: string;
-                amountCents: number;
-                /** Format: uuid */
-                transportId: string | null;
-            }[];
-        };
-        InvoiceIssue: {
-            /** Format: uuid */
-            transportId: string;
-            amountCents: number;
-            customerTaxCode?: string | null;
-            taxCodeConfirmed?: boolean;
-            customerAddress?: string | null;
-            /** @enum {string} */
-            paymentMethod?: "contanti" | "pos" | "bonifico";
-        };
-        InvoicePay: {
-            /** @enum {string} */
-            method: "contanti" | "pos" | "bonifico";
-            /** Format: date */
-            paidOn?: string;
-        };
-        InvoiceVoid: {
-            reason: string;
-        };
         StaffServices: {
             items: components["schemas"]["StaffService"][];
         };
@@ -8112,10 +7648,7 @@ export interface components {
             taxCode: string | null;
             address: string | null;
             membershipFeeCents: number;
-            stampDutyThresholdCents: number;
-            stampDutyAmountCents: number;
             nextCardNumber: number;
-            kmRateCents: number;
         };
         VolunteerPage: {
             items: components["schemas"]["Volunteer"][];
@@ -8329,6 +7862,10 @@ export interface components {
             odometerStart: number;
             odometerEnd: number;
             driverNotes?: string | null;
+            collectedCents?: number | null;
+        };
+        TransportCollected: {
+            collectedCents: number | null;
         };
         UserPage: {
             items: components["schemas"]["UserItem"][];
@@ -8369,26 +7906,17 @@ export interface components {
             taxCode?: string | null;
             address?: string | null;
             lastCardNumber: number;
-            invoiceCounter: {
-                year: number;
-                lastNumber: number;
-            };
         };
         OrgSettingsInput: {
             legalName: string;
             taxCode: string;
             address: string;
-            vatExemptionText: string;
-            stampDutyThresholdCents: number;
-            stampDutyAmountCents: number;
             membershipFeeCents: number;
-            kmRateCents: number;
+            priceBands: components["schemas"]["PriceBands"];
             videoMaxMb: number;
         };
         CountersInput: {
-            lastCardNumber?: number;
-            invoiceYear?: number;
-            invoiceLastNumber?: number;
+            lastCardNumber: number;
         };
         AuditPage: {
             items: components["schemas"]["AuditEntry"][];
