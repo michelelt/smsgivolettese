@@ -47,6 +47,9 @@ export default function Soci() {
         actions={
           <>
             <ButtonLink href="/gestione/soci/nuovo">Nuovo socio</ButtonLink>
+            <ButtonLink href="/gestione/soci/importa" variant="secondary">
+              Importa da Excel
+            </ButtonLink>
             <Button
               variant="secondary"
               disabled={csv.isPending}

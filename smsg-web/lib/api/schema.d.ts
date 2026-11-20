@@ -1336,6 +1336,72 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/members/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["MemberImport"];
+                };
+            };
+            responses: {
+                /** @description Esito per riga (dryRun: solo controllo, nessun inserimento) */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["MemberImportResult"];
+                    };
+                };
+                /** @description Dati non validi */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Non autenticato */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+                /** @description Permesso negato */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorBody"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/members/{id}": {
         parameters: {
             query?: never;
@@ -7487,6 +7553,23 @@ export interface components {
             joinedCurrentYear: number;
             ceased: number;
             total: number;
+        };
+        MemberImportResult: {
+            created: number;
+            rows: {
+                errors: {
+                    field: string;
+                    message: string;
+                    code?: string;
+                }[];
+                cardNumber: number | null;
+            }[];
+        };
+        MemberImport: {
+            rows: {
+                [key: string]: unknown;
+            }[];
+            dryRun: boolean;
         };
         MemberDetail: components["schemas"]["Member"] & {
             fees: components["schemas"]["MembershipFee"][];

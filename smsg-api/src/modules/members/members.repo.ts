@@ -108,6 +108,15 @@ export const register = async (tx: Tx, p: Record<string, unknown>, feeMethod: st
       select id from public.register_member(${tx.json(p as never)}::jsonb, ${feeMethod}::public.payment_method)`
   )[0]!.id;
 
+/** Registered members matching any tax code or lower(last|first|birth) key. */
+export const findDuplicates = (tx: Tx, codes: string[], keys: string[]) =>
+  tx<{ taxCode: string | null; key: string; cardNumber: number }[]>`
+    select tax_code as "taxCode", card_number as "cardNumber",
+           lower(last_name || '|' || first_name || '|' || coalesce(birth_date::text, '')) as key
+    from public.members
+    where tax_code = any(${codes}::text[])
+       or lower(last_name || '|' || first_name || '|' || coalesce(birth_date::text, '')) = any(${keys}::text[])`;
+
 export const update = (tx: Tx, id: string, input: object) =>
   tx`update public.members set ${tx(toRow(input, COLS))}, updated_at = now() where id = ${id} returning id`;
 

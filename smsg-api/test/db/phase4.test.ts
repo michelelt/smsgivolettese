@@ -99,7 +99,8 @@ describe('demo transports seed', () => {
   it('has one richiesto and one svolto (odometers, no invoice) for the example member; km rate 35', async () => {
     const rows =
       await sql`select t.status, t.km, t.invoice_id from transports t join members c on c.id = t.member_id
-      where c.last_name = 'Rossi (esempio)' order by t.status`;
+      where c.last_name = 'Rossi (esempio)' and t.notes is distinct from 'Prova rendicontazione' -- make db-fake rows
+      order by t.status`;
     expect(rows).toEqual([
       { status: 'richiesto', km: null, invoice_id: null },
       { status: 'svolto', km: 42, invoice_id: null },

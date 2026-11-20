@@ -1,11 +1,12 @@
 "use client";
 
+import { MemberAddHeader } from "@/components/gestione/member-add-tabs";
 import { MemberForm } from "@/components/gestione/member-form";
 
 export default function NuovoSocio() {
   return (
     <>
-      <h1 className="text-4xl font-extrabold text-bordeaux">Nuovo socio</h1>
+      <MemberAddHeader current="/gestione/soci/nuovo" />
       <MemberForm />
     </>
   );

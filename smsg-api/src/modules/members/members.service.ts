@@ -2,16 +2,18 @@ import type { z } from '@hono/zod-openapi';
 import { asUser, type Ctx } from '../../lib/ctx.js';
 import { csvDate, toCsv } from '../../lib/csv.js';
 import { assertPaidOn, romeToday, romeYear } from '../../lib/dates.js';
-import { Conflict, NotFound, ValidationError } from '../../lib/errors.js';
+import { Conflict, DomainError, NotFound, ValidationError } from '../../lib/errors.js';
 import { centsToDecimal } from '../../lib/money.js';
 import { receiptPdf } from '../../lib/pdf.js';
 import { assertTaxCode } from '../../lib/tax-code.js';
 import { orgInfo } from '../settings/settings.repo.js';
 import * as repo from './members.repo.js';
+import { MemberImportRow } from './members.schemas.js';
 import type {
   FeeCreate,
   MemberCreate,
   MemberEnd,
+  MemberImport,
   MemberPatch,
   MembersQuery,
 } from './members.schemas.js';
@@ -39,6 +41,89 @@ export const create = (ctx: Ctx, input: z.infer<typeof MemberCreate>) =>
     snake.tax_code = taxOf(f.taxCode, taxCodeConfirmed);
     const id = await repo.register(tx, snake, feeMethod ?? null);
     return (await repo.detail(tx, id))!;
+  });
+
+const IMPORT_MSG: Record<string, string> = {
+  firstName: 'Nome mancante o troppo lungo',
+  lastName: 'Cognome mancante o troppo lungo',
+  birthDate: 'Data non valida',
+  joinedOn: 'Data non valida',
+  privacySignedOn: 'Data non valida',
+  postalCode: 'Il CAP deve avere 5 cifre',
+  email: 'Indirizzo email non valido',
+  memberType: 'Tipo di socio non valido',
+};
+type RowError = { field: string; message: string; code?: string };
+
+/** Bulk import (ADR-048 tax codes): validates every row, blocks duplicates, inserts only clean rows unless dryRun. */
+export const importRows = (ctx: Ctx, input: z.infer<typeof MemberImport>) =>
+  asUser(ctx, async (tx) => {
+    const parsed = input.rows.map((raw) => {
+      const errors: RowError[] = [];
+      const r = MemberImportRow.safeParse(raw);
+      if (!r.success) {
+        for (const i of r.error.issues) {
+          const field = String(i.path[0] ?? '');
+          errors.push({
+            field,
+            message: IMPORT_MSG[field] ?? (field ? 'Valore non valido' : 'Campo sconosciuto'),
+          });
+        }
+        return { errors, data: undefined };
+      }
+      const { taxCodeConfirmed, ...f } = r.data;
+      try {
+        f.taxCode = taxOf(f.taxCode, taxCodeConfirmed);
+      } catch (e) {
+        if (!(e instanceof DomainError)) throw e;
+        errors.push({ field: 'taxCode', message: e.message, code: e.code });
+      }
+      return { errors, data: f };
+    });
+    // Duplicates: same tax code, or same name and birth date, inside the file or already registered.
+    const keyOf = (f: { firstName: string; lastName: string; birthDate?: string | null }) =>
+      f.birthDate ? `${f.lastName}|${f.firstName}|${f.birthDate}`.toLowerCase() : null;
+    const codes = parsed.flatMap((p) => (p.data?.taxCode ? [p.data.taxCode] : []));
+    const keys = parsed.flatMap((p) => (p.data && keyOf(p.data) ? [keyOf(p.data)!] : []));
+    const existing = await repo.findDuplicates(tx, codes, keys);
+    const seenCode = new Map<string, number>();
+    const seenKey = new Map<string, number>();
+    parsed.forEach((p, i) => {
+      if (!p.data) return;
+      const code = p.data.taxCode;
+      const key = keyOf(p.data);
+      const hit = existing.find((m) => (code && m.taxCode === code) || (key && m.key === key));
+      if (hit)
+        p.errors.push({
+          field: hit.taxCode === code ? 'taxCode' : 'lastName',
+          message: `Socio già registrato: tessera n. ${hit.cardNumber}`,
+          code: 'DUPLICATE',
+        });
+      const prevCode = code ? seenCode.get(code) : undefined;
+      const prev = prevCode ?? (key ? seenKey.get(key) : undefined);
+      if (prev !== undefined)
+        p.errors.push({
+          field: prevCode !== undefined ? 'taxCode' : 'lastName',
+          message: `Socio ripetuto nel file (riga ${prev + 1})`,
+          code: 'DUPLICATE',
+        });
+      if (code && !seenCode.has(code)) seenCode.set(code, i);
+      if (key && !seenKey.has(key)) seenKey.set(key, i);
+    });
+    const rows = [];
+    let created = 0;
+    for (const p of parsed) {
+      let cardNumber: number | null = null;
+      if (!input.dryRun && p.errors.length === 0) {
+        const snake = Object.fromEntries(
+          Object.entries(repo.COLS).map(([k, c]) => [c, (p.data as Record<string, unknown>)[k]]),
+        );
+        cardNumber = (await repo.byId(tx, await repo.register(tx, snake, null)))!.cardNumber;
+        created++;
+      }
+      rows.push({ errors: p.errors, cardNumber });
+    }
+    return { created, rows };
   });
 
 export const update = (ctx: Ctx, id: string, input: z.infer<typeof MemberPatch>) => {

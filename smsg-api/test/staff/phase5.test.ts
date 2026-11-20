@@ -71,6 +71,10 @@ async function cleanup() {
     await t`delete from shifts where shift_type_id in (select id from shift_types where name like 'ZZP%')`;
     await t`delete from shift_types where name like 'ZZP%'`;
     await t`delete from vehicles where plate like 'ZZP%'`;
+    // replica mode skips FK cascades: drop the commitments left by deleted transports/assignments
+    await t`delete from volunteer_commitments c where (c.transport_id is not null and not exists
+      (select 1 from transports x where x.id = c.transport_id)) or (c.shift_assignment_id is not null
+      and not exists (select 1 from shift_assignments x where x.id = c.shift_assignment_id))`;
     // audit_log is append-only (ADR-066): test rows are left behind, queries filter by request_id/actor
     await t`delete from volunteers where id in (${zu})`;
     await t`delete from user_roles where user_id in (${zu})`;
@@ -490,6 +494,11 @@ describe('transports', () => {
         'contactPhone',
         'vehiclePlate',
         'vehicleModel',
+        // ADR-075: the driver sees the band and records the amount collected
+        'bandLabel',
+        'bandColor',
+        'bandPriceCents',
+        'collectedCents',
       ].sort(),
     );
     expect(JSON.stringify(mine.data)).not.toMatch(/visita riservata|nota staff riservata/);
@@ -636,6 +645,9 @@ describe('transports', () => {
         'Ausili',
         'Accompagnatori',
         'Note autista',
+        'Fascia',
+        'Prezzo fascia',
+        'Incassato',
       ]
         .map((h) => `"${h}"`)
         .join(';'),

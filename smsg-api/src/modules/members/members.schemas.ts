@@ -103,6 +103,27 @@ export const MemberCreate = z
     feeMethod: PaymentMethod.optional(),
   })
   .openapi('MemberCreate');
+/** Bulk import: rows are validated one by one in the service, so one bad row never rejects the batch. */
+export const MemberImportRow = z.strictObject(fields);
+export const MemberImport = z
+  .strictObject({
+    rows: z.array(z.record(z.string(), z.unknown())).min(1).max(2000),
+    dryRun: z.boolean(),
+  })
+  .openapi('MemberImport');
+export const MemberImportResult = z
+  .strictObject({
+    created: z.number().int(),
+    rows: z.array(
+      z.strictObject({
+        errors: z.array(
+          z.strictObject({ field: z.string(), message: z.string(), code: z.string().optional() }),
+        ),
+        cardNumber: z.number().int().nullable(),
+      }),
+    ),
+  })
+  .openapi('MemberImportResult');
 export const MemberPatch = z.strictObject(fields).partial().openapi('MemberPatch');
 
 export const MemberEnd = z

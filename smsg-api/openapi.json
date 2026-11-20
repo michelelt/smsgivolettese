@@ -3793,6 +3793,82 @@
         ],
         "additionalProperties": false
       },
+      "MemberImportResult": {
+        "type": "object",
+        "properties": {
+          "created": {
+            "type": "integer"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "field": {
+                        "type": "string"
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "code": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "field",
+                      "message"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "cardNumber": {
+                  "type": "integer",
+                  "nullable": true
+                }
+              },
+              "required": [
+                "errors",
+                "cardNumber"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "created",
+          "rows"
+        ],
+        "additionalProperties": false
+      },
+      "MemberImport": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "nullable": true
+              }
+            },
+            "minItems": 1,
+            "maxItems": 2000
+          },
+          "dryRun": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "rows",
+          "dryRun"
+        ],
+        "additionalProperties": false
+      },
       "MemberDetail": {
         "allOf": [
           {
@@ -7578,6 +7654,70 @@
                 "schema": {
                   "type": "string",
                   "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dati non validi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Non autenticato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permesso negato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/members/import": {
+      "post": {
+        "tags": [
+          "members"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberImport"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Esito per riga (dryRun: solo controllo, nessun inserimento)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberImportResult"
                 }
               }
             }

@@ -2,9 +2,9 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { ActionBar } from "@/components/ui/actions";
 import { SaveErrors } from "@/components/ui/bits";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
@@ -127,110 +127,100 @@ export function MemberForm({ member }: { member?: Member }) {
       return router.push(`/gestione/soci/${member.id}`);
     g.submit(v);
   };
+  const reg = (k: keyof Values, label: string, extra: object = {}) => (
+    <Field label={label} {...extra} {...f.register(k)} error={e[k]?.message} />
+  );
   return (
-    <form onSubmit={f.handleSubmit(submit)} noValidate className="max-w-xl">
-      <Field
-        label="Nome"
-        {...f.register("firstName")}
-        error={e.firstName?.message}
-      />
-      <Field
-        label="Cognome"
-        {...f.register("lastName")}
-        error={e.lastName?.message}
-      />
-      <Field
-        label="Codice fiscale"
-        autoComplete="off"
-        {...f.register("taxCode")}
-        error={e.taxCode?.message}
-      />
-      <Field
-        label="Data di nascita"
-        type="date"
-        {...f.register("birthDate")}
-        error={e.birthDate?.message}
-      />
-      <Field
-        label="Luogo di nascita"
-        {...f.register("birthPlace")}
-        error={e.birthPlace?.message}
-      />
-      <Field
-        label="Indirizzo"
-        {...f.register("address")}
-        error={e.address?.message}
-      />
-      <Field
-        label="CAP"
-        inputMode="numeric"
-        {...f.register("postalCode")}
-        error={e.postalCode?.message}
-      />
-      <Field label="Comune" {...f.register("city")} error={e.city?.message} />
-      <Field
-        label="Telefono"
-        type="tel"
-        {...f.register("phone")}
-        error={e.phone?.message}
-      />
-      <Field
-        label="Email"
-        type="email"
-        {...f.register("email")}
-        error={e.email?.message}
-      />
-      <Select label="Tipo di socio" {...f.register("memberType")}>
-        {TYPES.map(([v, l]) => (
-          <option key={v} value={v}>
-            {l}
-          </option>
-        ))}
-      </Select>
-      <Field
-        label="Data di iscrizione"
-        type="date"
-        {...f.register("joinedOn")}
-        error={e.joinedOn?.message}
-      />
-      <Field
-        label="Privacy firmata il"
-        type="date"
-        {...f.register("privacySignedOn")}
-        error={e.privacySignedOn?.message}
-      />
-      <Textarea
-        label="Note"
-        {...f.register("notes")}
-        error={e.notes?.message}
-      />
-      {!member && (
-        <Select
-          label="Quota di iscrizione"
-          hint={
-            org
-              ? `Quota ${formatEuro(org.membershipFeeCents)}. Prossima tessera: n. ${org.nextCardNumber}.`
-              : undefined
-          }
-          {...f.register("feeMethod")}
-        >
-          <option value="">Non ancora pagata</option>
-          {METHODS.map(([v, l]) => (
+    <form
+      onSubmit={f.handleSubmit(submit)}
+      noValidate
+      className="mx-auto mt-6 grid max-w-3xl gap-8"
+    >
+      <Group title="Persona">
+        {reg("firstName", "Nome")}
+        {reg("lastName", "Cognome")}
+        {reg("taxCode", "Codice fiscale", { autoComplete: "off" })}
+        {reg("birthDate", "Nato il", { type: "date" })}
+        <div className="md:col-span-2">{reg("birthPlace", "Nato a")}</div>
+      </Group>
+      <Group title="Contatti">
+        <div className="md:col-span-2">{reg("address", "Indirizzo")}</div>
+        {reg("postalCode", "CAP", { inputMode: "numeric" })}
+        {reg("city", "Comune")}
+        {reg("phone", "Telefono", { type: "tel" })}
+        {reg("email", "Email", { type: "email" })}
+      </Group>
+      <Group title="Iscrizione">
+        <Select label="Tipo" {...f.register("memberType")}>
+          {TYPES.map(([v, l]) => (
             <option key={v} value={v}>
-              Pagata: {l}
+              {l}
             </option>
           ))}
         </Select>
-      )}
-      <SaveErrors g={g} />
-      <ActionBar label="Azioni sulla scheda del socio" sticky>
-        <Button type="submit" disabled={g.pending}>
-          {member ? "Salva le modifiche" : "Registra socio"}
-        </Button>
-        <Button type="button" variant="secondary" onClick={() => router.back()}>
-          Indietro
-        </Button>
-      </ActionBar>
+        {!member ? (
+          <Select
+            label="Quota"
+            hint={org ? formatEuro(org.membershipFeeCents) : undefined}
+            {...f.register("feeMethod")}
+          >
+            <option value="">Da pagare</option>
+            {METHODS.map(([v, l]) => (
+              <option key={v} value={v}>
+                Pagata: {l}
+              </option>
+            ))}
+          </Select>
+        ) : (
+          <span className="hidden md:block" />
+        )}
+        {reg("joinedOn", "Iscritto il", { type: "date" })}
+        {reg("privacySignedOn", "Privacy firmata il", { type: "date" })}
+        <div className="md:col-span-2">
+          <Textarea
+            label="Note"
+            {...f.register("notes")}
+            error={e.notes?.message}
+          />
+        </div>
+      </Group>
+
+      <div className="sticky bottom-0 z-10 -mx-4 border-t border-ink/10 bg-paper/85 px-4 py-3 backdrop-blur-md">
+        <SaveErrors g={g} />
+        <div className="mx-auto grid max-w-3xl grid-cols-[auto_1fr] gap-3 sm:flex sm:justify-end">
+          <Button
+            type="button"
+            variant="secondary"
+            auto
+            className="px-4 sm:min-w-36"
+            onClick={() => router.back()}
+          >
+            Annulla
+          </Button>
+          <Button
+            type="submit"
+            auto
+            className="whitespace-nowrap px-3 sm:min-w-48"
+            disabled={g.pending}
+          >
+            {member ? "Salva" : "Registra socio"}
+          </Button>
+        </div>
+      </div>
     </form>
+  );
+}
+
+/** Apple-style grouped section: quiet caption above a white rounded card. */
+function Group({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <fieldset>
+      <legend className="mb-2 ml-1 text-sm font-bold uppercase tracking-wider text-ink/55">
+        {title}
+      </legend>
+      <div className="grid gap-x-5 rounded-3xl bg-white px-5 pb-5 pt-1 shadow-sm ring-1 ring-ink/10 md:grid-cols-2">
+        {children}
+      </div>
+    </fieldset>
   );
 }

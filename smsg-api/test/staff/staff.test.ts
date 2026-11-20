@@ -73,6 +73,10 @@ async function cleanup(restore: boolean) {
     await t`delete from membership_fees where member_id in (select id from members where first_name = 'ZZT')`;
     await t`delete from members where first_name = 'ZZT'`;
     await t`delete from services where name like 'ZZT%'`;
+    // replica mode skips FK cascades: drop the commitments left by deleted transports/assignments
+    await t`delete from volunteer_commitments c where (c.transport_id is not null and not exists
+      (select 1 from transports x where x.id = c.transport_id)) or (c.shift_assignment_id is not null
+      and not exists (select 1 from shift_assignments x where x.id = c.shift_assignment_id))`;
     // audit_log is append-only (ADR-066): test rows are left behind, queries filter by request_id/actor
     if (restore) {
       await t`delete from invoice_counters`;
@@ -161,6 +165,7 @@ describe('permissions', () => {
     ['GET', '/members'],
     ['GET', '/members/export.csv'],
     ['POST', '/members'],
+    ['POST', '/members/import'],
     ['GET', '/transports/00000000-0000-4000-8000-000000000000/proforma.pdf'],
     ['PUT', '/transports/00000000-0000-4000-8000-000000000000/collected'],
     ['GET', '/services'],
@@ -269,6 +274,43 @@ describe('members', () => {
     expect(okc.status).toBe(201);
     const omo = await staff('POST', '/members', { ...base, taxCode: 'RSSMRA85T10A56NS' });
     expect(omo.status).toBe(422); // layout fine, check character is the plain code's
+  });
+
+  it('imports in bulk: dry run, per-row errors, duplicates blocked, clean rows inserted', async () => {
+    const cf = (n: number) => `ZZI${tag}${n}`.toUpperCase().padEnd(16, 'X').slice(0, 16);
+    const row = (n: number, extra: object = {}) => ({
+      firstName: 'ZZT',
+      lastName: `I${tag}${n}`,
+      taxCode: cf(n),
+      taxCodeConfirmed: true,
+      ...extra,
+    });
+    const rows = [
+      row(1, { memberType: 'onorario', birthDate: '1950-06-30' }),
+      row(2, { postalCode: '!0040', email: 'nope' }),
+      row(3, { taxCode: cf(1) }), // same code as row 1
+      row(4, { taxCodeConfirmed: undefined }), // not a valid code, not confirmed
+      { lastName: 'ZZT' }, // no first name
+    ];
+    const dry = await staff('POST', '/members/import', { rows, dryRun: true });
+    expect(dry.status).toBe(200);
+    expect(dry.data.created).toBe(0);
+    const fields = (dry.data.rows as J[]).map((r) => r.errors.map((e: J) => e.field).sort());
+    expect(fields).toEqual([[], ['email', 'postalCode'], ['taxCode'], ['taxCode'], ['firstName']]);
+    expect(dry.data.rows[2].errors[0].message).toContain('riga 1');
+
+    const real = await staff('POST', '/members/import', { rows, dryRun: false });
+    expect(real.data.created).toBe(1);
+    expect(real.data.rows[0].cardNumber).toBeGreaterThan(0);
+    expect(real.data.rows[1].cardNumber).toBeNull();
+    const [m] =
+      await sql`select member_type, birth_date::text as b from members where tax_code = ${cf(1)}`;
+    expect(m).toMatchObject({ member_type: 'onorario', b: '1950-06-30' });
+
+    // Re-upload: the registered member is now blocked as a duplicate.
+    const again = await staff('POST', '/members/import', { rows: [rows[0]], dryRun: true });
+    expect(again.data.rows[0].errors[0].message).toContain('già registrato');
+    expect((await staff('POST', '/members/import', { rows: [], dryRun: true })).status).toBe(400);
   });
 
   it('registers a member: card number, fee, audit, duplicates, link, patch, lists', async () => {

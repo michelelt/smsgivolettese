@@ -17,7 +17,7 @@ export const PriceBands = z
   .max(20)
   .refine(
     (b) =>
-      b.at(-1)!.upToKm === null &&
+      b.at(-1)?.upToKm === null && // refine runs even when min(1) failed
       b
         .slice(0, -1)
         .every((x, i) => x.upToKm !== null && (i === 0 || x.upToKm > b[i - 1]!.upToKm!)),

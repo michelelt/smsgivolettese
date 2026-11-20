@@ -9,6 +9,8 @@ import {
   MemberCreate,
   MemberDetail,
   MemberEnd,
+  MemberImport,
+  MemberImportResult,
   MemberKpis,
   MemberPage,
   MemberPatch,
@@ -67,6 +69,17 @@ const create = createRoute({
   request: { body: body(MemberCreate) },
   responses: { 201: ok(MemberDetail, 'Socio registrato'), ...errs(404, 409, 422) },
 });
+const importRows = createRoute({
+  ...base,
+  method: 'post',
+  path: '/members/import',
+  middleware: [requirePermission('members.write')] as const,
+  request: { body: body(MemberImport) },
+  responses: {
+    200: ok(MemberImportResult, 'Esito per riga (dryRun: solo controllo, nessun inserimento)'),
+    ...errs(),
+  },
+});
 const patch = createRoute({
   ...base,
   method: 'patch',
@@ -115,6 +128,9 @@ export const membersRoutes = new OpenAPIHono<AuthEnv>({ defaultHook })
     const f = await service.csv(ctxOf(c));
     return attachment(f.body, 'text/csv; charset=utf-8', f.filename) as never;
   })
+  .openapi(importRows, async (c) =>
+    c.json(await service.importRows(ctxOf(c), c.req.valid('json')), 200),
+  )
   .openapi(get, async (c) => c.json(await service.get(ctxOf(c), c.req.valid('param').id), 200))
   .openapi(create, async (c) => c.json(await service.create(ctxOf(c), c.req.valid('json')), 201))
   .openapi(patch, async (c) =>
